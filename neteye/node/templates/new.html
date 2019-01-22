@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        New Node
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('node.create') }}" method=post class="form-horizontal " id="node_create">
+            {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.hostname.label(class_="col-md-3 col-form-label") }}{{ form.hostname(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.ip_address.label(class_="col-md-3 col-form-label") }}{{ form.ip_address(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.username.label(class_="col-md-3 col-form-label") }}{{ form.username(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.password.label(class_="col-md-3 col-form-label") }}{{ form.password(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.enable.label(class_="col-md-3 col-form-label") }}{{ form.enable(class_="form-control col-md-6") }}
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="node_create") }}
+        {{ form.reset(class_="btn btn-sm btn-danger") }}
+    </div>
+</div>
+{% endblock main %}

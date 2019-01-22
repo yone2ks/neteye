@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        Show Node
+    </div>
+    <div class="card-body">
+    <table class="table table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                <th>ID</th>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Enable</th>
+                <th>Model</th>
+                <th>OS Type</th>
+                <th>OS Version</th>
+                <th>Serial</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ node.id }}</td>
+                <td>{{ node.hostname }}</td>
+                <td>{{ node.ip_address }}</td>
+                <td>{{ node.username }}</td>
+                <td>{{ node.password }}</td>
+                <td>{{ node.enable }}</td>
+                <td>{{ node.model }}</td>
+                <td>{{ node.os_type }}</td>
+                <td>{{ node.os_version }}</td>
+                <td>{{ node.serial }}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_inventory'">Show Inventory</button>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock main %}

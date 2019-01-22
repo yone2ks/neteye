@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+         Edit Node
+    </div>
+    <div class="card-body">
+    <form action="{{ url_for('node.update', id=id ) }}" method=post class="form-horizontal" id="node_edit">
+        <input name="_method" type="hidden" value="PUT"/>
+        <div class="form-group row">
+            {{ form.hostname.label(class_="col-md-3 col-form-label") }}{{ form.hostname(class_="form-control col-md-6", placeholder=hostname) }}
+        </div>
+        <div class="form-group row">
+            {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6", placeholder=description) }}
+        </div>
+        <div class="form-group row">
+            {{ form.ip_address.label(class_="col-md-3 col-form-label") }}{{ form.ip_address(class_="form-control col-md-6", placeholder=ip_address) }}
+        </div>
+        <div class="form-group row">
+            {{ form.username.label(class_="col-md-3 col-form-label") }}{{ form.username(class_="form-control col-md-6", placeholder=username) }}
+        </div>
+        <div class="form-group row">
+            {{ form.password.label(class_="col-md-3 col-form-label") }}{{ form.password(class_="form-control col-md-6", placeholder=password) }}
+        </div>
+        <div class="form-group row">
+            {{ form.enable.label(class_="col-md-3 col-form-label") }}{{ form.enable(class_="form-control col-md-6", placeholder=enable) }}
+        </div>
+    </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="node_edit") }}
+        {{ form.reset(class_="btn btn-sm btn-danger") }}
+    </div>
+</div>
+{% endblock main %}

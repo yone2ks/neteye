@@ -1,0 +1,9 @@
+flask
+flask-sqlalchemy
+flask-security
+flask-wtf
+flask-nav
+flask-bootstrap
+netmiko
+napalm
+pandas

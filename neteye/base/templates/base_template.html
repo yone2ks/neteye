@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--
+* CoreUI - Free Bootstrap Admin Template
+* @version v2.1.10
+* @link https://coreui.io
+* Copyright (c) 2018 creativeLabs Łukasz Holeczek
+* Licensed under MIT (https://coreui.io/license)
+-->
+
+    <html lang="en">
+      <head>
+        {% block head %}
+          <base href="./">
+          <meta charset="utf-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+          <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+          <meta name="author" content="Łukasz Holeczek">
+          <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+          <title>{% block title %}{% endblock title %}</title>
+          {% block stylesheet %}
+            <!-- Icons-->
+            <link href="{{ url_for('base.static', filename='node_modules/@coreui/icons/css/coreui-icons.min.css' )}}" rel="stylesheet">
+            <link href="{{ url_for('base.static', filename='node_modules/flag-icon-css/css/flag-icon.min.css' )}}" rel="stylesheet">
+            <link href="{{ url_for('base.static', filename='node_modules/font-awesome/css/font-awesome.min.css' )}}" rel="stylesheet">
+            <link href="{{ url_for('base.static', filename='node_modules/simple-line-icons/css/simple-line-icons.css' )}}" rel="stylesheet">
+            <!-- Main styles for this application-->
+            <link href="{{ url_for('base.static', filename='css/style.css' )}}" rel="stylesheet">
+            <link href="{{ url_for('base.static', filename='vendors/pace-progress/css/pace.min.css' )}}" rel="stylesheet">
+          {% endblock stylesheet %}
+          <!-- Global site tag (gtag.js) - Google Analytics-->
+          <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-118965717-3"></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+            dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            // Shared ID
+            gtag('config', 'UA-118965717-3');
+            // Bootstrap ID
+            gtag('config', 'UA-118965717-5');
+          </script>
+        {% endblock head %}
+      </head>
+      <body class="app header-fixed sidebar-fixed aside-menu-fixed sidebar-lg-show">
+        {% block body %}
+          <header class="app-header navbar">
+              {% block header %}
+              <a class="navbar-brand" href="#">
+                  <img class="navbar-brand-full" src="{{ url_for('base.static', filename='img/brand/logo.png' )}}" width="100" height="32" alt="NetEye Logo">
+                  <img class="navbar-brand-minimized" src="{{ url_for('base.static', filename='img/brand/logo.png' )}}" width="30" height="30" alt="NetEye Logo">
+              </a>
+              {% endblock header %}
+          </header>
+          <div class="app-body">
+              <div class="sidebar">
+          <nav class="sidebar-nav">
+            <ul class="nav">
+              {% block sidebar_nav %}
+              {% endblock sidebar_nav %}
+            </ul>
+          </nav>
+              </div>
+          <main class="main">
+            <div class="container-fluid">
+              {% block main %}
+              {% endblock main %}
+            </div>
+          </main>
+          <aside class="aside-menu">
+            {% block aside_menu %}
+            {% endblock aside_menu %}
+          </aside>
+</div>
+          <footer class="app-footer">
+            {% block footer %}
+              <div>
+                <a href="https://coreui.io">CoreUI</a>
+                <span>&copy; 2018 creativeLabs.</span>
+              </div>
+              <div class="ml-auto">
+                <span>Powered by</span>
+                <a href="https://coreui.io">CoreUI</a>
+              </div>
+            {% endblock footer %}
+          </footer>
+          {% block javascript %}
+            <!-- CoreUI and necessary plugins-->
+            <script src="{{ url_for('base.static', filename='node_modules/jquery/dist/jquery.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/popper.js/dist/umd/popper.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/pace-progress/pace.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui/dist/js/coreui.min.js' )}}"></script>
+            <!-- Plugins and scripts required by this view-->
+            <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
+            <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
+          {% endblock javascript %}
+        {% endblock body %}
+      </body>
+    </html>

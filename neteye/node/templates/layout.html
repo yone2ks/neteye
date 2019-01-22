@@ -1,0 +1,62 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+{% block stylesheet %}
+{{ super() }}
+{% endblock stylesheet %}
+
+    {% block main %}
+    <div class="card">
+        <div class="card-header">
+            Nodes
+        </div>
+        <div class="card-body">
+    <table class="table table-responsive-sm table-hover table-outline table-striped mb-0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>IP Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for node in nodes %}
+            <tr>
+                <td>{{ node.id }}</td>
+                <td>{{ node.hostname }}</td>
+                <td>{{ node.ip_address }}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='node/{{node.id}}'">Show</button>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='node/{{node.id}}/edit'">Edit</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <ul class="pagination">
+        <li class="page-item">
+            <a class="page-link" href="#">Prev</a>
+        </li>
+        <li class="page-item active">
+            <a class="page-link" href="#">1</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">2</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">3</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">4</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+        </li>
+    </ul>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.new') }}'">New Node</button>
+        </div>
+    </div>
+{% endblock main %}
