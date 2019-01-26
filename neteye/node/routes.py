@@ -90,29 +90,14 @@ def delete(id):
 @node_bp.route('/<id>/show_ip_arp')
 def show_ip_arp(id):
     node = Node.query.get(id)
-    params = {
-        'device_type': 'cisco_ios',
-        'ip': node.ip_address,
-        'username': node.username,
-        'password': node.password,
-        'secret': node.enable
-    }
-    conn = netmiko.ConnectHandler(**params)
-    conn.enable()
+    conn = node.gen_conn()
     result = conn.send_command('show ip arp', use_textfsm=True)
     return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
 @node_bp.route('/<id>/show_inventory')
 def show_inventory(id):
     node = Node.query.get(id)
-    params = {
-        'device_type': 'cisco_ios',
-        'ip': node.ip_address,
-        'username': node.username,
-        'password': node.password,
-        'secret': node.enable
-    }
-    conn = netmiko.ConnectHandler(**params)
+    conn = node.gen_conn()
     conn.enable()
     result = conn.send_command('show inventory', use_textfsm=True)
     return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
