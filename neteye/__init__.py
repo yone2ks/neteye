@@ -8,6 +8,7 @@ from neteye.extensions import db, bootstrap, security
 from neteye.user.models import User, Role
 from neteye.base.routes import base_bp
 from neteye.node.routes import node_bp
+from neteye.interface.routes import interface_bp
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
 TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, 'templates')
@@ -27,6 +28,7 @@ bootstrap.init_app(app)
 security.init_app(app, SQLAlchemySessionUserDatastore(db.session, User, Role))
 app.register_blueprint(base_bp)
 app.register_blueprint(node_bp)
+app.register_blueprint(interface_bp)
 
 
 # Create a user to test with

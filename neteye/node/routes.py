@@ -2,6 +2,7 @@ from neteye.extensions import db
 from neteye.blueprints import bp_factory
 from .models import Node
 from .forms import NodeForm
+from neteye.interface.models import Interface
 from flask import request, redirect, url_for, render_template, flash, session
 import netmiko
 import pandas as pd
@@ -13,12 +14,12 @@ node_bp = bp_factory('node')
 @node_bp.route('')
 def index():
     nodes = Node.query.all()
-    return render_template('layout.html', nodes=nodes)
+    return render_template('node/layout.html', nodes=nodes)
 
 @node_bp.route('/<id>')
 def show(id):
     node = Node.query.get(id)
-    return render_template('show.html', node=node)
+    return render_template('node/show.html', node=node)
 
 @node_bp.route('/new')
 def new():
@@ -42,7 +43,7 @@ def new():
         form.username.data = ''
         form.password.data = ''
         form.enable.data = ''
-    return render_template('new.html', form=form, hostname=hostname, description=description, ip_address=ip_address, username=username, password=password, enable=enable)
+    return render_template('node/new.html', form=form, hostname=hostname, description=description, ip_address=ip_address, username=username, password=password, enable=enable)
 
 @node_bp.route('/create', methods=['POST'])
 def create():
@@ -65,7 +66,7 @@ def edit(id):
         form.hostname.data = ''
         form.description.data = ''
         form.ip_address.data = ''
-    return render_template('edit.html', id=id, form=form, hostname=hostname, description=description, ip_address=ip_address)
+    return render_template('node/edit.html', id=id, form=form, hostname=hostname, description=description, ip_address=ip_address)
 
 @node_bp.route('/<id>/update', methods=['POST'])
 def update(id):
@@ -112,4 +113,9 @@ def show_ip_int_breif(id):
     conn = node.gen_conn()
     conn.enable()
     result = conn.send_command('show ip int brief', use_textfsm=True)
+    for interface_info in result:
+        print(interface_info)
+        interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
+        db.session.add(interface)
+        db.session.commit()
     return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
