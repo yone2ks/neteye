@@ -1,8 +1,11 @@
 from neteye.base.models import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, ForeignKey, UniqueConstraint
 
 class Interface(Base):
     __tablename__ = 'interfaces'
+    __table_args__ = (
+        UniqueConstraint('node_id', 'name', name='unique_interface'),
+    )
 
     node_id = Column(Integer, ForeignKey('nodes.id'))
     name = Column(String)
