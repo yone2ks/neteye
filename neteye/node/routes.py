@@ -4,6 +4,7 @@ from .models import Node
 from .forms import NodeForm
 from neteye.interface.models import Interface
 from flask import request, redirect, url_for, render_template, flash, session
+from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
 import os
@@ -114,7 +115,8 @@ def show_ip_int_breif(id):
     conn.enable()
     result = conn.send_command('show ip int brief', use_textfsm=True)
     for interface_info in result:
-        interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
-        db.session.add(interface)
-        db.session.commit()
+        if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
+            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
+            db.session.add(interface)
+            db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
