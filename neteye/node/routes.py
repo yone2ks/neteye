@@ -106,3 +106,10 @@ def show_inventory(id):
     db.session.commit()
     return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
+@node_bp.route('/<id>/show_ip_int_brief')
+def show_ip_int_breif(id):
+    node = Node.query.get(id)
+    conn = node.gen_conn()
+    conn.enable()
+    result = conn.send_command('show ip int brief', use_textfsm=True)
+    return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
