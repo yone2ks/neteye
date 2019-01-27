@@ -47,7 +47,7 @@ def new():
 
 @node_bp.route('/create', methods=['POST'])
 def create():
-    node = Node(hostname=request.form['hostname'], description=request.form['description'], ip_address=request.form['ip_address'])
+    node = Node(hostname=request.form['hostname'], description=request.form['description'], ip_address=request.form['ip_address'], username=request.form['username'], password=request.form['password'], enable=request.form['enable'])
     db.session.add(node)
     db.session.commit()
     return redirect(url_for('node.index'))
@@ -93,7 +93,7 @@ def show_ip_arp(id):
     node = Node.query.get(id)
     conn = node.gen_conn()
     result = conn.send_command('show ip arp', use_textfsm=True)
-    return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
 @node_bp.route('/<id>/show_inventory')
 def show_inventory(id):
@@ -105,7 +105,7 @@ def show_inventory(id):
     node.os_type = result[0]['pid']
     node.os_version = result[0]['vid']
     db.session.commit()
-    return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
 @node_bp.route('/<id>/show_ip_int_brief')
 def show_ip_int_breif(id):
@@ -114,8 +114,7 @@ def show_ip_int_breif(id):
     conn.enable()
     result = conn.send_command('show ip int brief', use_textfsm=True)
     for interface_info in result:
-        print(interface_info)
         interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
         db.session.add(interface)
         db.session.commit()
-    return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
