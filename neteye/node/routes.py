@@ -100,5 +100,9 @@ def show_inventory(id):
     conn = node.gen_conn()
     conn.enable()
     result = conn.send_command('show inventory', use_textfsm=True)
+    node.serial = result[0]['sn']
+    node.os_type = result[0]['pid']
+    node.os_version = result[0]['vid']
+    db.session.commit()
     return render_template('command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
