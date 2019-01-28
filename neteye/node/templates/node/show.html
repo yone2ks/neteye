@@ -38,7 +38,7 @@
                     <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
                     <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_int_brief'">Show IP Int Brief</button>
                     <form action="{{ url_for('node.delete', id=node.id) }}" method="post">
-                        <button class="btn btn-sm btn-danger" type="submit"  onclick="return confirm('Are you sure?');">Delete</button>
+                        <button class="btn btn-sm btn-danger" type="submit" id="node_delete" onclick="return confirm('Are you sure?');">Delete</button>
                     </form>
                 </td>
             </tr>
