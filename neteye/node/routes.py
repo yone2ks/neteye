@@ -84,7 +84,8 @@ def update(id):
 
 @node_bp.route('/<id>/delete', methods=['POST'])
 def delete(id):
-    Node.query.get(id).delete()
+    node = Node.query.get(id)
+    db.session.delete(node)
     db.session.commit()
     return redirect(url_for('node.index'))
 
