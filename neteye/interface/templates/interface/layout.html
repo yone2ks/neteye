@@ -15,7 +15,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Node ID</th>
+                    <th>Node</th>
                     <th>Name</th>
                     <th>IP Address</th>
                 </tr>
@@ -24,7 +24,7 @@
                 {% for interface in interfaces %}
                 <tr>
                     <td>{{ interface.id }}</td>
-                    <td>{{ interface.node_id }}</td>
+                    <td>{{ interface.hostname }}</td>
                     <td>{{ interface.name }}</td>
                     <td>{{ interface.ip_address }}</td>
                 </tr>

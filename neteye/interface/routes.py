@@ -2,6 +2,7 @@ from neteye.extensions import db
 from neteye.blueprints import bp_factory
 from .models import Interface
 from .forms import InterfaceForm
+from neteye.node.models import Node
 from flask import request, redirect, url_for, render_template, flash, session
 import netmiko
 import pandas as pd
@@ -12,6 +13,6 @@ interface_bp = bp_factory('interface')
 
 @interface_bp.route('')
 def index():
-    interfaces = Interface.query.all()
+    interfaces = Interface.query.join(Node, Interface.node_id==Node.id).add_columns(Interface.id, Node.hostname, Interface.name, Interface.ip_address).all()
     return render_template('interface/layout.html', interfaces=interfaces)
 
