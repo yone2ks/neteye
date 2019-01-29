@@ -14,5 +14,5 @@ interface_bp = bp_factory('interface')
 @interface_bp.route('')
 def index():
     interfaces = Interface.query.join(Node, Interface.node_id==Node.id).add_columns(Interface.id, Node.hostname, Interface.name, Interface.ip_address).all()
-    return render_template('interface/layout.html', interfaces=interfaces)
+    return render_template('interface/index.html', interfaces=interfaces)
 
