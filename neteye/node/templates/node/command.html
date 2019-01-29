@@ -1,6 +1,9 @@
-{% extends "node/index.html" %}
+{% extends "base_template.html" %}
 {% block main %}
 <div class="card">
+    <div class="card-header">
+        {{ command }}
+    </div>
     <div class="card-body">
         {{ result|safe }}
     </div>
