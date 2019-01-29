@@ -22,6 +22,9 @@ app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_PASSWORD_SALT'] = 'salt'
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + app.config['DATABASE']
+app.config['DEFAULT_USERNAME'] = 'cisco'
+app.config['DEFAULT_PASSWORD'] = 'admin'
+app.config['DEFAULT_ENABLE'] = 'admin'
 
 db.init_app(app)
 bootstrap.init_app(app)

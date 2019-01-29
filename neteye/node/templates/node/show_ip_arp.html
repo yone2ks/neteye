@@ -1,0 +1,38 @@
+{% extends "node/index.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {{ command }}
+    </div>
+    <div class="card-body">
+    <table class="table table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                <th>IP Address</th>
+                <th>Age</th>
+                <th>Interface</th>
+                <th>MAC Address</th>
+                <th>Protocol</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+            <tr>
+                <td>{{ row['address'] }}</td>
+                <td>{{ row['age'] }}</td>
+                <td>{{ row['interface'] }}</td>
+                <td>{{ row['mac'] }}</td>
+                <td>{{ row['protocol'] }}</td>
+                <td>{{ row['type'] }}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['address']}}'">Import Node</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock main %}

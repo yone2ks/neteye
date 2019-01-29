@@ -132,4 +132,28 @@ def show_ip_arp(id):
     node = Node.query.get(id)
     conn = node.gen_conn()
     result = conn.send_command(command, use_textfsm=True)
-    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'), command=command)
+    print(result)
+    return render_template('node/show_ip_arp.html', result=result, command=command)
+
+@node_bp.route('/import_node/<ip_address>')
+def import_node(ip_address):
+    node = Node(hostname='hostname', ip_address=ip_address, username='admin', password='cisco', enable='cisco')
+    conn = node.gen_conn()
+    conn.enable()
+    show_inventory = conn.send_command('show inventory', use_textfsm=True)
+    node.serial = show_inventory[0]['sn']
+    node.model = show_inventory[0]['pid']
+    show_version = conn.send_command('show version', use_textfsm=True)
+    node.os_version = show_version[0]['version']
+    node.hostname = show_version[0]['hostname']
+    node.description = show_version[0]['hostname']
+    db.session.add(node)
+    db.session.commit()
+    result = conn.send_command('show ip int brief', use_textfsm=True)
+    for interface_info in result:
+        if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
+            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
+            db.session.add(interface)
+            db.session.commit()
+    return redirect(url_for('node.index'))
+
