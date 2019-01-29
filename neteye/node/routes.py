@@ -104,8 +104,17 @@ def show_inventory(id):
     conn.enable()
     result = conn.send_command('show inventory', use_textfsm=True)
     node.serial = result[0]['sn']
-    node.os_type = result[0]['pid']
-    node.os_version = result[0]['vid']
+    node.model = result[0]['pid']
+    db.session.commit()
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
+
+@node_bp.route('/<id>/show_version')
+def show_version(id):
+    node = Node.query.get(id)
+    conn = node.gen_conn()
+    conn.enable()
+    result = conn.send_command('show version', use_textfsm=True)
+    node.os_version = result[0]['version']
     db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'))
 
