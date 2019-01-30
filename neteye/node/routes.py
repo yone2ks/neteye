@@ -7,8 +7,7 @@ from flask import request, redirect, url_for, render_template, flash, session
 from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
-import os
-os.environ["NET_TEXTFSM"] = "/Users/yone2ks/Documents/Projects/neteye/neteye/ntc-templates/templates"
+
 
 node_bp = bp_factory('node')
 
