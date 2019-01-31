@@ -27,7 +27,11 @@
                 <td>{{ row['protocol'] }}</td>
                 <td>{{ row['type'] }}</td>
                 <td>
+                    {% if row['age'] == '-' %}
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['address']}}'" disabled>Import Node</button>
+                    {% else %}
                     <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['address']}}'">Import Node</button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
