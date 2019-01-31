@@ -131,8 +131,15 @@ def show_ip_arp(id):
     node = Node.query.get(id)
     conn = node.gen_conn()
     result = conn.send_command(command, use_textfsm=True)
-    print(result)
     return render_template('node/show_ip_arp.html', result=result, command=command)
+
+@node_bp.route('/<id>/show_ip_route')
+def show_ip_route(id):
+    command = 'show ip route'
+    node = Node.query.get(id)
+    conn = node.gen_conn()
+    result = conn.send_command(command, use_textfsm=True)
+    return render_template('node/show_ip_route.html', result=result, command=command)
 
 @node_bp.route('/import_node/<ip_address>')
 def import_node(ip_address):

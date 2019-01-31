@@ -1,0 +1,49 @@
+{% extends "node/index.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {{ command }}
+    </div>
+    <div class="card-body">
+    <table class="table table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                <th>Network</th>
+                <th>Mask</th>
+                <th>Nexthop IF</th>
+                <th>Nexthop IP</th>
+                <th>Protocol</th>
+                <th>Distance</th>
+                <th>Metric</th>
+                <th>Type</th>
+                <th>Uptime</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+            <tr>
+                <td>{{ row['network'] }}</td>
+                <td>{{ row['mask'] }}</td>
+                <td>{{ row['nexthop_if'] }}</td>
+                <td>{{ row['nexthop_ip'] }}</td>
+                <td>{{ row['protocol'] }}</td>
+                <td>{{ row['distance'] }}</td>
+                <td>{{ row['metric'] }}</td>
+                <td>{{ row['type'] }}</td>
+                <td>{{ row['uptime'] }}</td>
+                <td>
+                    {% if row['nexthop_ip'] == '' %}
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['address']}}'" disabled>Import Node</button>
+                    {% else %}
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['address']}}'">Import Node</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock main %}
+
