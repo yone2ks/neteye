@@ -125,6 +125,20 @@ def show_ip_int_breif(id):
             db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'), command=command)
 
+@node_bp.route('/<id>/show_interfaces_description')
+def show_interfaces_description(id):
+    command = 'show interfaces description'
+    node = Node.query.get(id)
+    conn = node.gen_conn()
+    conn.enable()
+    result = conn.send_command(command, use_textfsm=True)
+    # for interface_info in result:
+    #     if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
+    #         interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
+    #         db.session.add(interface)
+    #         db.session.commit()
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'), command=command)
+
 @node_bp.route('/<id>/show_ip_arp')
 def show_ip_arp(id):
     command = 'show ip arp'
