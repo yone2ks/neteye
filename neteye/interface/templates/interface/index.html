@@ -11,6 +11,17 @@
         Interfaces
     </div>
     <div class="card-body">
+        <nav class="navbar navbar-light">
+            <form class="form-inline" action="{{ url_for('interface.filter') }}" method="get">
+                <select name="field" class="custom-select bg-light">
+                    <option value="ip_address" selected="selected">IP Address</option>
+                    <option value="description">Description</option>
+                    <option value="node">Node</option>
+                </select>
+                <input name="filter_str" class="form-control mr-sm-2" type="search" placeholder="Filter" aria-label="Filter">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
+            </form>
+        </nav>
         <table class="table table-responsive-sm table-hover table-outline table-striped mb-0">
             <thead>
                 <tr>
