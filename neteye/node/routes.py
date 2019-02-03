@@ -88,6 +88,16 @@ def delete(id):
     db.session.commit()
     return redirect(url_for('node.index'))
 
+@node_bp.route('/filter')
+def filter():
+    field = request.args.get('field')
+    filter_str = request.args.get('filter_str')
+    if field == 'hostname':
+        nodes = Node.query.filter(Node.hostname.contains(filter_str))
+    elif field == 'ip_address':
+        nodes = Node.query.filter(Node.ip_address.contains(filter_str))
+    return render_template('node/index.html', nodes=nodes)
+
 @node_bp.route('/<id>/show_inventory')
 def show_inventory(id):
     command = 'show inventory'

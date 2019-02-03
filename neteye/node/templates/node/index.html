@@ -12,9 +12,13 @@
         </div>
         <div class="card-body">
             <nav class="navbar navbar-light">
-                <form class="form-inline">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                <form class="form-inline" action="{{ url_for('node.filter') }}" method="get">
+                    <select name="field" class="custom-select bg-light">
+                        <option value="hostname" selected="selected">Name</option>
+                        <option value="ip_address">IP Address</option>
+                    </select>
+                    <input name="filter_str" class="form-control mr-sm-2" type="search" placeholder="Filter" aria-label="Filter">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
                 </form>
             </nav>
     <table class="table table-responsive-sm table-hover table-outline table-striped mb-0">
