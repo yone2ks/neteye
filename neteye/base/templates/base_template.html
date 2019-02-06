@@ -55,7 +55,14 @@
                   <img class="navbar-brand-full" src="{{ url_for('base.static', filename='img/brand/logo.png' )}}" width="100" height="32" alt="NetEye Logo">
                   <img class="navbar-brand-minimized" src="{{ url_for('base.static', filename='img/brand/logo.png' )}}" width="30" height="30" alt="NetEye Logo">
               </a>
-              {% endblock header %}
+              <button class="navbar-toggler sidebar-toggler d-md-down-none" type="button" data-toggle="sidebar-lg-show">
+                  <span class="navbar-toggler-icon"></span>
+              </button>
+              <ul class="nav navbar-nav d-md-down-none">
+              </ul>
+              <ul class="nav navbar-nav ml-auto">
+              </ul>
+                  {% endblock header %}
           </header>
           <div class="app-body">
               <div class="sidebar">
