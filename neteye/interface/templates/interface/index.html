@@ -47,21 +47,32 @@
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('interface.index', page=interfaces.prev_num) }}">Prev</a>
             </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="{{ url_for('interface.index', page=interfaces.prev_num) }}">Prev</a>
+            </li>
             {% endif %}
+            {% for page in interfaces.iter_pages() %}
+            {% if page %}
+            {% if page == interfaces.page %}
             <li class="page-item active">
-                <a class="page-link" href="#">1</a>
+                <a class="page-link" href="{{ url_for('interface.index', page=page) }}{{ fragment }}">{{ page }}</a>
             </li>
+            {% else %}
             <li class="page-item">
-                <a class="page-link" href="#">2</a>
+                <a class="page-link" href="{{ url_for('interface.index', page=page) }}{{ fragment }}">{{ page }}</a>
             </li>
-            <li class="page-item">
-                <a class="page-link" href="#">3</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="#">4</a>
-            </li>
+            {% endif %}
+            {% else %}
+            <li class="page-item disabled"><a href="#">&hellip;</a></li>
+            {% endif %}
+            {% endfor %}
             {% if interfaces.has_next %}
             <li class="page-item">
+                <a class="page-link" href="{{ url_for('interface.index', page=interfaces.next_num) }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
                 <a class="page-link" href="{{ url_for('interface.index', page=interfaces.next_num) }}">Next</a>
             </li>
             {% endif %}

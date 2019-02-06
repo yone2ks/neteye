@@ -9,6 +9,7 @@ SQLALCHEMY_DATABASE_URI = 'sqlite://///tmp/neteye.db'
 DEFAULT_USERNAME = 'admin'
 DEFAULT_PASSWORD = 'cisco'
 DEFAULT_ENABLE = 'cisco'
+PER_PAGE = 30
 
 [development]
 
