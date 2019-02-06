@@ -1,0 +1,16 @@
+[default]
+DEBUG = true
+DATABASE = '/tmp/neteye.db'
+SECRET_KEY = 'secret key'
+SECURITY_REGISTERABLE = true
+SECURITY_PASSWORD_SALT = 'salt'
+SECURITY_SEND_REGISTER_EMAIL = false
+SQLALCHEMY_DATABASE_URI = 'sqlite://///tmp/neteye.db' 
+USERNAME = 'cisco'
+PASSWORD = 'admin'
+DEFAULT_ENABLE = 'admin'
+
+[development]
+
+
+[production]

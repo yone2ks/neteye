@@ -3,6 +3,7 @@ import locale
 import sqlite3
 from flask import Flask
 from flask_security import Security, login_required, SQLAlchemySessionUserDatastore
+from dynaconf import FlaskDynaconf
 import neteye as app_root
 from neteye.extensions import db, bootstrap, security
 from neteye.user.models import User, Role
@@ -15,17 +16,7 @@ TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, 'templates')
 STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, 'static')
 
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
-app.config['DEBUG'] = True
-app.config['DATABASE'] = '/tmp/neteye.db'
-app.config['SECRET_KEY'] = 'secret key'
-app.config['SECURITY_REGISTERABLE'] = True
-app.config['SECURITY_PASSWORD_SALT'] = 'salt'
-app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + app.config['DATABASE']
-app.config['DEFAULT_USERNAME'] = 'cisco'
-app.config['DEFAULT_PASSWORD'] = 'admin'
-app.config['DEFAULT_ENABLE'] = 'admin'
-
+FlaskDynaconf(app)
 db.init_app(app)
 bootstrap.init_app(app)
 security.init_app(app, SQLAlchemySessionUserDatastore(db.session, User, Role))
