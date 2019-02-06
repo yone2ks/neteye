@@ -6,9 +6,9 @@ SECURITY_REGISTERABLE = true
 SECURITY_PASSWORD_SALT = 'salt'
 SECURITY_SEND_REGISTER_EMAIL = false
 SQLALCHEMY_DATABASE_URI = 'sqlite://///tmp/neteye.db' 
-USERNAME = 'cisco'
-PASSWORD = 'admin'
-DEFAULT_ENABLE = 'admin'
+DEFAULT_USERNAME = 'admin'
+DEFAULT_PASSWORD = 'cisco'
+DEFAULT_ENABLE = 'cisco'
 
 [development]
 

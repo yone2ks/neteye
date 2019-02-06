@@ -7,7 +7,7 @@ from flask import request, redirect, url_for, render_template, flash, session
 from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
-
+from dynaconf import settings
 
 node_bp = bp_factory('node')
 
@@ -167,7 +167,7 @@ def show_ip_route(id):
 
 @node_bp.route('/import_node/<ip_address>')
 def import_node(ip_address):
-    node = Node(hostname='hostname', ip_address=ip_address, username='admin', password='cisco', enable='cisco')
+    node = Node(hostname='hostname', ip_address=ip_address, username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
     conn = node.gen_conn()
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
