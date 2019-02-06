@@ -13,7 +13,8 @@ node_bp = bp_factory('node')
 
 @node_bp.route('')
 def index():
-    nodes = Node.query.all()
+    page = request.args.get('page', 1, type=int)
+    nodes = Node.query.paginate(page, settings.PER_PAGE)
     return render_template('node/index.html', nodes=nodes)
 
 @node_bp.route('/<id>')

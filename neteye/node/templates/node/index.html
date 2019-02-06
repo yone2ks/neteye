@@ -31,7 +31,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for node in nodes %}
+            {% for node in nodes.items %}
             <tr>
                 <td>{{ node.id }}</td>
                 <td>{{ node.hostname }}</td>
@@ -56,24 +56,39 @@
         </tbody>
     </table>
     <ul class="pagination">
+        {% if nodes.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="#">Prev</a>
+            <a class="page-link" href="{{ url_for('node.index', page=nodes.prev_num) }}">Prev</a>
         </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="{{ url_for('node.index', page=nodes.prev_num) }}">Prev</a>
+        </li>
+        {% endif %}
+        {% for page in nodes.iter_pages() %}
+        {% if page %}
+        {% if page == nodes.page %}
         <li class="page-item active">
-            <a class="page-link" href="#">1</a>
+            <a class="page-link" href="{{ url_for('node.index', page=page) }}{{ fragment }}">{{ page }}</a>
         </li>
+        {% else %}
         <li class="page-item">
-            <a class="page-link" href="#">2</a>
+            <a class="page-link" href="{{ url_for('node.index', page=page) }}{{ fragment }}">{{ page }}</a>
         </li>
+        {% endif %}
+        {% else %}
+        <li class="page-item disabled">&hellip;</li>
+        {% endif %}
+        {% endfor %}
+        {% if nodes.has_next %}
         <li class="page-item">
-            <a class="page-link" href="#">3</a>
+            <a class="page-link" href="{{ url_for('node.index', page=nodes.next_num) }}">Next</a>
         </li>
-        <li class="page-item">
-            <a class="page-link" href="#">4</a>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="{{ url_for('node.index', page=nodes.next_num) }}">Next</a>
         </li>
-        <li class="page-item">
-            <a class="page-link" href="#">Next</a>
-        </li>
+        {% endif %}
     </ul>
         </div>
         <div class="card-footer">
