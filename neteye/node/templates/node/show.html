@@ -12,8 +12,6 @@
                 <th>Hostname</th>
                 <th>IP Address</th>
                 <th>Username</th>
-                <th>Password</th>
-                <th>Enable</th>
                 <th>Model</th>
                 <th>OS Type</th>
                 <th>OS Version</th>
@@ -27,19 +25,29 @@
                 <td>{{ node.hostname }}</td>
                 <td>{{ node.ip_address }}</td>
                 <td>{{ node.username }}</td>
-                <td>{{ node.password }}</td>
-                <td>{{ node.enable }}</td>
                 <td>{{ node.model }}</td>
                 <td>{{ node.os_type }}</td>
                 <td>{{ node.os_version }}</td>
                 <td>{{ node.serial }}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_inventory'">Show Inventory</button>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_version'">Show Version</button>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_int_brief'">Show IP Int Brief</button>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_interfaces_description'">Show Int Desc</button>
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_route'">Show IP Route</button>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_inventory'">Show Inventory</button>
+                    </div>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_version'">Show Version</button>
+                    </div>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
+                    </div>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_int_brief'">Show IP Int Brief</button>
+                    </div>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_interfaces_description'">Show Int Desc</button>
+                    </div>
+                    <div class="btn-group mr-2 mt-2">
+                        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_route'">Show IP Route</button>
+                    </div>
                 </td>
             </tr>
         </tbody>
