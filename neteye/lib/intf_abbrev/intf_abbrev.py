@@ -1,7 +1,8 @@
+import os
 import json
 
 class IntfAbbrevConverter():
-    TEMPLATE_DIR = './templates/'
+    TEMPLATE_DIR = os.path.dirname(__file__) + '/templates/'
     JSON_EXT = '.json'
     device_type = ''
     abbrev_dict = {}
