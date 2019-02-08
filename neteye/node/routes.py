@@ -146,10 +146,10 @@ def show_interfaces_description(id):
     result = conn.send_command(command, use_textfsm=True)
     intf_conv = IntfAbbrevConverter('cisco_ios')
     for interface_info in result:
-        if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==intf_conv.to_long(interface_info['port']))).scalar():
-            interface = Interface.query.where(Interface.node_id==node.id).where(Interface.name==intf_conv.to_long(interface_info['intf']))
+        if db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==intf_conv.to_long(interface_info['port']))).scalar():
+            interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
             interface.description = interface_info['descrip']
-            db.session.add(interface)
+            print(interface.id)
             db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'), command=command)
 

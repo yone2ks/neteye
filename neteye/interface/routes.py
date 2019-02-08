@@ -13,7 +13,7 @@ interface_bp = bp_factory('interface')
 @interface_bp.route('')
 def index():
     page = request.args.get('page', 1, type=int)
-    interfaces = Interface.query.join(Node, Interface.node_id==Node.id).add_columns(Interface.id, Node.hostname, Interface.name, Interface.ip_address).paginate(page, settings.PER_PAGE)
+    interfaces = Interface.query.join(Node, Interface.node_id==Node.id).add_columns(Interface.id, Node.hostname, Interface.name, Interface.ip_address, Interface.description).paginate(page, settings.PER_PAGE)
     return render_template('interface/index.html', interfaces=interfaces)
 
 @interface_bp.route('/filter')
