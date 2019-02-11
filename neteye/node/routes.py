@@ -132,7 +132,7 @@ def show_ip_int_breif(id):
     result = conn.send_command(command, use_textfsm=True)
     for interface_info in result:
         if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
-            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
+            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'], description="")
             db.session.add(interface)
             db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(classes='table table-striped'), command=command)
