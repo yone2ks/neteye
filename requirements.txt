@@ -8,3 +8,7 @@ netmiko
 napalm
 pandas
 dynaconf
+marshmallow-sqlalchemy
+flask-restplus
+flask-marshmallow
+
