@@ -1,3 +1,6 @@
+settings.toml
 neteye/ntc-templates
 *.pyc
 .python-version
+.DS_Store
+*~
