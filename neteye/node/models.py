@@ -32,4 +32,7 @@ class Node(Base):
         }
 
     def gen_conn(self):
-        return netmiko.ConnectHandler(**self.gen_params())
+        try:
+            return netmiko.ConnectHandler(**self.gen_params())
+        except netmiko.ssh_exception.NetMikoTimeoutException as err:
+            return netmiko.ConnectHandler(**self.gen_params(device_type='cisco_ios_telnet'))
