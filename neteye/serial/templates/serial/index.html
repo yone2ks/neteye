@@ -1,0 +1,84 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+{% block stylesheet %}
+{{ super() }}
+{% endblock stylesheet %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        Serials
+    </div>
+    <div class="card-body">
+        <nav class="navbar navbar-light">
+            <form class="form-inline" action="{{ url_for('serial.filter') }}" method="get">
+                <select name="field" class="custom-select bg-light">
+                    <option value="serial" selected="selected">Serial</option>
+                    <option value="product_id">Product ID</option>
+                    <option value="node">Node</option>
+                </select>
+                <input name="filter_str" class="form-control mr-sm-2" type="search" placeholder="Filter" aria-label="Filter">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
+            </form>
+        </nav>
+        <table class="table table-responsive-sm table-hover table-outline table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Node</th>
+                    <th>Serial</th>
+                    <th>Product ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for serial in serials.items %}
+                <tr>
+                    <td>{{ serial.id }}</td>
+                    <td>{{ serial.hostname }}</td>
+                    <td>{{ serial.serial }}</td>
+                    <td>{{ serial.product_id }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <ul class="pagination">
+            {% if serials.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('serial.index', page=serials.prev_num) }}">Prev</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="{{ url_for('serial.index', page=serials.prev_num) }}">Prev</a>
+            </li>
+            {% endif %}
+            {% for page in serials.iter_pages() %}
+            {% if page %}
+            {% if page == serials.page %}
+            <li class="page-item active">
+                <a class="page-link" href="{{ url_for('serial.index', page=page) }}{{ fragment }}">{{ page }}</a>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('serial.index', page=page) }}{{ fragment }}">{{ page }}</a>
+            </li>
+            {% endif %}
+            {% else %}
+            <li class="page-item disabled">&hellip;</li>
+            {% endif %}
+            {% endfor %}
+            {% if serials.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('serial.index', page=serials.next_num) }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="{{ url_for('serial.index', page=serials.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="card-footer">
+    </div>
+</div>
+{% endblock main %}
