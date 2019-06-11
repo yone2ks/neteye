@@ -10,6 +10,7 @@ from neteye.user.models import User, Role
 from neteye.base.routes import base_bp
 from neteye.node.routes import node_bp
 from neteye.interface.routes import interface_bp
+from neteye.serial.routes import serial_bp
 from neteye.apis.routes import api_bp
 from neteye.apis.node_namespace import nodes_api
 
@@ -28,6 +29,7 @@ api.init_app(api_bp)
 app.register_blueprint(base_bp)
 app.register_blueprint(node_bp)
 app.register_blueprint(interface_bp)
+app.register_blueprint(serial_bp)
 app.register_blueprint(api_bp)
 
 api.add_namespace(nodes_api)

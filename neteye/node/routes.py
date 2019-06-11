@@ -1,14 +1,15 @@
 from neteye.extensions import db
 from neteye.blueprints import bp_factory
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
-from .models import Node
-from .forms import NodeForm
-from neteye.interface.models import Interface
 from flask import request, redirect, url_for, render_template, flash, session
 from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
 from dynaconf import settings
+from .models import Node
+from .forms import NodeForm
+from neteye.interface.models import Interface
+from neteye.serial.models import Serial
 
 node_bp = bp_factory('node')
 
@@ -107,10 +108,11 @@ def show_inventory(id):
     conn = node.gen_conn()
     conn.enable()
     result = conn.send_command(command, use_textfsm=True)
-    print(result)
-    node.serial = result[0]['sn']
-    node.model = result[0]['pid']
-    db.session.commit()
+    for serial_info in result:
+        if not db.session.query(exists().where(Serial.serial==serial_info['sn'])).scalar():
+            serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
+            db.session.add(serial)
+            db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mb-0 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_version')
