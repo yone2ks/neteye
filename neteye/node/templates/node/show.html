@@ -50,7 +50,11 @@
             </tr>
             <tr>
                 <th>Serial</th>
-                <td>{{ node.serial }}</td>
+                <td>
+                    {% for serial in node.serials %}
+                    {{ serial.serial }}
+                    {% endfor %}
+                </td>
             </tr>
             <tr>
                 <th>Action</th>
