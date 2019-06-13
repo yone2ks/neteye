@@ -4,6 +4,17 @@
 {% block stylesheet %}
 {{ super() }}
 {% endblock stylesheet %}
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+
+<!-- <script>
+     $(document).ready(function() {
+     $('#index').DataTable();
+     } );
+     </script> -->
+{% endblock javascript %}
 
     {% block main %}
     <div class="card">
@@ -21,7 +32,7 @@
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
                 </form>
             </nav>
-    <table class="table table-responsive-sm table-hover table-outline table-striped table-bordered mb-0">
+    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mb-0">
         <thead>
             <tr>
                 <th>ID</th>
