@@ -11,7 +11,6 @@ class Node(Base):
     hostname = Column(String, unique=True, nullable=True)
     description = Column(String, nullable=False)
     ip_address = Column(String, nullable=False)
-    model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
     username = Column(String)

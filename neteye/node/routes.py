@@ -178,8 +178,11 @@ def import_node(ip_address):
     conn = node.gen_conn()
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
-    node.serial = show_inventory[0]['sn']
-    node.model = show_inventory[0]['pid']
+    for serial_info in show_inventory:
+        if not db.session.query(exists().where(Serial.serial==serial_info['sn'])).scalar():
+            serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
+            db.session.add(serial)
+            db.session.commit()
     show_version = conn.send_command('show version', use_textfsm=True)
     node.os_version = show_version[0]['version']
     node.hostname = show_version[0]['hostname']
