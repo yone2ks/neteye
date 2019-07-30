@@ -113,7 +113,7 @@ def show_inventory(id):
             serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
             db.session.add(serial)
             db.session.commit()
-    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mb-0 dataTable table-bordered'), command=command)
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_version')
 def show_version(id):
@@ -124,7 +124,7 @@ def show_version(id):
     result = conn.send_command(command, use_textfsm=True)
     node.os_version = result[0]['version']
     db.session.commit()
-    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-striped'), command=command)
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_ip_int_brief')
 def show_ip_int_breif(id):
@@ -138,7 +138,7 @@ def show_ip_int_breif(id):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'], description="")
             db.session.add(interface)
             db.session.commit()
-    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-striped'), command=command)
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_interfaces_description')
 def show_interfaces_description(id):
@@ -154,7 +154,7 @@ def show_interfaces_description(id):
             interface.description = interface_info['descrip']
             print(interface.id)
             db.session.commit()
-    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-striped'), command=command)
+    return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_ip_arp')
 def show_ip_arp(id):

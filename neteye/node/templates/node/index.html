@@ -9,11 +9,11 @@
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
 
-<!-- <script>
-     $(document).ready(function() {
+<script>
+ $(document).ready(function() {
      $('#index').DataTable();
-     } );
-     </script> -->
+ } );
+</script>
 {% endblock javascript %}
 
     {% block main %}
@@ -22,17 +22,7 @@
             Nodes
         </div>
         <div class="card-body">
-            <nav class="navbar navbar-light">
-                <form class="form-inline" action="{{ url_for('node.filter') }}" method="get">
-                    <select name="field" class="custom-select bg-light">
-                        <option value="hostname" selected="selected">Name</option>
-                        <option value="ip_address">IP Address</option>
-                    </select>
-                    <input name="filter_str" class="form-control mr-sm-2" type="search" placeholder="Filter" aria-label="Filter">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Filter</button>
-                </form>
-            </nav>
-    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mb-0">
+    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2">
         <thead>
             <tr>
                 <th>ID</th>
@@ -68,41 +58,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <ul class="pagination">
-        {% if nodes.has_prev %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('node.index', page=nodes.prev_num) }}">Prev</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <a class="page-link" href="{{ url_for('node.index', page=nodes.prev_num) }}">Prev</a>
-        </li>
-        {% endif %}
-        {% for page in nodes.iter_pages() %}
-        {% if page %}
-        {% if page == nodes.page %}
-        <li class="page-item active">
-            <a class="page-link" href="{{ url_for('node.index', page=page) }}{{ fragment }}">{{ page }}</a>
-        </li>
-        {% else %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('node.index', page=page) }}{{ fragment }}">{{ page }}</a>
-        </li>
-        {% endif %}
-        {% else %}
-        <li class="page-item disabled">&hellip;</li>
-        {% endif %}
-        {% endfor %}
-        {% if nodes.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('node.index', page=nodes.next_num) }}">Next</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <a class="page-link" href="{{ url_for('node.index', page=nodes.next_num) }}">Next</a>
-        </li>
-        {% endif %}
-    </ul>
         </div>
         <div class="card-footer">
             <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.new') }}'">New Node</button>
