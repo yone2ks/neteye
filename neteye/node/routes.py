@@ -169,12 +169,23 @@ def show_ip_route(id):
     command = 'show ip route'
     node = Node.query.get(id)
     conn = node.gen_conn()
-    result = conn.send_command(command, use_textfsm=True)
+    result = conn.send_command(command, use_textfsm=True) 
     return render_template('node/show_ip_route.html', result=result, command=command)
 
 @node_bp.route('/import_node/<ip_address>')
 def import_node(ip_address):
     node = Node(hostname='hostname', ip_address=ip_address, username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
+    import_target_node(node)
+    return redirect(url_for('node.index'))
+
+@node_bp.route('/explore_node/<id>')
+def explore_node(id):
+    # import pdb; pdb.set_trace()
+    node = Node.query.get(id)
+    explore_network(node)
+    return redirect(url_for('node.index'))
+
+def import_target_node(node):
     conn = node.gen_conn()
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
@@ -195,5 +206,21 @@ def import_node(ip_address):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
             db.session.add(interface)
             db.session.commit()
-    return redirect(url_for('node.index'))
 
+
+def explore_network(first_node):
+    print(first_node.ip_address)
+    command = 'show ip arp'
+    conn = first_node.gen_conn()
+    show_ip_arp = [ entry for entry in conn.send_command(command, use_textfsm=True) if entry["age"] != '-' ]
+    ng_node = []
+    for arp_entry in show_ip_arp:
+        if not arp_entry["address"] in ng_node:
+            if not db.session.query(exists().where(Interface.ip_address==arp_entry["address"])).scalar():
+                try:
+                    target_node = Node(hostname='hostname', ip_address=arp_entry["address"], username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
+                    import_target_node(target_node)
+                    explore_network(target_node)
+                except Exception as e:
+                    ng_node.append(arp_entry["address"])
+                    print(e)
