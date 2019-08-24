@@ -91,7 +91,7 @@ def show_inventory(id):
     conn.enable()
     result = conn.send_command(command, use_textfsm=True)
     for serial_info in result:
-        if not db.session.query(exists().where(Serial.serial==serial_info['sn'])).scalar():
+        if not Serial.exists(serial_info['sn']):
             serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
             db.session.add(serial)
             db.session.commit()
@@ -116,7 +116,7 @@ def show_ip_int_breif(id):
     conn.enable()
     result = conn.send_command(command, use_textfsm=True)
     for interface_info in result:
-        if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
+        if not Interface.exists(node.id, interface_info['intf']):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'], description="")
             db.session.add(interface)
             db.session.commit()
@@ -131,7 +131,7 @@ def show_interfaces_description(id):
     result = conn.send_command(command, use_textfsm=True)
     intf_conv = IntfAbbrevConverter('cisco_ios')
     for interface_info in result:
-        if db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==intf_conv.to_long(interface_info['port']))).scalar():
+        if Interface.exists(node.id, interface_info['intf']):
             interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
             interface.description = interface_info['descrip']
             print(interface.id)
@@ -172,7 +172,7 @@ def import_target_node(node):
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
     for serial_info in show_inventory:
-        if not db.session.query(exists().where(Serial.serial==serial_info['sn'])).scalar():
+        if not Serial.exists(serial_info['sn']):
             serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
             db.session.add(serial)
             db.session.commit()
@@ -184,9 +184,8 @@ def import_target_node(node):
     db.session.commit()
     result = conn.send_command('show ip int brief', use_textfsm=True)
     print(result)
-    import pdb; pdb.set_trace()
     for interface_info in result:
-        if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
+        if not Interface.exists(node.id, interface_info['intf']):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
             db.session.add(interface)
             db.session.commit()

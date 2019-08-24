@@ -12,3 +12,5 @@ class Serial(Base):
     def __repr__(self):
         return "serial_id={id} serial={serial} product_id={product_id} node_id={node_id}".format(id=self.id, serial=self.serial, product_id=self.product_id, node_id=self.node_id)
 
+    def exists(serial):
+        return Serial.query.filter_by(serial=serial).all() != None

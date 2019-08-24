@@ -1,4 +1,5 @@
 from neteye.base.models import Base
+from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, ForeignKey, UniqueConstraint
 
 class Interface(Base):
@@ -19,4 +20,6 @@ class Interface(Base):
     def __repr__(self):
         return "<Interface id={id} node_id={node_id} name={name}".format(id=self.id, node_id=self.node_id, name=self.name)
 
+    def exists(node_id, name):
+        return Interface.query.filter_by(node_id=node_id).filter_by(name=IntfAbbrevConverter('cisco_ios').to_long(name)).all() != None
 
