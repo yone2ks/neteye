@@ -32,19 +32,6 @@ def new():
     username = None
     password = None
     enable = None
-    if form.validate_on_submit():
-        hostname = form.hostname.data
-        description = form.description.data
-        ip_address = form.ip_address.data
-        username = form.username.data
-        password = form.password.data
-        enable = form.enable.data
-        form.hostname.data = ''
-        form.description.data = ''
-        form.ip_address.data = ''
-        form.username.data = ''
-        form.password.data = ''
-        form.enable.data = ''
     return render_template('node/new.html', form=form, hostname=hostname, description=description, ip_address=ip_address, username=username, password=password, enable=enable)
 
 @node_bp.route('/create', methods=['POST'])

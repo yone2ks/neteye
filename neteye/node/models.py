@@ -11,7 +11,8 @@ class Node(Base):
     hostname = Column(String, unique=True, nullable=True)
     description = Column(String, nullable=False)
     ip_address = Column(String, nullable=False)
-    model = Column(String, nullable=False)
+    device_type = Column(String)
+    model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
     username = Column(String)
@@ -24,7 +25,7 @@ class Node(Base):
     def __repr__(self):
         return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(id=self.id, hostname=self.hostname, ip_address=self.ip_address)
 
-    def gen_params(self, device_type='cisco_ios'):
+    def gen_params(self, device_type='autodetect'):
         return {
             'device_type': device_type,
             'ip': self.ip_address,
