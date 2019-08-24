@@ -48,14 +48,10 @@ def edit(id):
     hostname = node.hostname
     description = node.description
     ip_address = node.ip_address
-    if form.validate_on_submit():
-        hostname = form.hostname.data
-        description = form.description.data
-        ip_address = form.ip_address.data
-        form.hostname.data = ''
-        form.description.data = ''
-        form.ip_address.data = ''
-    return render_template('node/edit.html', id=id, form=form, hostname=hostname, description=description, ip_address=ip_address)
+    username = node.username
+    password = node.password
+    enable = node.enable
+    return render_template('node/edit.html', id=id, form=form, hostname=hostname, description=description, ip_address=ip_address, username=username, password=password, enable=enable)
 
 @node_bp.route('/<id>/update', methods=['POST'])
 def update(id):
@@ -187,6 +183,8 @@ def import_target_node(node):
     db.session.add(node)
     db.session.commit()
     result = conn.send_command('show ip int brief', use_textfsm=True)
+    print(result)
+    import pdb; pdb.set_trace()
     for interface_info in result:
         if not db.session.query(exists().where(Interface.node_id==node.id).where(Interface.name==interface_info['intf'])).scalar():
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
@@ -204,6 +202,7 @@ def explore_network(first_node):
         if not arp_entry["address"] in ng_node:
             if not db.session.query(exists().where(Interface.ip_address==arp_entry["address"])).scalar():
                 try:
+                    print(arp_entry)
                     target_node = Node(hostname='hostname', ip_address=arp_entry["address"], username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
                     import_target_node(target_node)
                     explore_network(target_node)

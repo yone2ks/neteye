@@ -6,19 +6,6 @@
     </div>
     <div class="card-body">
     <table class="table table-striped table-bordered">
-        <!-- <thead class="thead-inverse">
-             <tr>
-             <th>ID</th>
-             <th>Hostname</th>
-             <th>IP Address</th>
-             <th>Username</th>
-             <th>Model</th>
-             <th>OS Type</th>
-             <th>OS Version</th>
-             <th>Serial</th>
-             <th>Action</th>
-             </tr>
-             </thead> -->
         <tbody>
             <tr>
                 <th>ID</th>
@@ -35,6 +22,14 @@
             <tr>
                 <th>Username</th>
                 <td>{{ node.username }}</td>
+            </tr>
+            <tr>
+                <th>Device Type</th>
+                <td>{{ node.device_type }}</td>
+            </tr>
+            <tr>
+                <th>Model</th>
+                <td>{{ node.model }}</td>
             </tr>
             <tr>
                 <th>OS Type</th>
