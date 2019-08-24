@@ -11,8 +11,7 @@ serial_bp = bp_factory('serial')
 
 @serial_bp.route('')
 def index():
-    page = request.args.get('page', 1, type=int)
-    serials = Serial.query.join(Node, Serial.node_id==Node.id).add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id).paginate(page, settings.PER_PAGE)
+    serials = Serial.query.join(Node, Serial.node_id==Node.id).add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id).all()
     return render_template('serial/index.html', serials=serials)
 
 @serial_bp.route('/filter')
