@@ -162,7 +162,6 @@ def import_node(ip_address):
 
 @node_bp.route('/explore_node/<id>')
 def explore_node(id):
-    # import pdb; pdb.set_trace()
     node = Node.query.get(id)
     explore_network(node)
     return redirect(url_for('node.index'))
@@ -192,7 +191,6 @@ def import_target_node(node):
 
 
 def explore_network(first_node):
-    print(first_node.ip_address)
     command = 'show ip arp'
     conn = first_node.gen_conn()
     show_ip_arp = [ entry for entry in conn.send_command(command, use_textfsm=True) if entry["age"] != '-' ]
@@ -201,7 +199,6 @@ def explore_network(first_node):
         if not arp_entry["address"] in ng_node:
             if not db.session.query(exists().where(Interface.ip_address==arp_entry["address"])).scalar():
                 try:
-                    print(arp_entry)
                     target_node = Node(hostname='hostname', ip_address=arp_entry["address"], username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
                     import_target_node(target_node)
                     explore_network(target_node)
