@@ -131,7 +131,7 @@ def show_interfaces_description(id):
     result = conn.send_command(command, use_textfsm=True)
     intf_conv = IntfAbbrevConverter('cisco_ios')
     for interface_info in result:
-        if Interface.exists(node.id, interface_info['intf']):
+        if Interface.exists(node.id, interface_info['port']):
             interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
             interface.description = interface_info['descrip']
             print(interface.id)
