@@ -21,5 +21,5 @@ class Interface(Base):
         return "<Interface id={id} node_id={node_id} name={name}".format(id=self.id, node_id=self.node_id, name=self.name)
 
     def exists(node_id, name):
-        return Interface.query.filter_by(node_id=node_id).filter_by(name=IntfAbbrevConverter('cisco_ios').to_long(name)).all() != None
+        return Interface.query.filter_by(node_id=node_id).filter_by(name=IntfAbbrevConverter('cisco_ios').to_long(name)).scalar() != None
 
