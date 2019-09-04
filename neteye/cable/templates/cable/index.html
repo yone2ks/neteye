@@ -1,0 +1,50 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+{% block stylesheet %}
+{{ super() }}
+{% endblock stylesheet %}
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+
+<script>
+ $(document).ready(function() {
+     $('#index').DataTable();
+ } );
+</script>
+{% endblock javascript %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        Cables
+    </div>
+    <div class="card-body">
+        <table id="index" class="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Source Node</th>
+                    <th>Source Interface</th>
+                    <th>Destination Node</th>
+                    <th>Destination Interface</th>
+                    <th>Cable Type</th>
+                    <th>Link Speed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cable in cables %}
+                <tr>
+                    <td>{{ cable.id }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer">
+        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('cable.new') }}'">New Cable</button>
+    </div>
+</div>
+{% endblock main %}

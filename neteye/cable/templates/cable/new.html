@@ -1,0 +1,118 @@
+{% extends "node/index.html" %}
+
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+
+<script>
+ $(document).ready(function(){
+    var src_node_id = $("#src_node").val()
+    var dst_node_id = $("#dst_node").val()
+
+    var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
+     $.ajax({
+         url: src_interfaces_url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#src_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 $("#src_interface").append(
+                     $("<option></option>")
+                         .attr("value", selectOptions[i].id)
+                         .text(selectOptions[i].name)
+                 );
+             }
+         }
+     });
+
+    var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
+     $.ajax({
+         url: dst_interfaces_url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#dst_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 $("#dst_interface").append(
+                     $("<option></option>")
+                         .attr("value", selectOptions[i].id)
+                         .text(selectOptions[i].name)
+                 );
+             }
+         }
+     });
+});
+
+$("#src_node").change(function(){
+     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
+     $.ajax({
+         url: url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#src_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 $("#src_interface").append(
+                     $("<option></option>")
+                         .attr("value", selectOptions[i].id)
+                         .text(selectOptions[i].name)
+                 );
+             }
+         }
+     });
+ });
+
+ $("#dst_node").change(function(){
+     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
+     $.ajax({
+         url: url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#dst_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 $("#dst_interface").append(
+                     $("<option></option>")
+                         .attr("value", selectOptions[i].id)
+                         .text(selectOptions[i].name)
+                 );
+             }
+         }
+     });
+ });
+</script>
+{% endblock javascript %}
+
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        New Cable
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('cable.create') }}" method=post class="form-horizontal " id="cable_create">
+            {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.src_node.label(class_="col-md-3 col-form-label") }}{{ form.src_node(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.src_interface.label(class_="col-md-3 col-form-label") }}{{ form.src_interface(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.dst_node.label(class_="col-md-3 col-form-label") }}{{ form.dst_node(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.dst_interface.label(class_="col-md-3 col-form-label") }}{{ form.dst_interface(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.cable_type.label(class_="col-md-3 col-form-label") }}{{ form.cable_type(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.link_speed.label(class_="col-md-3 col-form-label") }}{{ form.link_speed(class_="form-control col-md-6") }}
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="cable_create") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="cable_create") }}
+    </div>
+</div>
+{% endblock main %}
