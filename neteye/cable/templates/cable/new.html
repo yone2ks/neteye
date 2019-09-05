@@ -44,9 +44,9 @@
 });
 
 $("#src_node").change(function(){
-     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
      $.ajax({
-         url: url,
+         url: src_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
              $("#src_interface").empty();
@@ -62,9 +62,9 @@ $("#src_node").change(function(){
  });
 
  $("#dst_node").change(function(){
-     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
+     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val()
      $.ajax({
-         url: url,
+         url: dst_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
              $("#dst_interface").empty();

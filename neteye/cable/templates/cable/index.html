@@ -38,6 +38,8 @@
                 {% for cable in cables %}
                 <tr>
                     <td>{{ cable.id }}</td>
+                    <td>{{ cable.hostname }}</td>
+                    <td>{{ cable.name }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

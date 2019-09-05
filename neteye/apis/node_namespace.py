@@ -48,3 +48,11 @@ class NodeResource(Resource):
         db.session.delete(node)
         db.session.commit()
         return "delete node"
+
+@nodes_api.route('/filter')
+class NodeResourceFilter(Resource):
+    def get(self):
+        field = request.args.get('field')
+        filter_str = request.args.get('filter_str')
+        results = Node.query.filter(getattr(Node, field).contains(filter_str)).all()
+        return nodes_schema.jsonify(results)

@@ -24,3 +24,10 @@ class InterfaceResource(Resource):
     def get(self, id):
         return interface_schema.jsonify(Interface.query.get(id))
 
+@interfaces_api.route('/filter')
+class InterfaceResourceFilter(Resource):
+    def get(self):
+        field = request.args.get('field')
+        filter_str = request.args.get('filter_str')
+        results = Interface.query.filter(getattr(Interface, field).contains(filter_str)).all()
+        return interfaces_schema.jsonify(results)

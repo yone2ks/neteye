@@ -24,3 +24,10 @@ class SerialResource(Resource):
     def get(self, id):
         return serial_schema.jsonify(Serial.query.get(id))
 
+@serials_api.route('/filter')
+class SerialResourceFilter(Resource):
+    def get(self):
+        field = request.args.get('field')
+        filter_str = request.args.get('filter_str')
+        results = Serial.query.filter(getattr(Serial, field).contains(filter_str)).all()
+        return serials_schema.jsonify(results)
