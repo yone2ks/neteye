@@ -15,6 +15,18 @@ def index():
     interfaces = Interface.query.join(Node, Interface.node_id==Node.id).add_columns(Interface.id, Node.hostname, Interface.name, Interface.ip_address, Interface.description).all()
     return render_template('interface/index.html', interfaces=interfaces)
 
+@interface_bp.route('/new')
+def new():
+    form = InterfaceForm()
+    return render_template('interface/new.html', form=form)
+
+@interface_bp.route('/create', methods=['POST'])
+def create():
+    interface = Interface(node_id=request.form['node'], name=request.form['name'], description=request.form['description'], ip_address=request.form['ip_address'], mask=request.form['mask'], speed=request.form['speed'], duplex=request.form['duplex'], status=request.form['status'])
+    db.session.add(interface)
+    db.session.commit()
+    return redirect(url_for('interface.index'))
+
 @interface_bp.route('/filter')
 def filter():
     page = request.args.get('page', 1, type=int)
