@@ -19,15 +19,11 @@ dst_node_table = aliased(Node)
 
 @cable_bp.route('')
 def index():
-    cables = Cable.query.join(src_interface_table, Cable.src_interface_id==src_interface_table.id)\
+    cables = Cable.query.join(src_interface_table, Cable.src_interface_id==src_interface_table.id).add_columns(src_interface_table.name)\
                         .join(src_node_table, src_interface_table.node_id == src_node_table.id)\
                         .join(dst_interface_table, Cable.dst_interface_id==dst_interface_table.id)\
                         .join(dst_node_table, dst_interface_table.node_id == dst_node_table.id)\
-                        .add_columns(Cable.id, src_node_table.hostname, src_interface_table.name, dst_node_table.hostname, dst_interface_table.name, Cable.cable_type, Cable.link_speed).all()
-    # import pdb; pdb.set_trace()
-    # cables = Cable.query.join(Interface, Cable.src_interface_id==Interface.id)\
-    #                     .join(Node, Interface.node_id == Node.id)\
-    #                     .add_columns(Cable.id, Interface.name, Node.hostname, Cable.cable_type, Cable.link_speed).all()
+                        .add_columns(Cable.id, src_node_table.hostname.label('src_node_hostname'), src_interface_table.name.label('src_interface_name'), dst_node_table.hostname.label('dst_node_hostname'), dst_interface_table.name.label('dst_interface_name'), Cable.cable_type, Cable.link_speed).all()
     return render_template('cable/index.html', cables=cables)
 
 @cable_bp.route('/new')

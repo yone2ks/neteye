@@ -38,8 +38,12 @@
                 {% for cable in cables %}
                 <tr>
                     <td>{{ cable.id }}</td>
-                    <td>{{ cable.hostname }}</td>
-                    <td>{{ cable.name }}</td>
+                    <td>{{ cable.src_node_hostname }}</td>
+                    <td>{{ cable.src_interface_name }}</td>
+                    <td>{{ cable.dst_node_hostname }}</td>
+                    <td>{{ cable.dst_interface_name }}</td>
+                    <td>{{ cable.cable_type }}</td>
+                    <td>{{ cable.link_speed }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
