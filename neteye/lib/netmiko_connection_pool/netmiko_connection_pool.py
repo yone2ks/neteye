@@ -8,9 +8,12 @@ class ConnectionPool():
         self.keepalive_time = 10
 
     def add_connection(self, params):
-        params['keepalive'] = self.keepalive_time
-        connection = netmiko.ConnectHandler(**params)
-        self.pool[params['ip']] = connection
+        try:
+            params['keepalive'] = self.keepalive_time
+            connection = netmiko.ConnectHandler(**params)
+            self.pool[params['ip']] = connection
+        except Exception as e:
+            raise e
 
     def delete_connection(self, ip):
         self.pool[ip].disconnect()

@@ -5,7 +5,7 @@ from flask import Flask
 from flask_security import Security, login_required, SQLAlchemySessionUserDatastore
 from dynaconf import FlaskDynaconf
 import neteye as app_root
-from neteye.extensions import db, bootstrap, security, api, ma
+from neteye.extensions import db, bootstrap, security, api, ma, connection_pool
 from neteye.user.models import User, Role
 from neteye.base.routes import base_bp
 from neteye.node.routes import node_bp
@@ -16,7 +16,7 @@ from neteye.apis.routes import api_bp
 from neteye.apis.node_namespace import nodes_api
 from neteye.apis.interface_namespace import interfaces_api
 from neteye.apis.serial_namespace import serials_api
-
+from neteye.node.models import Node
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
 TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, 'templates')
@@ -41,6 +41,14 @@ api.add_namespace(nodes_api)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
+
+# Create Connection Pool
+with app.app_context():
+        for node in  Node.query.all():
+            try:
+                connection_pool.add_connection(node.gen_params())
+            except Exception as e:
+                print(e)
 
 # Create a user to test with
 @app.before_first_request
