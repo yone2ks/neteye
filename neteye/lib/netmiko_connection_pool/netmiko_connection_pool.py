@@ -22,7 +22,7 @@ class ConnectionPool():
     def get_connection(self, ip):
         return self.pool[ip]
 
-    def _connection_exists(self):
+    def connection_exists(self, ip):
         return ip in self.pool
 
     def size(self):

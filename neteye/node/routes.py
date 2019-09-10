@@ -1,4 +1,4 @@
-from neteye.extensions import db
+from neteye.extensions import db, connection_pool
 from neteye.blueprints import bp_factory
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from flask import request, redirect, url_for, render_template, flash, session
@@ -87,8 +87,8 @@ def filter():
 def show_inventory(id):
     command = 'show inventory'
     node = Node.query.get(id)
-    conn = node.gen_conn()
-    conn.enable()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     for serial_info in result:
         if not Serial.exists(serial_info['sn']):
@@ -101,8 +101,8 @@ def show_inventory(id):
 def show_version(id):
     command = 'show version'
     node = Node.query.get(id)
-    conn = node.gen_conn()
-    conn.enable()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     node.os_version = result[0]['version']
     db.session.commit()
@@ -112,8 +112,8 @@ def show_version(id):
 def show_ip_int_breif(id):
     command = 'show ip int brief'
     node = Node.query.get(id)
-    conn = node.gen_conn()
-    conn.enable()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     for interface_info in result:
         if not Interface.exists(node.id, interface_info['intf']):
@@ -126,8 +126,8 @@ def show_ip_int_breif(id):
 def show_interfaces_description(id):
     command = 'show interfaces description'
     node = Node.query.get(id)
-    conn = node.gen_conn()
-    conn.enable()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     intf_conv = IntfAbbrevConverter('cisco_ios')
     for interface_info in result:
@@ -142,7 +142,8 @@ def show_interfaces_description(id):
 def show_ip_arp(id):
     command = 'show ip arp'
     node = Node.query.get(id)
-    conn = node.gen_conn()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     return render_template('node/show_ip_arp.html', result=result, command=command)
 
@@ -150,7 +151,8 @@ def show_ip_arp(id):
 def show_ip_route(id):
     command = 'show ip route'
     node = Node.query.get(id)
-    conn = node.gen_conn()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True) 
     return render_template('node/show_ip_route.html', result=result, command=command)
 

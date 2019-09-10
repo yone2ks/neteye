@@ -41,17 +41,11 @@ api.add_namespace(nodes_api)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
-
-# Create Connection Pool
+# Create DB and Connection Pool
 with app.app_context():
-        for node in  Node.query.all():
-            try:
-                connection_pool.add_connection(node.gen_params())
-            except Exception as e:
-                print(e)
-
-# Create a user to test with
-@app.before_first_request
-def create_db():
     db.create_all()
-
+    # for node in  Node.query.all():
+    #     try:
+    #         connection_pool.add_connection(node.gen_params())
+    #     except Exception as e:
+    #         print(e)
