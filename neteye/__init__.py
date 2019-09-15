@@ -12,6 +12,7 @@ from neteye.node.routes import node_bp
 from neteye.interface.routes import interface_bp
 from neteye.serial.routes import serial_bp
 from neteye.cable.routes import cable_bp
+from neteye.arp_entry.routes import arp_entry_bp
 from neteye.apis.routes import api_bp
 from neteye.apis.node_namespace import nodes_api
 from neteye.apis.interface_namespace import interfaces_api
@@ -35,6 +36,7 @@ app.register_blueprint(node_bp)
 app.register_blueprint(interface_bp)
 app.register_blueprint(serial_bp)
 app.register_blueprint(cable_bp)
+app.register_blueprint(arp_entry_bp)
 app.register_blueprint(api_bp)
 
 api.add_namespace(nodes_api)

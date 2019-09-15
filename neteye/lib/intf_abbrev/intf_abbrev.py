@@ -23,7 +23,7 @@ class IntfAbbrevConverter():
         return long_intf.replace(long_key, self.long_dict[long_key])
 
     def normalization(self, intf_name):
-        if intf_name in abbrev_dict.keys():
+        if intf_name in self.abbrev_dict.keys():
             return to_long(intf_name)
         else:
             return intf_name

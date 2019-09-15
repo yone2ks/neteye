@@ -4,11 +4,12 @@ flask-security
 flask-wtf
 flask-nav
 flask-bootstrap
+marshmallow-sqlalchemy
+flask-restplus
+flask-marshmallow
 netmiko
 napalm
 pandas
 dynaconf
-marshmallow-sqlalchemy
-flask-restplus
-flask-marshmallow
+netaddr
 

@@ -6,10 +6,13 @@ from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
 from dynaconf import settings
+from netaddr import *
 from .models import Node
 from .forms import NodeForm
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
+from neteye.arp_entry.models import ArpEntry
+
 
 node_bp = bp_factory('node')
 
@@ -134,7 +137,6 @@ def show_interfaces_description(id):
         if Interface.exists(node.id, interface_info['port']):
             interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
             interface.description = interface_info['descrip']
-            print(interface.id)
             db.session.commit()
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
@@ -145,6 +147,15 @@ def show_ip_arp(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
+    for arp_entry_info in result:
+        if not ArpEntry.exists(arp_entry_info['address']):
+            try:
+                vendor = EUI(arp_entry_info['mac'], dialect = mac_unix_expanded).oui.registration().org
+            except Exception as e:
+                vendor = ""
+            arp_entry = ArpEntry(ip_address=arp_entry_info['address'], mac_address=arp_entry_info['mac'], interface_id=1, protocol=arp_entry_info['protocol'], arp_type=arp_entry_info['type'], vendor=vendor)
+            db.session.add(arp_entry)
+            db.session.commit()
     return render_template('node/show_ip_arp.html', result=result, command=command)
 
 @node_bp.route('/<id>/show_ip_route')
