@@ -9,73 +9,42 @@
 
 <script>
  $(document).ready(function(){
-    var src_node_id = $("#src_node").val()
-    var dst_node_id = $("#dst_node").val()
+     var src_node_id = $("#src_node").val()
 
-    var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
      $.ajax({
          url: src_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#src_interface").empty();
+             $("#src_ip_address").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 $("#src_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
-
-    var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
-     $.ajax({
-         url: dst_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#dst_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#dst_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
-});
-
-$("#src_node").change(function(){
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
-     $.ajax({
-         url: src_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#src_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#src_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
+                 if (selectOptions[i].ip_address != 'unassigned'){
+                     $("#src_ip_address").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].ip_address)
+                             .text(selectOptions[i].ip_address)
+                     );
+                 }
              }
          }
      });
  });
 
- $("#dst_node").change(function(){
-     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val()
+ $("#src_node").change(function(){
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
      $.ajax({
-         url: dst_interfaces_url,
+         url: src_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#dst_interface").empty();
+             $("#src_ip_address").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 $("#dst_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
+                 if (selectOptions[i].ip_address != 'unassigned'){
+                     $("#src_ip_address").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].ip_address)
+                     );
+                 }
              }
          }
      });
@@ -87,34 +56,34 @@ $("#src_node").change(function(){
 {% block main %}
 <div class="card">
     <div class="card-header">
-        New Cable
+        Ping
     </div>
     <div class="card-body">
-        <form action="{{ url_for('cable.create') }}" method=post class="form-horizontal " id="cable_create">
+        <form action="{{ url_for('troubleshoot.ping_execute') }}" method=post class="form-horizontal " id="ping">
             {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.dst_ip_address.label(class_="col-md-3 col-form-label") }}{{ form.dst_ip_address(class_="form-control col-md-6") }}
+            </div>
             <div class="form-group row">
                 {{ form.src_node.label(class_="col-md-3 col-form-label") }}{{ form.src_node(class_="form-control col-md-6") }}
             </div>
             <div class="form-group row">
-                {{ form.src_interface.label(class_="col-md-3 col-form-label") }}{{ form.src_interface(class_="form-control col-md-6") }}
+                {{ form.src_ip_address.label(class_="col-md-3 col-form-label") }}{{ form.src_ip_address(class_="form-control col-md-6") }}
             </div>
             <div class="form-group row">
-                {{ form.dst_node.label(class_="col-md-3 col-form-label") }}{{ form.dst_node(class_="form-control col-md-6") }}
+                {{ form.count.label(class_="col-md-3 col-form-label") }}{{ form.count(class_="form-control col-md-6", value=5) }}
             </div>
             <div class="form-group row">
-                {{ form.dst_interface.label(class_="col-md-3 col-form-label") }}{{ form.dst_interface(class_="form-control col-md-6") }}
+                {{ form.data_size.label(class_="col-md-3 col-form-label") }}{{ form.data_size(class_="form-control col-md-6", value=100) }}
             </div>
             <div class="form-group row">
-                {{ form.cable_type.label(class_="col-md-3 col-form-label") }}{{ form.cable_type(class_="form-control col-md-6") }}
-            </div>
-            <div class="form-group row">
-                {{ form.link_speed.label(class_="col-md-3 col-form-label") }}{{ form.link_speed(class_="form-control col-md-6") }}
+                {{ form.timeout.label(class_="col-md-3 col-form-label") }}{{ form.timeout(class_="form-control col-md-6", value=2) }}
             </div>
         </form>
     </div>
     <div class="card-footer">
-        {{ form.submit(class_="btn btn-sm btn-primary", form="cable_create") }}
-        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="cable_create") }}
+        {{ form.submit(class_="btn btn-sm btn-primary", form="ping") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="ping") }}
     </div>
 </div>
 {% endblock main %}
