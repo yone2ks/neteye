@@ -180,7 +180,8 @@ def explore_node(id):
     return redirect(url_for('node.index'))
 
 def import_target_node(node):
-    conn = node.gen_conn()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
     for serial_info in show_inventory:
@@ -192,10 +193,10 @@ def import_target_node(node):
     node.os_version = show_version[0]['version']
     node.hostname = show_version[0]['hostname']
     node.description = show_version[0]['hostname']
-    db.session.add(node)
+    if not Node.exists(node.hostname):
+        db.session.add(node)
     db.session.commit()
     result = conn.send_command('show ip int brief', use_textfsm=True)
-    print(result)
     for interface_info in result:
         if not Interface.exists(node.id, interface_info['intf']):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
@@ -203,9 +204,10 @@ def import_target_node(node):
             db.session.commit()
 
 
-def explore_network(first_node):
+def explore_network(node):
     command = 'show ip arp'
-    conn = first_node.gen_conn()
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
     show_ip_arp = [ entry for entry in conn.send_command(command, use_textfsm=True) if entry["age"] != '-' ]
     ng_node = []
     for arp_entry in show_ip_arp:

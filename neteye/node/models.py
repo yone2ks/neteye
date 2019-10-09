@@ -29,6 +29,9 @@ class Node(Base):
     def __repr__(self):
         return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(id=self.id, hostname=self.hostname, ip_address=self.ip_address)
 
+    def exists(hostname):
+        return Node.query.filter_by(hostname=hostname).scalar() != None
+
     def gen_params(self):
         return {
             'device_type': self.device_type,
