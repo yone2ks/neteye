@@ -184,20 +184,20 @@ def import_target_node(node):
     conn = connection_pool.get_connection(node.ip_address)
     conn.enable()
     show_inventory = conn.send_command('show inventory', use_textfsm=True)
+    show_version = conn.send_command('show version', use_textfsm=True)
+    node.model = show_inventory[0]['pid']
+    node.os_version = show_version[0]['version']
+    node.hostname = show_version[0]['hostname']
+    if not Node.exists(node.hostname):
+        db.session.add(node)
+    db.session.commit()
     for serial_info in show_inventory:
         if not Serial.exists(serial_info['sn']):
             serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
             db.session.add(serial)
             db.session.commit()
-    show_version = conn.send_command('show version', use_textfsm=True)
-    node.os_version = show_version[0]['version']
-    node.hostname = show_version[0]['hostname']
-    node.description = show_version[0]['hostname']
-    if not Node.exists(node.hostname):
-        db.session.add(node)
-    db.session.commit()
-    result = conn.send_command('show ip int brief', use_textfsm=True)
-    for interface_info in result:
+    show_ip_int_brief = conn.send_command('show ip int brief', use_textfsm=True)
+    for interface_info in show_ip_int_brief:
         if not Interface.exists(node.id, interface_info['intf']):
             interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
             db.session.add(interface)
