@@ -13,7 +13,9 @@
 
 <script>
  $(document).ready(function() {
-     $('#index').DataTable();
+     $('#index').DataTable( {
+         stateSave: true
+     } );
  } );
 </script>
 {% endblock javascript %}
