@@ -93,11 +93,8 @@ def show_inventory(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    for serial_info in result:
-        if not Serial.exists(serial_info['sn']):
-            serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
-            db.session.add(serial)
-            db.session.commit()
+    import_serial(result, node)
+    import_node_model(result, node)
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_version')
@@ -107,8 +104,7 @@ def show_version(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    node.os_version = result[0]['version']
-    db.session.commit()
+    import_node_hostname(result, node)
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_ip_int_brief')
@@ -118,11 +114,7 @@ def show_ip_int_breif(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    for interface_info in result:
-        if not Interface.exists(node.id, interface_info['intf']):
-            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'], description="")
-            db.session.add(interface)
-            db.session.commit()
+    import_interface(result, node)
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_interfaces_description')
@@ -132,12 +124,7 @@ def show_interfaces_description(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    intf_conv = IntfAbbrevConverter('cisco_ios')
-    for interface_info in result:
-        if Interface.exists(node.id, interface_info['port']):
-            interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
-            interface.description = interface_info['descrip']
-            db.session.commit()
+    import_interface_description(result, node)
     return render_template('node/command.html', result=pd.DataFrame(result).to_html(table_id='result',classes='table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered'), command=command)
 
 @node_bp.route('/<id>/show_ip_arp')
@@ -147,15 +134,7 @@ def show_ip_arp(id):
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    for arp_entry_info in result:
-        if not ArpEntry.exists(arp_entry_info['address']):
-            try:
-                vendor = EUI(arp_entry_info['mac'], dialect = mac_unix_expanded).oui.registration().org
-            except Exception as e:
-                vendor = ""
-            arp_entry = ArpEntry(ip_address=arp_entry_info['address'], mac_address=arp_entry_info['mac'], interface_id=1, protocol=arp_entry_info['protocol'], arp_type=arp_entry_info['type'], vendor=vendor)
-            db.session.add(arp_entry)
-            db.session.commit()
+    import_ip_arp(result, node)
     return render_template('node/show_ip_arp.html', result=result, command=command)
 
 @node_bp.route('/<id>/show_ip_route')
@@ -179,31 +158,6 @@ def explore_node(id):
     explore_network(node)
     return redirect(url_for('node.index'))
 
-def import_target_node(node):
-    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
-    conn = connection_pool.get_connection(node.ip_address)
-    conn.enable()
-    show_inventory = conn.send_command('show inventory', use_textfsm=True)
-    show_version = conn.send_command('show version', use_textfsm=True)
-    node.model = show_inventory[0]['pid']
-    node.os_version = show_version[0]['version']
-    node.hostname = show_version[0]['hostname']
-    if not Node.exists(node.hostname):
-        db.session.add(node)
-    db.session.commit()
-    for serial_info in show_inventory:
-        if not Serial.exists(serial_info['sn']):
-            serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
-            db.session.add(serial)
-            db.session.commit()
-    show_ip_int_brief = conn.send_command('show ip int brief', use_textfsm=True)
-    for interface_info in show_ip_int_brief:
-        if not Interface.exists(node.id, interface_info['intf']):
-            interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'])
-            db.session.add(interface)
-            db.session.commit()
-
-
 def explore_network(node):
     command = 'show ip arp'
     if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
@@ -220,3 +174,64 @@ def explore_network(node):
                 except Exception as e:
                     ng_node.append(arp_entry["address"])
                     print(e)
+
+
+def import_serial(show_inventory, node):
+    for serial_info in show_inventory:
+        serial = Serial(node_id=node.id, serial=serial_info['sn'], product_id=serial_info['pid'])
+        if not Serial.exists(serial_info['sn']):
+            db.session.add(serial)
+        db.session.commit()
+
+def import_node_model(show_inventory, node):
+    node.model = show_inventory[0]['pid']
+    if not Node.exists(node.hostname):
+        db.session.add(node)
+    db.session.commit()
+
+def import_node_hostname(show_version, node):
+    node.hostname = show_version[0]['hostname']
+    node.os_version = show_version[0]['version']
+    db.session.commit()
+
+def import_interface(show_ip_int_brief, node):
+    for interface_info in show_ip_int_brief:
+        interface = Interface(node_id=node.id, name=interface_info['intf'], ip_address=interface_info['ipaddr'], status=interface_info['status'], description="")
+        if not Interface.exists(node.id, interface_info['intf']):
+            db.session.add(interface)
+        db.session.commit()
+
+def import_interface_description(show_interfaces_description, node):
+    intf_conv = IntfAbbrevConverter('cisco_ios')
+    for interface_info in show_interfaces_description:
+        if Interface.exists(node.id, interface_info['port']):
+            interface = Interface.query.filter(Interface.node_id==node.id, Interface.name==intf_conv.to_long(interface_info['port'])).first()
+            interface.description = interface_info['descrip']
+            db.session.commit()
+
+def import_ip_arp(show_ip_arp, node):
+    for arp_entry_info in show_ip_arp:
+        try:
+            vendor = EUI(arp_entry_info['mac'], dialect = mac_unix_expanded).oui.registration().org
+        except Exception as e:
+            vendor = ""
+        arp_entry = ArpEntry(ip_address=arp_entry_info['address'], mac_address=arp_entry_info['mac'], interface_id=1, protocol=arp_entry_info['protocol'], arp_type=arp_entry_info['type'], vendor=vendor)
+        if not ArpEntry.exists(arp_entry_info['address']):
+            db.session.add(arp_entry)
+        db.session.commit()
+
+def import_target_node(node):
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
+    conn.enable()
+    show_inventory = conn.send_command('show inventory', use_textfsm=True)
+    show_version = conn.send_command('show version', use_textfsm=True)
+    import_node_hostname(show_version, node)
+    import_node_model(show_inventory, node)
+    import_serial(show_inventory, node)
+    show_ip_int_brief = conn.send_command('show ip int brief', use_textfsm=True)
+    import_interface(show_ip_int_brief, node)
+    show_interfaces_description = conn.send_command('show interfaces description', use_textfsm=True)
+    import_interface_description(show_interfaces_description, node)
+    show_ip_arp = conn.send_command('show ip arp', use_textfsm=True)
+    import_ip_arp(show_ip_arp, node)

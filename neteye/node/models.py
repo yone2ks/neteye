@@ -9,8 +9,8 @@ from neteye.serial.models import Serial
 class Node(Base):
     __tablename__ = 'nodes'
 
-    hostname = Column(String, unique=True, nullable=True)
-    description = Column(String, nullable=False)
+    hostname = Column(String, unique=True, nullable=False)
+    description = Column(String)
     ip_address = Column(String, nullable=False)
     device_type = Column(String)
     model = Column(String)
