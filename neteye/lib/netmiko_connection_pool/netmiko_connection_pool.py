@@ -29,7 +29,7 @@ class ConnectionPool():
         if self.pool[ip].is_alive():
             return self.pool[ip]
         else:
-            recreate_connection(ip)
+            self.recreate_connection(ip)
             return self.pool[ip]
 
     def connection_exists(self, ip):
