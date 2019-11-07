@@ -4,6 +4,7 @@ from flask_security import Security, login_required, SQLAlchemySessionUserDatast
 from flask_restplus import Api
 from flask_marshmallow import Marshmallow
 from neteye.lib.netmiko_connection_pool.netmiko_connection_pool import ConnectionPool
+import toml
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
@@ -11,3 +12,4 @@ security = Security()
 api = Api()
 ma = Marshmallow()
 connection_pool = ConnectionPool()
+settings = toml.load('settings.toml')

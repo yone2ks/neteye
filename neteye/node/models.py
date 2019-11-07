@@ -53,7 +53,7 @@ class Node(Base):
     def detect_device_type(self):
         try:
             self.device_type = SSHDetect(**self.gen_params_specified_device_type()).autodetect()
-        except netmiko.ssh_exception.NetMikoTimeoutException as err:
+        except (netmiko.ssh_exception.NetMikoTimeoutException, netmiko.ssh_exception.SSHException) as err:
             self.device_type = 'cisco_ios_telnet'
 
     def gen_conn(self):

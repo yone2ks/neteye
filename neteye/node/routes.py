@@ -1,11 +1,10 @@
-from neteye.extensions import db, connection_pool
+from neteye.extensions import db, connection_pool, settings
 from neteye.blueprints import bp_factory
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from flask import request, redirect, url_for, render_template, flash, session
 from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
-from dynaconf import settings
 from netaddr import *
 from .models import Node
 from .forms import NodeForm
@@ -148,8 +147,12 @@ def show_ip_route(id):
 
 @node_bp.route('/import_node/<ip_address>')
 def import_node(ip_address):
-    node = Node(hostname='hostname', ip_address=ip_address, username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
-    import_target_node(node)
+    try:
+        node = try_connect_node(ip_address)
+        import_target_node(node)
+    except Exception as err:
+        print(err)
+
     return redirect(url_for('node.index'))
 
 @node_bp.route('/explore_node/<id>')
@@ -168,13 +171,27 @@ def explore_network(node):
         if not arp_entry["address"] in ng_node:
             if not db.session.query(exists().where(Interface.ip_address==arp_entry["address"])).scalar():
                 try:
-                    target_node = Node(hostname='hostname', ip_address=arp_entry["address"], username=settings.DEFAULT_USERNAME, password=settings.DEFAULT_PASSWORD, enable=settings.DEFAULT_ENABLE)
+                    target_node = try_connect_node(arp_entry["address"])
                     import_target_node(target_node)
                     explore_network(target_node)
-                except Exception as e:
+                except Exception as err:
                     ng_node.append(arp_entry["address"])
-                    print(e)
+                    print(err)
 
+
+def try_connect_node(ip_address):
+    for cred in settings['default']['credentials'].values():
+        try:
+            node = Node(hostname='hostname', ip_address=ip_address, username=cred['USERNAME'], password=cred['PASSWORD'], enable=cred['ENABLE'])
+            connection_pool.add_connection(node.gen_params())
+            return node
+        except (netmiko.ssh_exception.NetMikoTimeoutException, netmiko.ssh_exception.SSHException) as err:
+            print(err)
+            continue
+        except Exception as err:
+            print("Err: {err}, ip_address: {ip_address}".format(err=err, ip_address=ip_address))
+            break
+    raise Exception
 
 def import_serial(show_inventory, node):
     for serial_info in show_inventory:
