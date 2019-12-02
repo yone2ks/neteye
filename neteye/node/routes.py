@@ -2,6 +2,7 @@ from neteye.extensions import db, connection_pool, settings
 from neteye.blueprints import bp_factory
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from flask import request, redirect, url_for, render_template, flash, session
+from logging import error, warning, info, debug
 from sqlalchemy.sql import exists
 import netmiko
 import pandas as pd
@@ -150,10 +151,10 @@ def import_node(ip_address):
     try:
         node = try_connect_node(ip_address)
         import_target_node(node)
+        return redirect(url_for('node.show', id=id))
     except Exception as err:
-        print(err)
-
-    return redirect(url_for('node.index'))
+        error("Error: Import Node {ip_address}, {err}".format(ip_address=ip_address, err=err))
+        return redirect(url_for('node.index'))
 
 @node_bp.route('/explore_node/<id>')
 def explore_node(id):

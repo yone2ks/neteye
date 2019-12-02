@@ -14,8 +14,8 @@ class ConnectionPool():
             connection = netmiko.ConnectHandler(**params)
             self.pool[params['ip']] = connection
             self.params_pool[params['ip']] = params
-        except Exception as e:
-            raise e
+        except Exception as err:
+            raise err
 
     def delete_connection(self, ip):
         self.pool[ip].disconnect()
