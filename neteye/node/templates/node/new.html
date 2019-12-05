@@ -1,4 +1,41 @@
 {% extends "node/index.html" %}
+{% block javascript %}
+{{ super() }}
+
+<script>
+ $(document).ready(function() {
+     $('#show_hide_password').on('click', function(event) {
+         event.preventDefault();
+         if($('#password').attr("type") == "text"){
+             $('#password').attr('type', 'password');
+             $('#show_hide_password i').addClass( "fa-eye-slash" );
+             $('#show_hide_password i').removeClass( "fa-eye" );
+         }
+         else {
+             $('#password').attr('type', 'text');
+             $('#show_hide_password i').removeClass( "fa-eye-slash" );
+             $('#show_hide_password i').addClass( "fa-eye" );
+         }
+     });
+
+     $('#show_hide_enable').on('click', function(event) {
+         event.preventDefault();
+         if($('#enable').attr("type") == "text"){
+             $('#enable').attr('type', 'password');
+             $('#show_hide_enable i').addClass( "fa-eye-slash" );
+             $('#show_hide_enable i').removeClass( "fa-eye" );
+         }
+         else {
+             $('#enable').attr('type', 'text');
+             $('#show_hide_enable i').removeClass( "fa-eye-slash" );
+             $('#show_hide_enable i').addClass( "fa-eye" );
+         }
+     });
+ });
+</script>
+{% endblock javascript %}
+
+
 {% block main %}
 <div class="card">
     <div class="card-header">
@@ -21,9 +58,11 @@
             </div>
             <div class="form-group row">
                 {{ form.password.label(class_="col-md-3 col-form-label") }}{{ form.password(class_="form-control col-md-6") }}
+                <button id="show_hide_password" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
             </div>
             <div class="form-group row">
                 {{ form.enable.label(class_="col-md-3 col-form-label") }}{{ form.enable(class_="form-control col-md-6") }}
+                <button id="show_hide_enable" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
             </div>
         </form>
     </div>
