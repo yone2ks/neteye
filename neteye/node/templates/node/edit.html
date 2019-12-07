@@ -4,6 +4,9 @@
 
 <script>
  $(document).ready(function() {
+     $('#password').val('{{password}}');
+     $('#enable').val('{{enable}}');
+
      $('#show_hide_password').on('click', function(event) {
          event.preventDefault();
          if($('#password').attr("type") == "text"){
