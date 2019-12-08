@@ -11,13 +11,13 @@ management_bp = bp_factory('management')
 def connection_pool_index():
     return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
 
-@management_bp.route('/connection_pool/<ip>/reconnect')
+@management_bp.route('/connection_pool/<ip>/recreate')
 def connection_pool_reconnect(ip):
     connection_pool.recreate_connection(ip)
     return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
 
 @management_bp.route('/connection_pool/<ip>/delete', methods=['POST'])
-def delete(ip):
+def connection_pool_delete(ip):
     connection_pool.delete_connection(ip)
     return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
 

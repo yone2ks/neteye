@@ -22,8 +22,8 @@ class ConnectionPool():
         del self.pool[ip]
 
     def recreate_connection(self, ip):
-        connection = netmiko.ConnectHandler(**params)
-        self.pool[params['ip']] = connection
+        connection = netmiko.ConnectHandler(**self.params_pool[ip])
+        self.pool[ip] = connection
 
     def get_connection(self, ip):
         if self.pool[ip].is_alive():
