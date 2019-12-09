@@ -86,6 +86,17 @@ def filter():
         nodes = Node.query.filter(Node.ip_address.contains(filter_str))
     return render_template('node/index.html', nodes=nodes)
 
+@node_bp.route('/<id>/show_run')
+def show_run(id):
+    command = 'show run'
+    node = Node.query.get(id)
+    if not connection_pool.connection_exists(node.ip_address): connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
+    conn.enable()
+    result = conn.send_command(command)
+    result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+    return render_template('node/command.html', result=result, command=command)
+
 @node_bp.route('/<id>/show_inventory')
 def show_inventory(id):
     command = 'show inventory'
