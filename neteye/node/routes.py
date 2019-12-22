@@ -157,12 +157,22 @@ def show_ip_route(id):
     result = conn.send_command(command, use_textfsm=True) 
     return render_template('node/show_ip_route.html', result=result, command=command)
 
-@node_bp.route('/import_node/<ip_address>')
-def import_node(ip_address):
+@node_bp.route('/import_node_from_id/<id>')
+def import_node_from_id(id):
+    try:
+        node = Node.query.get(id)
+        import_target_node(node)
+        return redirect(url_for('node.show', id=id))
+    except Exception as err:
+        error("Error: Import Node {id}, {err}".format(id=id, err=err))
+        return redirect(url_for('node.index'))
+
+@node_bp.route('/import_node_from_ip/<ip_address>')
+def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
         import_target_node(node)
-        return redirect(url_for('node.show', id=id))
+        return redirect(url_for('node.index'))
     except Exception as err:
         error("Error: Import Node {ip_address}, {err}".format(ip_address=ip_address, err=err))
         return redirect(url_for('node.index'))
@@ -172,6 +182,7 @@ def explore_node(id):
     node = Node.query.get(id)
     explore_network(node)
     return redirect(url_for('node.index'))
+
 
 def explore_network(node):
     command = 'show ip arp'
