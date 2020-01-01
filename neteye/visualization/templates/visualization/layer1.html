@@ -44,7 +44,8 @@ display: block;
                           selector: 'node',
                           style: {
                               'background-color': '#666',
-                              'label': 'data(id)'
+                              'label': 'data(id)',
+                              'font-size': 12
                           }
                       },
 
@@ -54,13 +55,18 @@ display: block;
                               'width': 3,
                               'line-color': '#ccc',
                               'target-arrow-color': '#ccc',
-                              'target-arrow-shape': 'triangle'
+                              'target-arrow-shape': 'triangle',
+                              'source-label': 'data(source_label)',
+                              'target-label': 'data(target_label)',
+                              'font-size': 8,
+                              'source-text-offset': 25,
+                              'target-text-offset': 25
                           }
                       }
              ],
              layout: {
                  name: 'cola'
-             }
+                          }
          });
         </script>
 

@@ -21,6 +21,8 @@ dst_interface_table = aliased(Interface)
 src_node_table = aliased(Node)
 dst_node_table = aliased(Node)
 
+intf_conv = IntfAbbrevConverter('cisco_ios')
+
 @visualization_bp.route('/layer1')
 def layer1():
     cables = Cable.query.join(src_interface_table, Cable.src_interface_id==src_interface_table.id).add_columns(src_interface_table.name)\
@@ -34,7 +36,7 @@ def layer1():
     for node in nodes:
         elements.append({'group': 'nodes', 'data': {'id': node.hostname}})
     for cable in cables:
-        elements.append({ 'group': 'edges', 'data': {'id': cable.src_node_hostname + '_to_' + cable.dst_node_hostname, 'source': cable.src_node_hostname, 'target': cable.dst_node_hostname}})
+        elements.append({ 'group': 'edges', 'data': {'id': cable.src_node_hostname + '_to_' + cable.dst_node_hostname, 'source': cable.src_node_hostname, 'source_label': intf_conv.to_abbrev(cable.src_interface_name), 'target': cable.dst_node_hostname, 'target_label': intf_conv.to_abbrev(cable.dst_interface_name)}})
 
     return render_template('/visualization/layer1.html', elements=elements)
 
