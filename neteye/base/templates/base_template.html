@@ -19,15 +19,28 @@
           <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
           <title>{% block title %}{% endblock title %}</title>
           {% block stylesheet %}
-            <!-- Icons-->
-            <link href="{{ url_for('base.static', filename='node_modules/@coreui/icons/css/coreui-icons.min.css' )}}" rel="stylesheet">
-            <link href="{{ url_for('base.static', filename='node_modules/flag-icon-css/css/flag-icon.min.css' )}}" rel="stylesheet">
-            <link href="{{ url_for('base.static', filename='node_modules/font-awesome/css/font-awesome.min.css' )}}" rel="stylesheet">
-            <link href="{{ url_for('base.static', filename='node_modules/simple-line-icons/css/simple-line-icons.css' )}}" rel="stylesheet">
-            <!-- Main styles for this application-->
-            <link href="{{ url_for('base.static', filename='css/style.css' )}}" rel="stylesheet">
-            <link href="{{ url_for('base.static', filename='vendors/pace-progress/css/pace.min.css' )}}" rel="stylesheet">
+          <!-- Icons-->
+          <link href="{{ url_for('base.static', filename='node_modules/@coreui/icons/css/coreui-icons.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='node_modules/flag-icon-css/css/flag-icon.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='node_modules/font-awesome/css/font-awesome.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='node_modules/simple-line-icons/css/simple-line-icons.css' )}}" rel="stylesheet">
+          <!-- Main styles for this application-->
+          <link href="{{ url_for('base.static', filename='css/style.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='vendors/pace-progress/css/pace.min.css' )}}" rel="stylesheet">
           {% endblock stylesheet %}
+          {% block javascript %}
+          <!-- CoreUI and necessary plugins-->
+          <script src="{{ url_for('base.static', filename='node_modules/jquery/dist/jquery.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/popper.js/dist/umd/popper.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/pace-progress/pace.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui/dist/js/coreui.min.js' )}}"></script>
+          <!-- Plugins and scripts required by this view-->
+          <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
+          <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
+          {% endblock javascript %}
           <!-- Global site tag (gtag.js) - Google Analytics-->
           <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-118965717-3"></script>
           <script>
@@ -96,6 +109,19 @@
                 </li>
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link nav-dropdown-toggle" href="#">
+                        Visualization
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/visualization/layer1">Layer 1</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/visualization/layer2">Layer 2</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link nav-dropdown-toggle" href="#">
                         Troubleshoot
                     </a>
                     <ul class="nav-dropdown-items">
@@ -144,19 +170,6 @@
               </div>
             {% endblock footer %}
           </footer>
-          {% block javascript %}
-            <!-- CoreUI and necessary plugins-->
-            <script src="{{ url_for('base.static', filename='node_modules/jquery/dist/jquery.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/popper.js/dist/umd/popper.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/pace-progress/pace.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui/dist/js/coreui.min.js' )}}"></script>
-            <!-- Plugins and scripts required by this view-->
-            <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
-            <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
-          {% endblock javascript %}
         {% endblock body %}
       </body>
     </html>

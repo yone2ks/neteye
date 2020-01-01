@@ -10,7 +10,5 @@ class Cable(Base):
     cable_type = Column(String)
     link_speed = Column(String)
 
-    def __repr__(self):
-        return "src_interface_id={src_interface_id} dst_interface_id={dst_interface_id}".format(src_interface_id=src_interface_id, dst_interface_id=dst_interface_id)
 
 

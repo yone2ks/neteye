@@ -43,3 +43,33 @@ def create():
     db.session.add(cable)
     db.session.commit()
     return redirect(url_for('cable.index'))
+
+@cable_bp.route('/<id>/edit')
+def edit(id):
+    cable = Cable.query.get(id)
+    form = CableForm()
+    src_interface = Interface.query.get(cable.src_interface_id)
+    dst_interface = Interface.query.get(cable.dst_interface_id)
+    src_node = Node.query.get(src_interface.node_id)
+    dst_node = Node.query.get(dst_interface.node_id)
+    cable_type = cable.cable_type
+    link_speed = cable.link_speed
+    return render_template('cable/edit.html', id=id, form=form, src_node=src_node, dst_node=dst_node, src_interface=src_interface, dst_interface=dst_interface, cable_type=cable_type, link_speed=link_speed)
+
+@cable_bp.route('/<id>/update', methods=['POST'])
+def update(id):
+    cable = Cable.query.get(id)
+    src_interface_id=request.form['src_interface']
+    dst_interface_id=request.form['dst_interface']
+    cable_type=request.form['cable_type']
+    link_speed=request.form['link_speed']
+    db.session.commit()
+    return redirect(url_for('cable.index'))
+
+
+@cable_bp.route('/<id>/delete', methods=['POST'])
+def delete(id):
+    cable = Cable.query.get(id)
+    db.session.delete(cable)
+    db.session.commit()
+    return redirect(url_for('cable.index'))

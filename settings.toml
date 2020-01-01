@@ -1,11 +1,11 @@
 [default]
 DEBUG = true
-DATABASE = '/tmp/neteye.db'
+DATABASE = '/var/tmp/neteye.db'
 SECRET_KEY = 'secret key'
 SECURITY_REGISTERABLE = true
 SECURITY_PASSWORD_SALT = 'salt'
 SECURITY_SEND_REGISTER_EMAIL = false
-SQLALCHEMY_DATABASE_URI = 'sqlite://///tmp/neteye.db' 
+SQLALCHEMY_DATABASE_URI = 'sqlite://///var/tmp/neteye.db'
   [default.credentials]
     [default.credentials.1]
     USERNAME = 'admin'
