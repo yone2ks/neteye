@@ -1,0 +1,138 @@
+{% extends "node/index.html" %}
+
+{% block javascript %}
+{{ super() }}
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+
+<script>
+ $(document).ready(function(){
+     $("#src_node").val({{src_node_id}})
+     $("#dst_node").val({{dst_node_id}})
+
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + {{src_node_id}}
+     $.ajax({
+         url: src_interfaces_url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#src_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 if (selectOptions[i].id == {{src_interface_id}}){
+                     $("#src_interface").append(
+                         $("<option selected></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+                 else {
+                     $("#src_interface").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+             }
+         }
+     });
+
+     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + {{dst_node_id}}
+     $.ajax({
+         url: dst_interfaces_url,
+         type: 'GET',
+         success: function(selectOptions){
+             $("#dst_interface").empty();
+             for (var i = 0; i < selectOptions.length; i++){
+                 if (selectOptions[i].id == {{dst_interface_id}}){
+                     $("#dst_interface").append(
+                         $("<option selected></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+                 else {
+                     $("#dst_interface").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+             }
+         }
+     });
+
+     $("#src_node").change(function(){
+         var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
+         $.ajax({
+             url: src_interfaces_url,
+             type: 'GET',
+             success: function(selectOptions){
+                 $("#src_interface").empty();
+                 for (var i = 0; i < selectOptions.length; i++){
+                     $("#src_interface").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+             }
+         });
+     });
+
+     $("#dst_node").change(function(){
+         var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val()
+         $.ajax({
+             url: dst_interfaces_url,
+             type: 'GET',
+             success: function(selectOptions){
+                 $("#dst_interface").empty();
+                 for (var i = 0; i < selectOptions.length; i++){
+                     $("#dst_interface").append(
+                         $("<option></option>")
+                             .attr("value", selectOptions[i].id)
+                             .text(selectOptions[i].name)
+                     );
+                 }
+             }
+         });
+     });
+ });
+</script>
+{% endblock javascript %}
+
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        Edit Cable
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('cable.update', id=id ) }}" method=post class="form-horizontal " id="cable_update">
+            {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.src_node.label(class_="col-md-3 col-form-label") }}{{ form.src_node(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.src_interface.label(class_="col-md-3 col-form-label") }}{{ form.src_interface(class_="form-control col-md-6", value=src_interface) }}
+            </div>
+            <div class="form-group row">
+                {{ form.dst_node.label(class_="col-md-3 col-form-label") }}{{ form.dst_node(class_="form-control col-md-6", value=dst_node) }}
+            </div>
+            <div class="form-group row">
+                {{ form.dst_interface.label(class_="col-md-3 col-form-label") }}{{ form.dst_interface(class_="form-control col-md-6", value=dst_interface) }}
+            </div>
+            <div class="form-group row">
+                {{ form.cable_type.label(class_="col-md-3 col-form-label") }}{{ form.cable_type(class_="form-control col-md-6", value=cable_type) }}
+            </div>
+            <div class="form-group row">
+                {{ form.link_speed.label(class_="col-md-3 col-form-label") }}{{ form.link_speed(class_="form-control col-md-6", value=link_speed) }}
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="cable_update") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="cable_update") }}
+    </div>
+</div>
+{% endblock main %}

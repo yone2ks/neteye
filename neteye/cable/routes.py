@@ -50,11 +50,9 @@ def edit(id):
     form = CableForm()
     src_interface = Interface.query.get(cable.src_interface_id)
     dst_interface = Interface.query.get(cable.dst_interface_id)
-    src_node = Node.query.get(src_interface.node_id)
-    dst_node = Node.query.get(dst_interface.node_id)
     cable_type = cable.cable_type
     link_speed = cable.link_speed
-    return render_template('cable/edit.html', id=id, form=form, src_node=src_node, dst_node=dst_node, src_interface=src_interface, dst_interface=dst_interface, cable_type=cable_type, link_speed=link_speed)
+    return render_template('cable/edit.html', id=id, form=form, src_node_id=src_interface.node_id, dst_node_id=dst_interface.node_id, src_interface_id=src_interface.id, dst_interface_id=dst_interface.id, cable_type=cable_type, link_speed=link_speed)
 
 @cable_bp.route('/<id>/update', methods=['POST'])
 def update(id):
