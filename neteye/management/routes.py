@@ -5,19 +5,27 @@ import netmiko
 import pandas as pd
 from dynaconf import settings
 
-management_bp = bp_factory('management')
+management_bp = bp_factory("management")
 
-@management_bp.route('/connection_pool')
+
+@management_bp.route("/connection_pool")
 def connection_pool_index():
-    return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
+    return render_template(
+        "management/connection_pool_index.html", connection_pool=connection_pool.pool
+    )
 
-@management_bp.route('/connection_pool/<ip>/recreate')
+
+@management_bp.route("/connection_pool/<ip>/recreate")
 def connection_pool_reconnect(ip):
     connection_pool.recreate_connection(ip)
-    return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
+    return render_template(
+        "management/connection_pool_index.html", connection_pool=connection_pool.pool
+    )
 
-@management_bp.route('/connection_pool/<ip>/delete', methods=['POST'])
+
+@management_bp.route("/connection_pool/<ip>/delete", methods=["POST"])
 def connection_pool_delete(ip):
     connection_pool.delete_connection(ip)
-    return render_template('management/connection_pool_index.html', connection_pool=connection_pool.pool)
-
+    return render_template(
+        "management/connection_pool_index.html", connection_pool=connection_pool.pool
+    )

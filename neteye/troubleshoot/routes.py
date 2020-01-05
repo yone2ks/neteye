@@ -7,14 +7,15 @@ import netmiko
 import pandas as pd
 from dynaconf import settings
 
-troubleshoot_bp = bp_factory('troubleshoot')
+troubleshoot_bp = bp_factory("troubleshoot")
 
-@troubleshoot_bp.route('/ping')
+
+@troubleshoot_bp.route("/ping")
 def ping():
     form = PingForm()
-    return render_template('/troubleshoot/ping.html', form=form)
+    return render_template("/troubleshoot/ping.html", form=form)
 
-@troubleshoot_bp.route('/ping', methods=['POST'])
+
+@troubleshoot_bp.route("/ping", methods=["POST"])
 def ping_execute():
-    return render_template('/troubleshoot/ping.html')
-
+    return render_template("/troubleshoot/ping.html")

@@ -4,17 +4,20 @@ from neteye.node.models import Node
 from neteye.extensions import ma, api, db
 from neteye.apis.routes import api_bp
 
+
 class NodeSchema(ma.ModelSchema):
     class Meta:
         model = Node
 
+
 nodes_schema = NodeSchema(many=True)
-node_schema= NodeSchema()
+node_schema = NodeSchema()
 
-nodes_api = Namespace('nodes')
+nodes_api = Namespace("nodes")
 
-@api_bp.route('nodes')
-@nodes_api.route('/')
+
+@api_bp.route("nodes")
+@nodes_api.route("/")
 class NodesResource(Resource):
     def get(self):
         return nodes_schema.jsonify(Node.query.all())
@@ -26,7 +29,7 @@ class NodesResource(Resource):
         return "create node"
 
 
-@nodes_api.route('/<int:id>')
+@nodes_api.route("/<int:id>")
 class NodeResource(Resource):
     def get(self, id):
         return node_schema.jsonify(Node.query.get(id))
@@ -49,10 +52,11 @@ class NodeResource(Resource):
         db.session.commit()
         return "delete node"
 
-@nodes_api.route('/filter')
+
+@nodes_api.route("/filter")
 class NodeResourceFilter(Resource):
     def get(self):
-        field = request.args.get('field')
-        filter_str = request.args.get('filter_str')
+        field = request.args.get("field")
+        filter_str = request.args.get("filter_str")
         results = Node.query.filter(getattr(Node, field).contains(filter_str)).all()
         return nodes_schema.jsonify(results)

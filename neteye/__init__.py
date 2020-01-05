@@ -23,8 +23,8 @@ from neteye.apis.serial_namespace import serials_api
 from neteye.node.models import Node
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
-TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, 'templates')
-STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, 'static')
+TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, "templates")
+STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
 FlaskDynaconf(app)

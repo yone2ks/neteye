@@ -1,7 +1,8 @@
 import netmiko
 from netmiko.ssh_autodetect import SSHDetect
 
-class ConnectionPool():
+
+class ConnectionPool:
     def __init__(self, pool_size=50):
         self.pool = {}
         self.params_pool = {}
@@ -10,10 +11,10 @@ class ConnectionPool():
 
     def add_connection(self, params):
         try:
-            params['keepalive'] = self.keepalive_time
+            params["keepalive"] = self.keepalive_time
             connection = netmiko.ConnectHandler(**params)
-            self.pool[params['ip']] = connection
-            self.params_pool[params['ip']] = params
+            self.pool[params["ip"]] = connection
+            self.params_pool[params["ip"]] = params
         except Exception as err:
             raise err
 
@@ -37,4 +38,3 @@ class ConnectionPool():
 
     def size(self):
         return len(self.pool)
-

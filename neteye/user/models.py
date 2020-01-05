@@ -3,15 +3,18 @@ from flask_security import UserMixin, RoleMixin
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
 from sqlalchemy.orm import relationship, backref
 
+
 class RolesUsers(db.Model):
     id = Column(Integer, primary_key=True)
-    user_id = Column('user_id', Integer, ForeignKey('user.id'))
-    role_id = Column('role_id', Integer, ForeignKey('role.id'))
+    user_id = Column("user_id", Integer, ForeignKey("user.id"))
+    role_id = Column("role_id", Integer, ForeignKey("role.id"))
+
 
 class Role(db.Model, RoleMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String(80), unique=True)
     description = Column(String(255))
+
 
 class User(db.Model, UserMixin):
     id = Column(Integer, primary_key=True)
@@ -25,6 +28,6 @@ class User(db.Model, UserMixin):
     login_count = Column(Integer)
     active = Column(Boolean())
     confirmed_at = Column(DateTime())
-    roles = relationship('Role', secondary='roles_users',
-                         backref=backref('users', lazy='dynamic'))
-
+    roles = relationship(
+        "Role", secondary="roles_users", backref=backref("users", lazy="dynamic")
+    )

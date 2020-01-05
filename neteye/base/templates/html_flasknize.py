@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 
-class HtmlFlasknize():
+
+class HtmlFlasknize:
     def __init__(self, filename):
         self.filename = filename
-        self.parser = 'html.parser'
+        self.parser = "html.parser"
         with open(filename, "r") as f:
             self.soup = BeautifulSoup(f.read(), self.parser)
 
@@ -24,9 +25,11 @@ class HtmlFlasknize():
     def change_common(self, tag, attr):
         lines = self.soup.find_all(tag)
         for line in lines:
-            if line.has_attr(attr) and (not (line[attr] in 'http://') or (line[attr] in 'https://')):
+            if line.has_attr(attr) and (
+                not (line[attr] in "http://") or (line[attr] in "https://")
+            ):
                 data = line[attr]
-                flasknize_data =  "{{ url_for('base.static', filename='" + data + "' )}}"
+                flasknize_data = "{{ url_for('base.static', filename='" + data + "' )}}"
                 line[attr] = flasknize_data
 
     def output(self):

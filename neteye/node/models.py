@@ -6,8 +6,9 @@ from netmiko.ssh_autodetect import SSHDetect
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
 
+
 class Node(Base):
-    __tablename__ = 'nodes'
+    __tablename__ = "nodes"
 
     hostname = Column(String, unique=True, nullable=False)
     description = Column(String)
@@ -19,42 +20,56 @@ class Node(Base):
     username = Column(String)
     password = Column(String)
     enable = Column(String)
-    interfaces = relationship('Interface', backref='nodes', lazy='joined', cascade="save-update, merge, delete")
-    serials = relationship('Serial', backref='nodes', lazy='joined', cascade="save-update, merge, delete")
+    interfaces = relationship(
+        "Interface",
+        backref="nodes",
+        lazy="joined",
+        cascade="save-update, merge, delete",
+    )
+    serials = relationship(
+        "Serial", backref="nodes", lazy="joined", cascade="save-update, merge, delete"
+    )
 
     def __init__(self, **kwargs):
         super(Node, self).__init__(**kwargs)
         self.detect_device_type()
 
     def __repr__(self):
-        return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(id=self.id, hostname=self.hostname, ip_address=self.ip_address)
+        return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(
+            id=self.id, hostname=self.hostname, ip_address=self.ip_address
+        )
 
     def exists(hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
     def gen_params(self):
         return {
-            'device_type': self.device_type,
-            'ip': self.ip_address,
-            'username': self.username,
-            'password': self.password,
-            'secret': self.enable
+            "device_type": self.device_type,
+            "ip": self.ip_address,
+            "username": self.username,
+            "password": self.password,
+            "secret": self.enable,
         }
 
-    def gen_params_specified_device_type(self, device_type='autodetect'):
+    def gen_params_specified_device_type(self, device_type="autodetect"):
         return {
-            'device_type': device_type,
-            'ip': self.ip_address,
-            'username': self.username,
-            'password': self.password,
-            'secret': self.enable
+            "device_type": device_type,
+            "ip": self.ip_address,
+            "username": self.username,
+            "password": self.password,
+            "secret": self.enable,
         }
 
     def detect_device_type(self):
         try:
-            self.device_type = SSHDetect(**self.gen_params_specified_device_type()).autodetect()
-        except (netmiko.ssh_exception.NetMikoTimeoutException, netmiko.ssh_exception.SSHException) as err:
-            self.device_type = 'cisco_ios_telnet'
+            self.device_type = SSHDetect(
+                **self.gen_params_specified_device_type()
+            ).autodetect()
+        except (
+            netmiko.ssh_exception.NetMikoTimeoutException,
+            netmiko.ssh_exception.SSHException,
+        ) as err:
+            self.device_type = "cisco_ios_telnet"
 
     def gen_conn(self):
         return netmiko.ConnectHandler(**self.gen_params())

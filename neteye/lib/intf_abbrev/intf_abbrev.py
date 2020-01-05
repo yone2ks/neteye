@@ -1,16 +1,19 @@
 import os
 import json
 
-class IntfAbbrevConverter():
-    TEMPLATE_DIR = os.path.dirname(__file__) + '/templates/'
-    JSON_EXT = '.json'
-    device_type = ''
+
+class IntfAbbrevConverter:
+    TEMPLATE_DIR = os.path.dirname(__file__) + "/templates/"
+    JSON_EXT = ".json"
+    device_type = ""
     abbrev_dict = {}
     long_dict = {}
 
     def __init__(self, device_type):
         self.device_type = device_type
-        with open(self.TEMPLATE_DIR + self.device_type + self.JSON_EXT, "r") as abbrev_json:
+        with open(
+            self.TEMPLATE_DIR + self.device_type + self.JSON_EXT, "r"
+        ) as abbrev_json:
             self.abbrev_dict = json.load(abbrev_json)
             self.long_dict = {value: key for key, value in self.abbrev_dict.items()}
 
@@ -27,4 +30,3 @@ class IntfAbbrevConverter():
             return to_long(intf_name)
         else:
             return intf_name
-

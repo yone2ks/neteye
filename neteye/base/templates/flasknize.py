@@ -6,6 +6,3 @@ hf = HtmlFlasknize(filename)
 hf.change_all()
 with open(filename, "w") as f:
     f.write(hf.output())
-
-
-
