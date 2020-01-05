@@ -1,19 +1,21 @@
 import json
-from neteye.extensions import db, connection_pool, settings
-from neteye.blueprints import bp_factory
-from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
-from flask import request, redirect, url_for, render_template, flash, session
-from logging import error, warning, info, debug
-from sqlalchemy.sql import exists
+from logging import debug, error, info, warning
+
 import netmiko
 import pandas as pd
+from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
-from neteye.node.models import Node
-from neteye.interface.models import Interface
-from neteye.serial.models import Serial
-from neteye.cable.models import Cable
-from neteye.arp_entry.models import ArpEntry
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import exists
+
+from neteye.arp_entry.models import ArpEntry
+from neteye.blueprints import bp_factory
+from neteye.cable.models import Cable
+from neteye.extensions import connection_pool, db, settings
+from neteye.interface.models import Interface
+from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
+from neteye.node.models import Node
+from neteye.serial.models import Serial
 
 visualization_bp = bp_factory("visualization")
 src_interface_table = aliased(Interface)
@@ -53,16 +55,19 @@ def layer1():
 
     elements = []
     for node in nodes:
-        elements.append({"group": "nodes", "data": {"id": node.hostname}})
+        elements.append({"group": "nodes", "data": {"id": node.hostname}, "classes": "node"})
+        for interface in node.interfaces:
+            elements.append({"group": "nodes", "data": {"id": interface.id, "name": intf_conv.to_abbrev(interface.name), "parent": node.hostname}, "classes": "interface"})
+
     for cable in cables:
         elements.append(
             {
                 "group": "edges",
                 "data": {
                     "id": cable.src_node_hostname + "_to_" + cable.dst_node_hostname,
-                    "source": cable.src_node_hostname,
+                    "source": cable.src_interface_id,
                     "source_label": intf_conv.to_abbrev(cable.src_interface_name),
-                    "target": cable.dst_node_hostname,
+                    "target": cable.dst_interface_id,
                     "target_label": intf_conv.to_abbrev(cable.dst_interface_name),
                 },
             }

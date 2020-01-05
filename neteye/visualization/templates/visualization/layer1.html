@@ -41,23 +41,29 @@ display: block;
              elements: {{elements|tojson}},
              style: [ // the stylesheet for the graph
                       {
-                          selector: 'node',
+                          selector: '.node',
                           style: {
                               'background-color': '#666',
                               'label': 'data(id)',
-                              'font-size': 12
+                              'font-size': 12,
+                              'shape': 'rectangle'
                           }
                       },
-
                       {
-                          selector: 'edge',
+                          selector: '.interface',
+                          style: {
+                              'background-color': '#500',
+                              'label': 'data(name)',
+                              'font-size': 12,
+                          }
+                      },
+                      {
+                          selector: 'edges',
                           style: {
                               'width': 3,
                               'line-color': '#ccc',
                               'target-arrow-color': '#ccc',
                               'target-arrow-shape': 'triangle',
-                              'source-label': 'data(source_label)',
-                              'target-label': 'data(target_label)',
                               'font-size': 8,
                               'source-text-offset': 25,
                               'target-text-offset': 25
