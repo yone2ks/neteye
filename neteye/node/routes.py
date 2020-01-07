@@ -1,18 +1,20 @@
-from neteye.extensions import db, connection_pool, settings
-from neteye.blueprints import bp_factory
-from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
-from flask import request, redirect, url_for, render_template, flash, session
-from logging import error, warning, info, debug
-from sqlalchemy.sql import exists
+from logging import debug, error, info, warning
+
 import netmiko
 import pandas as pd
+from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
-from .models import Node
-from .forms import NodeForm
-from neteye.interface.models import Interface
-from neteye.serial.models import Serial
-from neteye.arp_entry.models import ArpEntry
+from sqlalchemy.sql import exists
 
+from neteye.arp_entry.models import ArpEntry
+from neteye.blueprints import bp_factory
+from neteye.extensions import connection_pool, db, settings
+from neteye.interface.models import Interface
+from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
+from neteye.serial.models import Serial
+
+from .forms import NodeForm
+from .models import Node
 
 node_bp = bp_factory("node")
 
@@ -231,6 +233,18 @@ def show_ip_route(id):
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     return render_template("node/show_ip_route.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/command/<command>")
+def command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    if not connection_pool.connection_exists(node.ip_address):
+        connection_pool.add_connection(node.gen_params())
+    conn = connection_pool.get_connection(node.ip_address)
+    result = conn.send_command(command, use_textfsm=True)
+    result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+    return render_template("node/command.html", result=result, command=command)
 
 
 @node_bp.route("/import_node_from_id/<id>")
