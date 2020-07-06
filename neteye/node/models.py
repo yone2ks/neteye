@@ -1,8 +1,10 @@
-from neteye.base.models import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
-from sqlalchemy.orm import relationship, backref
 import netmiko
 from netmiko.ssh_autodetect import SSHDetect
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String)
+from sqlalchemy.orm import backref, relationship
+
+from neteye.base.models import Base
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
 
@@ -42,22 +44,24 @@ class Node(Base):
     def exists(hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
-    def gen_params(self):
+    def gen_params(self, timeout=10):
         return {
             "device_type": self.device_type,
             "ip": self.ip_address,
             "username": self.username,
             "password": self.password,
             "secret": self.enable,
+            "timeout": timeout,
         }
 
-    def gen_params_specified_device_type(self, device_type="autodetect"):
+    def gen_params_specified_device_type(self, device_type="autodetect", timeout=10):
         return {
             "device_type": device_type,
             "ip": self.ip_address,
             "username": self.username,
             "password": self.password,
             "secret": self.enable,
+            "timeout": timeout,
         }
 
     def detect_device_type(self):

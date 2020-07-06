@@ -127,7 +127,7 @@ def show_run(id):
     command = "show run"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     conn.enable()
     result = conn.send_command(command)
@@ -140,7 +140,7 @@ def show_inventory(id):
     command = "show inventory"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     import_serial(result, node)
@@ -160,7 +160,7 @@ def show_version(id):
     command = "show version"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     import_node_hostname(result, node)
@@ -179,7 +179,7 @@ def show_ip_int_breif(id):
     command = "show ip int brief"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     import_interface(result, node)
@@ -198,7 +198,7 @@ def show_interfaces_description(id):
     command = "show interfaces description"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     import_interface_description(result, node)
@@ -217,7 +217,7 @@ def show_ip_arp(id):
     command = "show ip arp"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     import_ip_arp(result, node)
@@ -229,7 +229,7 @@ def show_ip_route(id):
     command = "show ip route"
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     return render_template("node/show_ip_route.html", result=result, command=command)
@@ -240,7 +240,7 @@ def command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
     result = result.replace("\r\n", "<br />").replace("\n", "<br />")
@@ -283,7 +283,7 @@ def explore_node(id):
 def explore_network(node):
     command = "show ip arp"
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     show_ip_arp = [
         entry
@@ -315,7 +315,7 @@ def try_connect_node(ip_address):
                 password=cred["PASSWORD"],
                 enable=cred["ENABLE"],
             )
-            connection_pool.add_connection(node.gen_params())
+            connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
             return node
         except (
             netmiko.ssh_exception.NetMikoTimeoutException,
@@ -407,7 +407,7 @@ def import_ip_arp(show_ip_arp, node):
 
 def import_target_node(node):
     if not connection_pool.connection_exists(node.ip_address):
-        connection_pool.add_connection(node.gen_params())
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     conn.enable()
     show_inventory = conn.send_command("show inventory", use_textfsm=True)
