@@ -34,7 +34,7 @@ class ConnectionPool:
             return self.pool[ip]
 
     def connection_exists(self, ip):
-        return ip in self.pool and "telnet" not in self.params_pool[ip]["model"]
+        return ip in self.pool and "telnet" not in self.params_pool[ip]["device_type"]
 
     def size(self):
         return len(self.pool)
