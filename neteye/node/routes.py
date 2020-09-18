@@ -37,18 +37,22 @@ def new():
     hostname = None
     description = None
     ip_address = None
+    device_type = "autodetect"
     username = None
     password = None
     enable = None
+    device_type_datalist = netmiko.platforms
     return render_template(
         "node/new.html",
         form=form,
         hostname=hostname,
         description=description,
         ip_address=ip_address,
+        device_type=device_type,
         username=username,
         password=password,
         enable=enable,
+        device_type_datalist=device_type_datalist,
     )
 
 
@@ -58,6 +62,7 @@ def create():
         hostname=request.form["hostname"],
         description=request.form["description"],
         ip_address=request.form["ip_address"],
+        device_type=request.form["device_type"],
         username=request.form["username"],
         password=request.form["password"],
         enable=request.form["enable"],
@@ -74,9 +79,11 @@ def edit(id):
     hostname = node.hostname
     description = node.description
     ip_address = node.ip_address
+    device_type = node.device_type
     username = node.username
     password = node.password
     enable = node.enable
+    device_type_datalist = netmiko.platforms
     return render_template(
         "node/edit.html",
         id=id,
@@ -84,9 +91,11 @@ def edit(id):
         hostname=hostname,
         description=description,
         ip_address=ip_address,
+        device_type=device_type,
         username=username,
         password=password,
         enable=enable,
+        device_type_datalist=device_type_datalist,
     )
 
 

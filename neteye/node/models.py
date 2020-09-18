@@ -34,7 +34,7 @@ class Node(Base):
 
     def __init__(self, **kwargs):
         super(Node, self).__init__(**kwargs)
-        self.detect_device_type()
+        if self.device_type == "autodetect": self.detect_device_type()
 
     def __repr__(self):
         return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(
@@ -54,20 +54,10 @@ class Node(Base):
             "timeout": timeout,
         }
 
-    def gen_params_specified_device_type(self, device_type="autodetect", timeout=10):
-        return {
-            "device_type": device_type,
-            "ip": self.ip_address,
-            "username": self.username,
-            "password": self.password,
-            "secret": self.enable,
-            "timeout": timeout,
-        }
-
     def detect_device_type(self):
         try:
             self.device_type = SSHDetect(
-                **self.gen_params_specified_device_type()
+                **self.gen_params()
             ).autodetect()
         except (
             netmiko.ssh_exception.NetMikoTimeoutException,
