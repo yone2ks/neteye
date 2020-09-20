@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 
 class IntfAbbrevConverter:
@@ -27,6 +27,6 @@ class IntfAbbrevConverter:
 
     def normalization(self, intf_name):
         if intf_name in self.abbrev_dict.keys():
-            return to_long(intf_name)
+            return self.to_long(intf_name)
         else:
             return intf_name
