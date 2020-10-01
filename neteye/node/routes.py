@@ -8,7 +8,7 @@ from sqlalchemy.sql import exists
 
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
-from neteye.extensions import connection_pool, db, settings
+from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.serial.models import Serial
@@ -28,7 +28,8 @@ def index():
 @node_bp.route("/<id>")
 def show(id):
     node = Node.query.get(id)
-    return render_template("node/show.html", node=node)
+    command_list = ntc_template_utils.get_command_list(node.device_type)
+    return render_template("node/show.html", node=node, command_list=command_list)
 
 
 @node_bp.route("/new")
@@ -105,6 +106,7 @@ def update(id):
     node.hostname = request.form["hostname"]
     node.description = request.form["description"]
     node.ip_address = request.form["ip_address"]
+    node.device_type = request.form["device_type"]
     node.username = request.form["username"]
     node.password = request.form["password"]
     node.enable = request.form["enable"]

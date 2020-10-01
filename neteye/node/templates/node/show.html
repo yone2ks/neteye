@@ -50,6 +50,12 @@
             <tr>
                 <th>Action</th>
                 <td>
+                    <input class="form-control col-md-6" type="search" name="command" autocomplete="on" list="command_datalist">
+                    <datalist id="command_datalist">
+                        {% for command in command_list %}
+                        <option value={{ command }}>
+                        {% endfor %}
+                    </datalist>
                     <div class="btn-group mr-2 mt-2">
                         <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_run'">Show Run</button>
                     </div>
