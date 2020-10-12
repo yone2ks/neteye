@@ -6,6 +6,7 @@ import pandas as pd
 
 class NtcTemplateUtils:
     INDEX_FILE = os.environ["NET_TEXTFSM"] + "/index"
+    TEMPLATE_EXTENSION = ".textfsm"
     ntc_template_index_df = pd.DataFrame()
 
     def __init__(self):
@@ -17,7 +18,7 @@ class NtcTemplateUtils:
     def convert_template_to_command(self, template):
         platform = self.convert_template_to_platform(template)
         template_lreplace = re.sub("^%s" % platform + "_", "", template)
-        template_allreplace = re.sub("%s$" % ".template", "", template_lreplace)
+        template_allreplace = re.sub("%s$" % self.TEMPLATE_EXTENSION, "", template_lreplace)
         return template_allreplace.replace("_", " ")
 
     def get_command_list(self, platform):
