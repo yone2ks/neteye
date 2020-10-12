@@ -254,7 +254,8 @@ def command(id, command):
         connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
     conn = connection_pool.get_connection(node.ip_address)
     result = conn.send_command(command, use_textfsm=True)
-    result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+    if isinstance(result, str):
+        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
 
