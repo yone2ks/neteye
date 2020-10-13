@@ -1,0 +1,29 @@
+{% extends "node/index.html" %}
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {{ command }}
+    </div>
+    <div class="card-body">
+    <table class="table table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                {% for key in result[0].keys() %}
+                <th>key</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+            <tr>
+                {% for key in row.keys() %}
+                <td>{{ row[key] }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock main %}
+

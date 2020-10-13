@@ -256,7 +256,8 @@ def command(id, command):
     result = conn.send_command(command, use_textfsm=True)
     if isinstance(result, str):
         result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-    return render_template("node/command.html", result=result, command=command)
+        return render_template("node/command.html", result=result, command=command)
+    return render_template("node/parsed_command.html", result=result, command=command)
 
 
 @node_bp.route("/import_node_from_id/<id>")
