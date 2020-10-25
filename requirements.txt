@@ -7,6 +7,7 @@ flask-bootstrap
 marshmallow-sqlalchemy
 flask-restplus
 flask-marshmallow
+Flask-Continuum
 netmiko
 napalm
 pandas

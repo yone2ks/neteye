@@ -1,5 +1,6 @@
 import toml
 from flask_bootstrap import Bootstrap
+from flask_continuum import Continuum
 from flask_marshmallow import Marshmallow
 from flask_restplus import Api
 from flask_security import (Security, SQLAlchemySessionUserDatastore,
@@ -13,6 +14,7 @@ from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 security = Security()
+continuum = Continuum(db=db)
 api = Api()
 ma = Marshmallow()
 connection_pool = ConnectionPool()

@@ -1,9 +1,13 @@
-from neteye.extensions import db
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
 from datetime import datetime
 
+from flask_continuum import VersioningMixin
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String)
 
-class Base(db.Model):
+from neteye.extensions import db
+
+
+class Base(db.Model, VersioningMixin):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, autoincrement=True)

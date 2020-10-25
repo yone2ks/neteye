@@ -22,6 +22,8 @@ node_bp = bp_factory("node")
 @node_bp.route("")
 def index():
     nodes = Node.query.all()
+    for node in nodes:
+        print(node.versions[0].device_type)
     return render_template("node/index.html", nodes=nodes)
 
 
