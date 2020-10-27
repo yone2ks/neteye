@@ -1,0 +1,65 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+{% block stylesheet %}
+{{ super() }}
+{% endblock stylesheet %}
+{% block javascript %}
+{{ super() }}
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+
+<script>
+ $(document).ready(function() {
+     $('#index').DataTable( {
+         stateSave: true
+     } );
+ } );
+</script>
+{% endblock javascript %}
+
+    {% block main %}
+    <div class="card">
+        <div class="card-header">
+            Node History
+        </div>
+        <div class="card-body">
+    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2">
+        <thead>
+            <tr>
+                <th>HISTORY ID</th>
+                <th>Node ID</th>
+                <th>Hostname</th>
+                <th>Description</th>
+                <th>IP Address</th>
+                <th>Device Type</th>
+                <th>Model</th>
+                <th>OS Type</th>
+                <th>OS Version</th>
+                <th>Username</th>
+                <th>Operation Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in node_history %}
+            <tr>
+                <td>{{ transaction.transaction_id }}</td>
+                <td>{{ transaction.id }}</td>
+                <td>{{ transaction.hostname }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.ip_address }}</td>
+                <td>{{ transaction.device_type }}</td>
+                <td>{{ transaction.model }}</td>
+                <td>{{ transaction.os_type }}</td>
+                <td>{{ transaction.os_version }}</td>
+                <td>{{ transaction.username }}</td>
+                <td>{{ OPERATION_TYPE[transaction.operation_type] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+        </div>
+    </div>
+{% endblock main %}
