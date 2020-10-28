@@ -17,6 +17,7 @@ from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.extensions import (api, bootstrap, connection_pool, continuum, db,
                                ma, security)
+from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
 from neteye.node.models import Node
@@ -45,6 +46,7 @@ app.register_blueprint(interface_bp)
 app.register_blueprint(serial_bp)
 app.register_blueprint(cable_bp)
 app.register_blueprint(arp_entry_bp)
+app.register_blueprint(history_bp)
 app.register_blueprint(management_bp)
 app.register_blueprint(visualization_bp)
 app.register_blueprint(troubleshoot_bp)
