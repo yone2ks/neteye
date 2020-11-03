@@ -13,7 +13,24 @@
 
 <script>
  $(document).ready(function() {
-     $('#index').DataTable( {
+     $('#index thead tr').clone(true).appendTo('#index thead');
+     $('#index thead tr:eq(1) th').each(function (i) {
+         var title = $(this).text();
+         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+
+         $('input', this).on( 'keyup change', function () {
+             if (table.column(i).search() !== this.value) {
+                 table
+                     .column(i)
+                     .search( this.value )
+                     .draw();
+             }
+         });
+     });
+
+     var table = $('#index').DataTable( {
+         orderCellsTop: true,
+         fixedHeader: false,
          stateSave: true
      } );
  } );
@@ -26,7 +43,7 @@
             Nodes
         </div>
         <div class="card-body">
-    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2">
+    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2" style="width:100%">
         <thead>
             <tr>
                 <th>ID</th>

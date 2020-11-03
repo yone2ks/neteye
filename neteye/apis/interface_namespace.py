@@ -1,8 +1,9 @@
 from flask import jsonify, request
-from flask_restplus import Resource, Namespace
-from neteye.interface.models import Interface
-from neteye.extensions import ma, api, db
+from flask_restplus import Namespace, Resource
+
 from neteye.apis.routes import api_bp
+from neteye.extensions import api, db, ma
+from neteye.interface.models import Interface
 
 
 class InterfaceSchema(ma.ModelSchema):
@@ -34,7 +35,5 @@ class InterfaceResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        results = Interface.query.filter(
-            getattr(Interface, field).contains(filter_str)
-        ).all()
+        results = Interface.query.filter(getattr(Interface, field) == filter_str).all()
         return interfaces_schema.jsonify(results)

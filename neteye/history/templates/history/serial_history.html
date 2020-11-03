@@ -13,7 +13,24 @@
 
 <script>
  $(document).ready(function() {
-     $('#index').DataTable( {
+     $('#index thead tr').clone(true).appendTo('#index thead');
+     $('#index thead tr:eq(1) th').each(function (i) {
+         var title = $(this).text();
+         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+
+         $('input', this).on( 'keyup change', function () {
+             if (table.column(i).search() !== this.value) {
+                 table
+                     .column(i)
+                     .search( this.value )
+                     .draw();
+             }
+         });
+     });
+
+     var table = $('#index').DataTable( {
+         orderCellsTop: true,
+         fixedHeader: false,
          stateSave: true
      } );
  } );
@@ -26,12 +43,12 @@
             Serial History
         </div>
         <div class="card-body">
-    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2">
+    <table id="index" class="table table-responsive table-hover table-outline table-striped table-bordered mt-2 mb-2" style="width:100%">
         <thead>
             <tr>
-                <th>HISTORY ID</th>
+                <th>Date</th>
                 <th>Serial ID</th>
-                <th>Node</th>
+                <th>Node ID</th>
                 <th>Serial</th>
                 <th>Product ID</th>
                 <th>Operation Type</th>
@@ -40,12 +57,12 @@
         <tbody>
             {% for transaction in serial_history %}
             <tr>
-                <td>{{ transaction.transaction_id }}</td>
-                <td>{{ transaction.id }}</td>
-                <td>{{ transaction.hostname }}</td>
-                <td>{{ transaction.serial }}</td>
-                <td>{{ transaction.product_id }}</td>
-                <td>{{ OPERATION_TYPE[transaction.operation_type] }}</td>
+                <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ transaction.SerialVersion.id }}</td>
+                <td>{{ transaction.SerialVersion.node_id }}</td>
+                <td>{{ transaction.SerialVersion.serial }}</td>
+                <td>{{ transaction.SerialVersion.product_id }}</td>
+                <td>{{ OPERATION_TYPE[transaction.SerialVersion.operation_type] }}</td>
             </tr>
             {% endfor %}
         </tbody>

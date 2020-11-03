@@ -13,7 +13,24 @@
 
 <script>
  $(document).ready(function() {
-     $('#index').DataTable( {
+     $('#index thead tr').clone(true).appendTo('#index thead');
+     $('#index thead tr:eq(1) th').each(function (i) {
+         var title = $(this).text();
+         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+
+         $('input', this).on( 'keyup change', function () {
+             if (table.column(i).search() !== this.value) {
+                 table
+                     .column(i)
+                     .search( this.value )
+                     .draw();
+             }
+         });
+     });
+
+     var table = $('#index').DataTable( {
+         orderCellsTop: true,
+         fixedHeader: false,
          stateSave: true
      } );
  } );
@@ -26,10 +43,10 @@
             Node History
         </div>
         <div class="card-body">
-    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2">
+    <table id="index" class="table table-responsive table-hover table-outline table-striped table-bordered mt-2 mb-2" style="width:100%">
         <thead>
             <tr>
-                <th>HISTORY ID</th>
+                <th>Date</th>
                 <th>Node ID</th>
                 <th>Hostname</th>
                 <th>Description</th>
@@ -45,17 +62,17 @@
         <tbody>
             {% for transaction in node_history %}
             <tr>
-                <td>{{ transaction.transaction_id }}</td>
-                <td>{{ transaction.id }}</td>
-                <td>{{ transaction.hostname }}</td>
-                <td>{{ transaction.description }}</td>
-                <td>{{ transaction.ip_address }}</td>
-                <td>{{ transaction.device_type }}</td>
-                <td>{{ transaction.model }}</td>
-                <td>{{ transaction.os_type }}</td>
-                <td>{{ transaction.os_version }}</td>
-                <td>{{ transaction.username }}</td>
-                <td>{{ OPERATION_TYPE[transaction.operation_type] }}</td>
+                <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ transaction.NodeVersion.id }}</td>
+                <td>{{ transaction.NodeVersion.hostname }}</td>
+                <td>{{ transaction.NodeVersion.description }}</td>
+                <td>{{ transaction.NodeVersion.ip_address }}</td>
+                <td>{{ transaction.NodeVersion.device_type }}</td>
+                <td>{{ transaction.NodeVersion.model }}</td>
+                <td>{{ transaction.NodeVersion.os_type }}</td>
+                <td>{{ transaction.NodeVersion.os_version }}</td>
+                <td>{{ transaction.NodeVersion.username }}</td>
+                <td>{{ OPERATION_TYPE[transaction.NodeVersion.operation_type] }}</td>
             </tr>
             {% endfor %}
         </tbody>

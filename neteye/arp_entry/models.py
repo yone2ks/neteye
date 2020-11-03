@@ -1,8 +1,11 @@
-from neteye.base.models import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
-from sqlalchemy.orm import relationship, backref
 import netmiko
 from netmiko.ssh_autodetect import SSHDetect
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String)
+from sqlalchemy.orm import backref, relationship
+from sqlalchemy_utils import UUIDType
+
+from neteye.base.models import Base
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
 
@@ -12,7 +15,7 @@ class ArpEntry(Base):
 
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
-    interface_id = Column(Integer, ForeignKey("interfaces.id"))
+    interface_id = Column(UUIDType(binary=False), ForeignKey("interfaces.id"))
     protocol = Column(String)
     arp_type = Column(String)
     vendor = Column(String)

@@ -1,8 +1,9 @@
 from flask import jsonify, request
-from flask_restplus import Resource, Namespace
-from neteye.serial.models import Serial
-from neteye.extensions import ma, api, db
+from flask_restplus import Namespace, Resource
+
 from neteye.apis.routes import api_bp
+from neteye.extensions import api, db, ma
+from neteye.serial.models import Serial
 
 
 class SerialSchema(ma.ModelSchema):
@@ -34,5 +35,5 @@ class SerialResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        results = Serial.query.filter(getattr(Serial, field).contains(filter_str)).all()
+        results = Serial.query.filter(getattr(Serial, field) == filter_str).all()
         return serials_schema.jsonify(results)

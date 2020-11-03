@@ -1,11 +1,13 @@
-from neteye.extensions import db
-from neteye.blueprints import bp_factory
-from .models import Serial
-from neteye.node.models import Node
-from flask import request, redirect, url_for, render_template, flash, session
 import netmiko
 import pandas as pd
 from dynaconf import settings
+from flask import flash, redirect, render_template, request, session, url_for
+
+from neteye.blueprints import bp_factory
+from neteye.extensions import db
+from neteye.node.models import Node
+
+from .models import Serial
 
 serial_bp = bp_factory("serial")
 

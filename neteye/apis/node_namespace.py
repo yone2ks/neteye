@@ -1,8 +1,9 @@
 from flask import jsonify, request
-from flask_restplus import Resource, Namespace
-from neteye.node.models import Node
-from neteye.extensions import ma, api, db
+from flask_restplus import Namespace, Resource
+
 from neteye.apis.routes import api_bp
+from neteye.extensions import api, db, ma
+from neteye.node.models import Node
 
 
 class NodeSchema(ma.ModelSchema):
@@ -58,5 +59,5 @@ class NodeResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        results = Node.query.filter(getattr(Node, field).contains(filter_str)).all()
+        results = Node.query.filter(getattr(Node, field) == filter_str).all()
         return nodes_schema.jsonify(results)

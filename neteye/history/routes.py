@@ -5,7 +5,7 @@ import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
-from sqlalchemy_continuum import version_class
+from sqlalchemy_continuum import transaction_class, version_class
 
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
@@ -19,11 +19,13 @@ OPERATION_TYPE = {0: "INSERT", 1: "UPDATE", 2: "DELETE"}
 @history_bp.route("/node_history")
 def node_history():
     node_version = version_class(Node)
-    node_history = db.session.query(node_version).all()
+    node_transaction = transaction_class(Node)
+    node_history = db.session.query(node_version, node_transaction).filter(node_version.transaction_id == node_transaction.id).all()
     return render_template("history/node_history.html", node_history=node_history, OPERATION_TYPE=OPERATION_TYPE)
 
 @history_bp.route("/serial_history")
 def serial_history():
     serial_version = version_class(Serial)
-    serial_history = db.session.query(serial_version).all()
+    serial_transaction = transaction_class(Serial)
+    serial_history = db.session.query(serial_version, serial_transaction).filter(serial_version.transaction_id == serial_transaction.id).all()
     return render_template("history/serial_history.html", serial_history=serial_history, OPERATION_TYPE=OPERATION_TYPE)

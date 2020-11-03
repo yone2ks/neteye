@@ -1,23 +1,16 @@
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String, UniqueConstraint)
+from sqlalchemy_utils import UUIDType
+
 from neteye.base.models import Base
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
-from sqlalchemy import (
-    Boolean,
-    Column,
-    ForeignKey,
-    Integer,
-    String,
-    Float,
-    DateTime,
-    ForeignKey,
-    UniqueConstraint,
-)
 
 
 class Interface(Base):
     __tablename__ = "interfaces"
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
-    node_id = Column(Integer, ForeignKey("nodes.id"))
+    node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
     name = Column(String)
     description = Column(String)
     ip_address = Column(String)
