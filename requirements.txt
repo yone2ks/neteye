@@ -8,6 +8,7 @@ marshmallow-sqlalchemy
 flask-restplus
 flask-marshmallow
 Flask-Continuum
+sqlalchemy-utils
 netmiko
 napalm
 pandas

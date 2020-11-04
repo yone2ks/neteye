@@ -405,10 +405,14 @@ def import_ip_arp(show_ip_arp, node):
             )
         except Exception as e:
             vendor = ""
+        interface = Interface.query.filter(
+            Interface.node_id == node.id,
+            Interface.name == arp_entry_info['interface']
+        ).first()
         arp_entry = ArpEntry(
             ip_address=arp_entry_info["address"],
             mac_address=arp_entry_info["mac"],
-            interface_id=1,
+            interface_id=interface.id,
             protocol=arp_entry_info["protocol"],
             arp_type=arp_entry_info["type"],
             vendor=vendor,
