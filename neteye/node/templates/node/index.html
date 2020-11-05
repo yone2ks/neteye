@@ -3,6 +3,8 @@
 {% block title %}neteye{% endblock title %}
 {% block stylesheet %}
 {{ super() }}
+<link href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" rel="stylesheet"></link>
+
 {% endblock stylesheet %}
 {% block javascript %}
 {{ super() }}
@@ -10,6 +12,9 @@
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
+
 
 <script>
  $(document).ready(function() {
@@ -29,6 +34,10 @@
      });
 
      var table = $('#index').DataTable( {
+         dom: '<"dt_filter_wrapper col-lg-12"<"pull-right"f>><"dt_length_wrapper col-lg-2"<"pull-left"l>><"dt_length_wrapper col-lg-10 mt-2"<"pull-right"B>>t<"dt_info_wrapper col-lg-8"<"pull-left"i>><"dt_paginate_wrapper col-lg-4"<"pull-right"p>>',
+         buttons: [
+             'columnsToggle'
+         ],
          orderCellsTop: true,
          fixedHeader: false,
          stateSave: true
@@ -50,6 +59,7 @@
                 <th>Hostname</th>
                 <th>Description</th>
                 <th>IP Address</th>
+                <th>Model</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -60,6 +70,7 @@
                 <td>{{ node.hostname }}</td>
                 <td>{{ node.description }}</td>
                 <td>{{ node.ip_address }}</td>
+                <td>{{ node.model }}</td>
                 <td>
                     <div class="btn-toolbar">
                         <div class="btn-group mr-2">

@@ -15,7 +15,7 @@ class ArpEntry(Base):
 
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
-    interface_id = Column(UUIDType(binary=False), ForeignKey("interfaces.id"))
+    interface_id = Column(UUIDType(binary=False), ForeignKey("interfaces.id"), nullable=True)
     protocol = Column(String)
     arp_type = Column(String)
     vendor = Column(String)

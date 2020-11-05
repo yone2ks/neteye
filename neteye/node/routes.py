@@ -409,10 +409,11 @@ def import_ip_arp(show_ip_arp, node):
             Interface.node_id == node.id,
             Interface.name == arp_entry_info['interface']
         ).first()
+        interface_id = interface.id if interface is not None else None
         arp_entry = ArpEntry(
             ip_address=arp_entry_info["address"],
             mac_address=arp_entry_info["mac"],
-            interface_id=interface.id,
+            interface_id=interface_id,
             protocol=arp_entry_info["protocol"],
             arp_type=arp_entry_info["type"],
             vendor=vendor,
