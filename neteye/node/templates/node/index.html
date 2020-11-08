@@ -1,78 +1,28 @@
-{% extends "base_template.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block title %}neteye{% endblock title %}
-{% block stylesheet %}
-{{ super() }}
-<link href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" rel="stylesheet"></link>
-
-{% endblock stylesheet %}
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
-
-
-<script>
- $(document).ready(function() {
-     $('#index thead tr').clone(true).appendTo('#index thead');
-     $('#index thead tr:eq(1) th').each(function (i) {
-         var title = $(this).text();
-         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-
-         $('input', this).on( 'keyup change', function () {
-             if (table.column(i).search() !== this.value) {
-                 table
-                     .column(i)
-                     .search( this.value )
-                     .draw();
-             }
-         });
-     });
-
-     var table = $('#index').DataTable( {
-         dom: '<"dt_filter_wrapper col-lg-12"<"pull-right"f>><"dt_length_wrapper col-lg-2"<"pull-left"l>><"dt_length_wrapper col-lg-10 mt-2"<"pull-right"B>>t<"dt_info_wrapper col-lg-8"<"pull-left"i>><"dt_paginate_wrapper col-lg-4"<"pull-right"p>>',
-         buttons: [
-             'columnsToggle'
-         ],
-         orderCellsTop: true,
-         fixedHeader: false,
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-    {% block main %}
-    <div class="card">
-        <div class="card-header">
-            Nodes
-        </div>
-        <div class="card-body">
-    <table id="index" class="table table-responsive-sm table-hover table-outline table-striped table-bordered mt-2 mb-2" style="width:100%">
-        <thead>
+{% block card_header %}Nodes{% endblock card_header %}
+{% block thead %}
             <tr>
                 <th>ID</th>
                 <th>Hostname</th>
                 <th>Description</th>
                 <th>IP Address</th>
+                <th>Device Type</th>
                 <th>Model</th>
                 <th>Action</th>
             </tr>
-        </thead>
-        <tbody>
+{% endblock thead %}
+{% block tbody %}
             {% for node in nodes %}
             <tr>
                 <td>{{ node.id }}</td>
                 <td>{{ node.hostname }}</td>
                 <td>{{ node.description }}</td>
                 <td>{{ node.ip_address }}</td>
+                <td>{{ node.device_type }}</td>
                 <td>{{ node.model }}</td>
                 <td>
-                    <div class="btn-toolbar">
+                    <div class="btn-toolbar" style="flex-wrap: nowrap;">
                         <div class="btn-group mr-2">
                             <button class="btn btn-sm btn-primary" type="button" onclick="location.href='node/{{node.id}}'">Show</button>
                         </div>
@@ -81,18 +31,15 @@
                         </div>
                         <div class="btn-group mr-2">
                             <form action="{{ url_for('node.delete', id=node.id) }}" method="post">
-                                <button class="btn btn-sm btn-danger" type="submit" id="node_delete" onclick="return confirm('Are you sure?');">Delete</button>
+                                <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
                             </form>
                         </div>
                     </div>
                 </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
-        </div>
-        <div class="card-footer">
+{% endblock tbody %}
+{% block card_footer %}
             <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.new') }}'">New Node</button>
-        </div>
-    </div>
-{% endblock main %}
+{% endblock card_footer %}
+

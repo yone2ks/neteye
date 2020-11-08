@@ -1,47 +1,19 @@
-{% extends "node/index.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
-<script>
- $(document).ready(function() {
-     $('#result').DataTable( {
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        {{ command }}
-    </div>
-    <div class="card-body">
-    <table id="result" class="table table-responsive table-hover table-outline table-striped table-bordered mt-2 mb-2">
-        <thead class="thead-inverse">
-            <tr>
-                {% for key in result[0].keys() %}
-                <th>{{ key }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in result %}
-            <tr>
-                {% for key in row.keys() %}
-                <td>{{ row[key] }}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    </div>
-</div>
-{% endblock main %}
-
+{% block card_header %}{{ command }}{% endblock card_header %}
+{% block thead %}
+<tr>
+    {% for key in result[0].keys() %}
+    <th>{{ key }}</th>
+    {% endfor %}
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for row in result %}
+<tr>
+    {% for key in row.keys() %}
+    <td>{{ row[key] }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+{% endblock tbody %}

@@ -4,7 +4,7 @@
 
 <script>
  $(function() {
-     var node_id = {{ node.id }};
+     var node_id = "{{ node.id }}";
      $('#command').change(function() {
          var selected_command = $(this).val();
          var onclick_value = "location.href=" + "'" + node_id + '/command/' + selected_command.replace(/ /g, '_') + "'";

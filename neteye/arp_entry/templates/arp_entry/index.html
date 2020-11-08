@@ -1,75 +1,25 @@
-{% extends "base_template.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block title %}neteye{% endblock title %}
-{% block stylesheet %}
-{{ super() }}
-{% endblock stylesheet %}
-
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
-<script>
- $(document).ready(function() {
-     $('#index thead tr').clone(true).appendTo('#index thead');
-     $('#index thead tr:eq(1) th').each(function (i) {
-         var title = $(this).text();
-         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-
-         $('input', this).on( 'keyup change', function () {
-             if (table.column(i).search() !== this.value) {
-                 table
-                     .column(i)
-                     .search( this.value )
-                     .draw();
-             }
-         });
-     });
-
-     var table = $('#index').DataTable( {
-         orderCellsTop: true,
-         fixedHeader: false,
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Arp Entries
-    </div>
-    <div class="card-body">
-        <table id="index" class="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>IP Address</th>
-                    <th>MAC Address</th>
-                    <th>Node</th>
-                    <th>Interface</th>
-                    <th>Vendor</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for arp_entry in arp_entries %}
-                <tr>
-                    <td>{{ arp_entry.id }}</td>
-                    <td>{{ arp_entry.ip_address }}</td>
-                    <td>{{ arp_entry.mac_address }}</td>
-                    <td>{{ arp_entry.hostname }}</td>
-                    <td>{{ arp_entry.interface }}</td>
-                    <td>{{ arp_entry.vendor }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer">
-    </div>
-</div>
-{% endblock main %}
+{% block card_header %}Arp Entries{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>ID</th>
+    <th>IP Address</th>
+    <th>MAC Address</th>
+    <th>Node</th>
+    <th>Interface</th>
+    <th>Vendor</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for arp_entry in arp_entries %}
+<tr>
+    <td>{{ arp_entry.id }}</td>
+    <td>{{ arp_entry.ip_address }}</td>
+    <td>{{ arp_entry.mac_address }}</td>
+    <td>{{ arp_entry.hostname }}</td>
+    <td>{{ arp_entry.interface }}</td>
+    <td>{{ arp_entry.vendor }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}

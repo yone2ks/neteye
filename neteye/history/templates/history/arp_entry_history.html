@@ -1,0 +1,31 @@
+{% extends "base_datatables_template.html" %}
+
+{% block card_header %}Arp Entry History{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>Date</th>
+    <th>Arp Entry ID</th>
+    <th>IP Address</th>
+    <th>MAC Address</th>
+    <th>Interface ID</th>
+    <th>Protocol</th>
+    <th>Arp Type</th>
+    <th>Vendor</th>
+    <th>Operation Type</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for transaction in arp_entry_history %}
+<tr>
+    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    <td>{{ transaction.ArpEntryVersion.id }}</td>
+    <td>{{ transaction.ArpEntryVersion.ip_address }}</td>
+    <td>{{ transaction.ArpEntryVersion.mac_address }}</td>
+    <td>{{ transaction.ArpEntryVersion.interface_id }}</td>
+    <td>{{ transaction.ArpEntryVersion.protocol }}</td>
+    <td>{{ transaction.ArpEntryVersion.arp_type }}</td>
+    <td>{{ transaction.ArpEntryVersion.vendor }}</td>
+    <td>{{ OPERATION_TYPE[transaction.ArpEntryVersion.operation_type] }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}

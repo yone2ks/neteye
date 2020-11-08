@@ -1,82 +1,35 @@
-{% extends "base_template.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block title %}neteye{% endblock title %}
-{% block stylesheet %}
-{{ super() }}
-{% endblock stylesheet %}
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
-<script>
- $(document).ready(function() {
-     $('#index thead tr').clone(true).appendTo('#index thead');
-     $('#index thead tr:eq(1) th').each(function (i) {
-         var title = $(this).text();
-         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-
-         $('input', this).on( 'keyup change', function () {
-             if (table.column(i).search() !== this.value) {
-                 table
-                     .column(i)
-                     .search( this.value )
-                     .draw();
-             }
-         });
-     });
-
-     var table = $('#index').DataTable( {
-         orderCellsTop: true,
-         fixedHeader: false,
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-    {% block main %}
-    <div class="card">
-        <div class="card-header">
-            Node History
-        </div>
-        <div class="card-body">
-    <table id="index" class="table table-responsive table-hover table-outline table-striped table-bordered mt-2 mb-2" style="width:100%">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Node ID</th>
-                <th>Hostname</th>
-                <th>Description</th>
-                <th>IP Address</th>
-                <th>Device Type</th>
-                <th>Model</th>
-                <th>OS Type</th>
-                <th>OS Version</th>
-                <th>Username</th>
-                <th>Operation Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in node_history %}
-            <tr>
-                <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                <td>{{ transaction.NodeVersion.id }}</td>
-                <td>{{ transaction.NodeVersion.hostname }}</td>
-                <td>{{ transaction.NodeVersion.description }}</td>
-                <td>{{ transaction.NodeVersion.ip_address }}</td>
-                <td>{{ transaction.NodeVersion.device_type }}</td>
-                <td>{{ transaction.NodeVersion.model }}</td>
-                <td>{{ transaction.NodeVersion.os_type }}</td>
-                <td>{{ transaction.NodeVersion.os_version }}</td>
-                <td>{{ transaction.NodeVersion.username }}</td>
-                <td>{{ OPERATION_TYPE[transaction.NodeVersion.operation_type] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-        </div>
-    </div>
-{% endblock main %}
+{% block card_header %}Node History{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>Date</th>
+    <th>Node ID</th>
+    <th>Hostname</th>
+    <th>Description</th>
+    <th>IP Address</th>
+    <th>Device Type</th>
+    <th>Model</th>
+    <th>OS Type</th>
+    <th>OS Version</th>
+    <th>Username</th>
+    <th>Operation Type</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for transaction in node_history %}
+<tr>
+    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    <td>{{ transaction.NodeVersion.id }}</td>
+    <td>{{ transaction.NodeVersion.hostname }}</td>
+    <td>{{ transaction.NodeVersion.description }}</td>
+    <td>{{ transaction.NodeVersion.ip_address }}</td>
+    <td>{{ transaction.NodeVersion.device_type }}</td>
+    <td>{{ transaction.NodeVersion.model }}</td>
+    <td>{{ transaction.NodeVersion.os_type }}</td>
+    <td>{{ transaction.NodeVersion.os_version }}</td>
+    <td>{{ transaction.NodeVersion.username }}</td>
+    <td>{{ OPERATION_TYPE[transaction.NodeVersion.operation_type] }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}

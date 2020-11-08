@@ -1,0 +1,27 @@
+{% extends "base_datatables_template.html" %}
+
+{% block card_header %}Interfae History{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>Date</th>
+    <th>Interface ID</th>
+    <th>Node ID</th>
+    <th>Name</th>
+    <th>IP Address</th>
+    <th>Description</th>
+    <th>Operation Type</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for transaction in interface_history %}
+<tr>
+    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    <td>{{ transaction.InterfaceVersion.id }}</td>
+    <td>{{ transaction.InterfaceVersion.node_id }}</td>
+    <td>{{ transaction.InterfaceVersion.name }}</td>
+    <td>{{ transaction.InterfaceVersion.ip_address }}</td>
+    <td>{{ transaction.InterfaceVersion.description }}</td>
+    <td>{{ OPERATION_TYPE[transaction.InterfaceVersion.operation_type] }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}

@@ -1,71 +1,21 @@
-{% extends "base_template.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block title %}neteye{% endblock title %}
-{% block stylesheet %}
-{{ super() }}
-{% endblock stylesheet %}
-
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
-<script>
- $(document).ready(function() {
-     $('#index thead tr').clone(true).appendTo('#index thead');
-     $('#index thead tr:eq(1) th').each(function (i) {
-         var title = $(this).text();
-         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-
-         $('input', this).on( 'keyup change', function () {
-             if (table.column(i).search() !== this.value) {
-                 table
-                     .column(i)
-                     .search( this.value )
-                     .draw();
-             }
-         });
-     });
-
-     var table = $('#index').DataTable( {
-         orderCellsTop: true,
-         fixedHeader: false,
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Serials
-    </div>
-    <div class="card-body">
-        <table id="index" class="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Node</th>
-                    <th>Serial</th>
-                    <th>Product ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for serial in serials %}
-                <tr>
-                    <td>{{ serial.id }}</td>
-                    <td>{{ serial.hostname }}</td>
-                    <td>{{ serial.serial }}</td>
-                    <td>{{ serial.product_id }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer">
-    </div>
-</div>
-{% endblock main %}
+{% block card_header %}Serials{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>ID</th>
+    <th>Node</th>
+    <th>Serial</th>
+    <th>Product ID</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for serial in serials %}
+<tr>
+    <td>{{ serial.id }}</td>
+    <td>{{ serial.hostname }}</td>
+    <td>{{ serial.serial }}</td>
+    <td>{{ serial.product_id }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}

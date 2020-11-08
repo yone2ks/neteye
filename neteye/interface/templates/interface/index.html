@@ -1,74 +1,26 @@
-{% extends "base_template.html" %}
+{% extends "base_datatables_template.html" %}
 
-{% block title %}neteye{% endblock title %}
-{% block stylesheet %}
-{{ super() }}
-{% endblock stylesheet %}
-{% block javascript %}
-{{ super() }}
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
-<script>
- $(document).ready(function() {
-     $('#index thead tr').clone(true).appendTo('#index thead');
-     $('#index thead tr:eq(1) th').each(function (i) {
-         var title = $(this).text();
-         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-
-         $('input', this).on( 'keyup change', function () {
-             if (table.column(i).search() !== this.value) {
-                 table
-                     .column(i)
-                     .search( this.value )
-                     .draw();
-             }
-         });
-     });
-
-     var table = $('#index').DataTable( {
-         orderCellsTop: true,
-         fixedHeader: false,
-         stateSave: true
-     } );
- } );
-</script>
-{% endblock javascript %}
-
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Interfaces
-    </div>
-    <div class="card-body">
-        <table id="index" class="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>ID
-                    <th>Node</th>
-                    <th>Name</th>
-                    <th>IP Address</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for interface in interfaces %}
-                <tr>
-                    <td>{{ interface.id }}</td>
-                    <td>{{ interface.hostname }}</td>
-                    <td>{{ interface.name }}</td>
-                    <td>{{ interface.ip_address }}</td>
-                    <td>{{ interface.description }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer">
-        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('interface.new') }}'">New Interface</button>
-    </div>
-    </div>
-</div>
-{% endblock main %}
+{% block card_header %}Interfaces{% endblock card_header %}
+{% block thead %}
+<tr>
+    <th>ID</th>ID
+    <th>Node</th>
+    <th>Name</th>
+    <th>IP Address</th>
+    <th>Description</th>
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for interface in interfaces %}
+<tr>
+    <td>{{ interface.id }}</td>
+    <td>{{ interface.hostname }}</td>
+    <td>{{ interface.name }}</td>
+    <td>{{ interface.ip_address }}</td>
+    <td>{{ interface.description }}</td>
+</tr>
+{% endfor %}
+{% endblock tbody %}
+{% block card_footer %}
+<button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('interface.new') }}'">New Interface</button>
+{% endblock card_footer %}

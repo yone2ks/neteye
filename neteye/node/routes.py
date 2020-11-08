@@ -159,7 +159,7 @@ def show_inventory(id):
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
-            table_id="result",
+            table_id="index",
             classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
         ),
         command=command,
@@ -178,7 +178,7 @@ def show_version(id):
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
-            table_id="result",
+            table_id="index",
             classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
         ),
         command=command,
@@ -197,7 +197,7 @@ def show_ip_int_breif(id):
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
-            table_id="result",
+            table_id="index",
             classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
         ),
         command=command,
@@ -216,7 +216,7 @@ def show_interfaces_description(id):
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
-            table_id="result",
+            table_id="index",
             classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
         ),
         command=command,
