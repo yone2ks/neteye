@@ -324,6 +324,7 @@ def try_connect_node(ip_address):
             node = Node(
                 hostname="hostname",
                 ip_address=ip_address,
+                device_type = "autodetect",
                 username=cred["USERNAME"],
                 password=cred["PASSWORD"],
                 enable=cred["ENABLE"],
@@ -418,7 +419,7 @@ def import_ip_arp(show_ip_arp, node):
             arp_type=arp_entry_info["type"],
             vendor=vendor,
         )
-        if not ArpEntry.exists(arp_entry_info["address"]):
+        if not ArpEntry.exists(arp_entry_info["address"], interface_id):
             db.session.add(arp_entry)
         db.session.commit()
 
