@@ -16,6 +16,10 @@ TIMEOUT = 1
     USERNAME = 'admin'
     PASSWORD = 'juniper'
     ENABLE = 'juniper'
+    [default.credentials.3]
+    USERNAME = 'admin'
+    PASSWORD = 'cisco'
+    ENABLE = 'cisco'
 
 [development]
 

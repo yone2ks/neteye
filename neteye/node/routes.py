@@ -330,6 +330,8 @@ def try_connect_node(ip_address):
                 enable=cred["ENABLE"],
             )
             connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
+            conn = connection_pool.get_connection(node.ip_address)
+            conn.enable()
             return node
         except (
             netmiko.ssh_exception.NetMikoTimeoutException,
