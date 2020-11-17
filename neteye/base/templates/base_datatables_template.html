@@ -14,6 +14,10 @@
 <script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
 
 
 <script>
@@ -36,7 +40,25 @@
      var table = $('#index').DataTable( {
          dom: '<"dt_filter_wrapper col-lg-12"<"pull-right"f>><"dt_length_wrapper col-lg-2"<"pull-left"l>><"dt_length_wrapper col-lg-10 mt-2"<"pull-right"B>><"table-responsive"t><"dt_info_wrapper col-lg-8"<"pull-left"i>><"dt_paginate_wrapper col-lg-4"<"pull-right"p>>',
          buttons: [
-             'columnsToggle'
+             {
+                 extend: 'collection',
+                 text: 'Export',
+                 buttons: [
+                     'excelHtml5',
+                     'csvHtml5',
+                     'pdfHtml5'
+                 ],
+                 exportOptions: {
+                     modifier: {
+                         page: 'all',
+                         selected: true
+                     }
+                 },
+             },
+             {
+                 extend: 'colvis',
+                 text: 'Column Visibility',
+             },
          ],
          autoWidth: false,
          orderCellsTop: true,
