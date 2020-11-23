@@ -9,6 +9,7 @@
                 <th>IP Address</th>
                 <th>Device Type</th>
                 <th>Model</th>
+                <th>OS Version</th>
                 <th>Action</th>
             </tr>
 {% endblock thead %}
@@ -21,6 +22,7 @@
                 <td>{{ node.ip_address }}</td>
                 <td>{{ node.device_type }}</td>
                 <td>{{ node.model }}</td>
+                <td>{{ node.os_version }}</td>
                 <td>
                     <div class="btn-toolbar" style="flex-wrap: nowrap;">
                         <div class="btn-group mr-2">
