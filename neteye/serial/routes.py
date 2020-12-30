@@ -7,6 +7,7 @@ from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node
 
+from .forms import SerialForm
 from .models import Serial
 
 serial_bp = bp_factory("serial")
@@ -20,6 +21,23 @@ def index():
         .all()
     )
     return render_template("serial/index.html", serials=serials)
+
+@serial_bp.route("/new")
+def new():
+    form = SerialForm()
+    return render_template("serial/new.html", form=form)
+
+
+@serial_bp.route("/create", methods=["POST"])
+def create():
+    serial = Serial(
+        node_id=request.form["node"],
+        serial=request.form["serial"],
+        product_id=request.form["product_id"]
+    )
+    db.session.add(serial)
+    db.session.commit()
+    return redirect(url_for("serial.index"))
 
 
 @serial_bp.route("/filter")

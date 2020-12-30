@@ -1,0 +1,34 @@
+{% extends "node/index.html" %}
+
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+{% endblock javascript %}
+
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        New Seiarl
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('serial.create') }}" method=post class="form-horizontal " id="serial_create">
+            {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.node.label(class_="col-md-3 col-form-label") }}{{ form.node(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.serial.label(class_="col-md-3 col-form-label") }}{{ form.serial(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.product_id.label(class_="col-md-3 col-form-label") }}{{ form.product_id(class_="form-control col-md-6") }}
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="serial_create") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="serial_create") }}
+    </div>
+</div>
+{% endblock main %}

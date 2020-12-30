@@ -19,3 +19,7 @@
 </tr>
 {% endfor %}
 {% endblock tbody %}
+{% block card_footer %}
+<button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('serial.new') }}'">New Serial</button>
+{% endblock card_footer %}
+
