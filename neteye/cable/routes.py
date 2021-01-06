@@ -52,6 +52,7 @@ def new():
     dst_interface = None
     cable_type = None
     link_speed = None
+    description = None
     return render_template(
         "cable/new.html",
         form=form,
@@ -61,6 +62,7 @@ def new():
         dst_interface=dst_interface,
         cable_type=cable_type,
         link_speed=link_speed,
+        description=description,
     )
 
 
@@ -71,6 +73,7 @@ def create():
         dst_interface_id=request.form["dst_interface"],
         cable_type=request.form["cable_type"],
         link_speed=request.form["link_speed"],
+        description=request.form["description"],
     )
     db.session.add(cable)
     db.session.commit()
