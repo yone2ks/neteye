@@ -390,7 +390,7 @@ def import_interface(show_ip_int_brief, node):
 def import_interface_description(show_interfaces_description, node):
     intf_conv = IntfAbbrevConverter("cisco_ios")
     for interface_info in show_interfaces_description:
-        if Interface.exists(node.id, interface_info["port"]):
+        if Interface.exists(node.id, intf_conv.to_long(interface_info["port"])):
             interface = Interface.query.filter(
                 Interface.node_id == node.id,
                 Interface.name == intf_conv.to_long(interface_info["port"]),
