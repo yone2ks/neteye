@@ -20,5 +20,8 @@
     "AT" : "ATM",
     "Async" : "Async",
     "Group-Async" : "Group-Async",
-    "MFR" : "MFR"
+    "MFR" : "MFR",
+    "Twe" : "TwentyFiveGigE",
+    "Fo" : "FortyGigabitEthernet",
+    "Ap" : "Ap",
 }
