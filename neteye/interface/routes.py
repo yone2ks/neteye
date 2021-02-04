@@ -51,6 +51,14 @@ def create():
     return redirect(url_for("interface.index"))
 
 
+@interface_bp.route("/<id>/delete", methods=["POST"])
+def delete(id):
+    interface = Interface.query.get(id)
+    db.session.delete(interface)
+    db.session.commit()
+    return redirect(url_for("interface.index"))
+
+
 @interface_bp.route("/filter")
 def filter():
     page = request.args.get("page", 1, type=int)

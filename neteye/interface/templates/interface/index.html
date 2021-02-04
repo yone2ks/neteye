@@ -8,6 +8,7 @@
     <th>Name</th>
     <th>IP Address</th>
     <th>Description</th>
+    <th>Action</th>
 </tr>
 {% endblock thead %}
 {% block tbody %}
@@ -18,6 +19,15 @@
     <td>{{ interface.name }}</td>
     <td>{{ interface.ip_address }}</td>
     <td>{{ interface.description }}</td>
+    <td>
+        <div class="btn-toolbar" style="flex-wrap: nowrap;">
+            <div class="btn-group mr-2">
+                <form action="{{ url_for('interface.delete', id=interface.id) }}" method="post">
+                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
+                </form>
+            </div>
+        </div>
+    </td>
 </tr>
 {% endfor %}
 {% endblock tbody %}
