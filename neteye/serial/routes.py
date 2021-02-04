@@ -40,6 +40,14 @@ def create():
     return redirect(url_for("serial.index"))
 
 
+@serial_bp.route("/<id>/delete", methods=["POST"])
+def delete(id):
+    serial = Serial.query.get(id)
+    db.session.delete(serial)
+    db.session.commit()
+    return redirect(url_for("serial.index"))
+
+
 @serial_bp.route("/filter")
 def filter():
     page = request.args.get("page", 1, type=int)

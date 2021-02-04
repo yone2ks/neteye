@@ -7,6 +7,7 @@
     <th>Node</th>
     <th>Serial</th>
     <th>Product ID</th>
+    <th>Action</th>
 </tr>
 {% endblock thead %}
 {% block tbody %}
@@ -16,6 +17,15 @@
     <td>{{ serial.hostname }}</td>
     <td>{{ serial.serial }}</td>
     <td>{{ serial.product_id }}</td>
+    <td>
+        <div class="btn-toolbar" style="flex-wrap: nowrap;">
+            <div class="btn-group mr-2">
+                <form action="{{ url_for('serial.delete', id=serial.id) }}" method="post">
+                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
+                </form>
+            </div>
+        </div>
+    </td>
 </tr>
 {% endfor %}
 {% endblock tbody %}
