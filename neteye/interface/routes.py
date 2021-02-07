@@ -28,6 +28,13 @@ def index():
     return render_template("interface/index.html", interfaces=interfaces)
 
 
+@interface_bp.route("/<id>")
+def show(id):
+    interface = Interface.query.get(id)
+    node = Node.query.get(interface.node_id)
+    return render_template("interface/show.html", interface=interface, node=node)
+
+
 @interface_bp.route("/new")
 def new():
     form = InterfaceForm()
@@ -37,7 +44,7 @@ def new():
 @interface_bp.route("/create", methods=["POST"])
 def create():
     interface = Interface(
-        node_id=request.form["node"],
+        node_id=request.form["node_id"],
         name=request.form["name"],
         description=request.form["description"],
         ip_address=request.form["ip_address"],
@@ -49,6 +56,48 @@ def create():
     db.session.add(interface)
     db.session.commit()
     return redirect(url_for("interface.index"))
+
+
+@interface_bp.route("/<id>/edit")
+def edit(id):
+    interface = Interface.query.get(id)
+    form = InterfaceForm()
+    node_id = interface.node_id
+    name = interface.name
+    description = interface.description
+    ip_address = interface.ip_address
+    mask = interface.mask
+    speed = interface.speed
+    duplex = interface.duplex
+    status = interface.status
+    return render_template(
+        "interface/edit.html",
+        id=id,
+        form=form,
+        node_id=node_id,
+        name=name,
+        description=description,
+        ip_address=ip_address,
+        mask=mask,
+        speed=speed,
+        duplex=duplex,
+        status=status,
+    )
+
+
+@interface_bp.route("/<id>/update", methods=["POST"])
+def update(id):
+    interface = Interface.query.get(id)
+    interface.node_id = request.form["node_id"]
+    interface.name = request.form["name"]
+    interface.description = request.form["description"]
+    interface.ip_address = request.form["ip_address"]
+    interface.mask = request.form["mask"]
+    interface.speed = request.form["speed"]
+    interface.duplex = request.form["duplex"]
+    interface.status = request.form["status"]
+    db.session.commit()
+    return redirect(url_for("interface.show", id=id))
 
 
 @interface_bp.route("/<id>/delete", methods=["POST"])

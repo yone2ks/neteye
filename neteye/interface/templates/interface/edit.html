@@ -7,10 +7,10 @@
 
 <script>
  $(document).ready(function(){
-    var src_node_id = $("#src_node").val()
-    var dst_node_id = $("#dst_node").val()
+     var src_node_id = $("#src_node").val()
+     var dst_node_id = $("#dst_node").val()
 
-    var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
      $.ajax({
          url: src_interfaces_url,
          type: 'GET',
@@ -26,7 +26,7 @@
          }
      });
 
-    var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
+     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
      $.ajax({
          url: dst_interfaces_url,
          type: 'GET',
@@ -41,9 +41,9 @@
              }
          }
      });
-});
+ });
 
-$("#src_node").change(function(){
+ $("#src_node").change(function(){
      var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
      $.ajax({
          url: url,
@@ -85,40 +85,40 @@ $("#src_node").change(function(){
 {% block main %}
 <div class="card">
     <div class="card-header">
-        New Interface
+        Edit Interface
     </div>
     <div class="card-body">
-        <form action="{{ url_for('interface.create') }}" method=post class="form-horizontal " id="interface_create">
+        <form action="{{ url_for('interface.update', id=id ) }}" method=post class="form-horizontal " id="interface_edit">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ form.node_id.label(class_="col-md-3 col-form-label") }}{{ form.node_id(class_="form-control col-md-6") }}
+                {{ form.node_id.label(class_="col-md-3 col-form-label") }}{{ form.node_id(class_="form-control col-md-6", value=node, readonly="readonly") }}
             </div>
             <div class="form-group row">
-                {{ form.name.label(class_="col-md-3 col-form-label") }}{{ form.name(class_="form-control col-md-6") }}
+                {{ form.name.label(class_="col-md-3 col-form-label") }}{{ form.name(class_="form-control col-md-6", value=name) }}
             </div>
             <div class="form-group row">
-                {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6") }}
+                {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6", value=description) }}
             </div>
             <div class="form-group row">
-                {{ form.ip_address.label(class_="col-md-3 col-form-label") }}{{ form.ip_address(class_="form-control col-md-6") }}
+                {{ form.ip_address.label(class_="col-md-3 col-form-label") }}{{ form.ip_address(class_="form-control col-md-6", value=ip_address) }}
             </div>
             <div class="form-group row">
-                {{ form.mask.label(class_="col-md-3 col-form-label") }}{{ form.mask(class_="form-control col-md-6") }}
+                {{ form.mask.label(class_="col-md-3 col-form-label") }}{{ form.mask(class_="form-control col-md-6", value=mask) }}
             </div>
             <div class="form-group row">
-                {{ form.speed.label(class_="col-md-3 col-form-label") }}{{ form.speed(class_="form-control col-md-6") }}
+                {{ form.speed.label(class_="col-md-3 col-form-label") }}{{ form.speed(class_="form-control col-md-6", value=speed) }}
             </div>
             <div class="form-group row">
-                {{ form.duplex.label(class_="col-md-3 col-form-label") }}{{ form.duplex(class_="form-control col-md-6") }}
+                {{ form.duplex.label(class_="col-md-3 col-form-label") }}{{ form.duplex(class_="form-control col-md-6", value=duplex) }}
             </div>
             <div class="form-group row">
-                {{ form.status.label(class_="col-md-3 col-form-label") }}{{ form.status(class_="form-control col-md-6") }}
+                {{ form.status.label(class_="col-md-3 col-form-label") }}{{ form.status(class_="form-control col-md-6", value=status) }}
             </div>
         </form>
     </div>
     <div class="card-footer">
-        {{ form.submit(class_="btn btn-sm btn-primary", form="interface_create") }}
-        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="interface_create") }}
+        {{ form.submit(class_="btn btn-sm btn-primary", form="interface_edit") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="interface_update") }}
     </div>
 </div>
 {% endblock main %}
