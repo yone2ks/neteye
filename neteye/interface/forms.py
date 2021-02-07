@@ -11,7 +11,7 @@ def get_nodes():
 
 
 class InterfaceForm(FlaskForm):
-    node = QuerySelectField(
+    node_id = QuerySelectField(
         "Node:", validators=[Required()], query_factory=get_nodes, get_label="hostname"
     )
     name = StringField("Name:", validators=[Required()])
