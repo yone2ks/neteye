@@ -260,6 +260,17 @@ def command(id, command):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
+@node_bp.route("/<id>/raw_command/<command>")
+def raw_command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    if not connection_pool.connection_exists(node.ip_address):
+        connection_pool.add_connection(node.gen_params(settings["default"]["TIMEOUT"]))
+    conn = connection_pool.get_connection(node.ip_address)
+    result = conn.send_command(command, use_textfsm=False).replace("\r\n", "<br />").replace("\n", "<br />")
+    return render_template("node/command.html", result=result, command=command)
+
+
 @node_bp.route("/import_node_from_id/<id>")
 def import_node_from_id(id):
     try:

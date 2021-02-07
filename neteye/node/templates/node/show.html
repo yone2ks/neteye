@@ -5,10 +5,12 @@
 <script>
  $(function() {
      var node_id = "{{ node.id }}";
-     $('#command').change(function() {
+     $('#command_input').change(function() {
          var selected_command = $(this).val();
-         var onclick_value = "location.href=" + "'" + node_id + '/command/' + selected_command.replace(/ /g, '_') + "'";
-         $('#execute').attr("onclick", onclick_value);
+         var command_onclick_value = "location.href=" + "'" + node_id + '/command/' + selected_command.replace(/ /g, '_') + "'";
+         var raw_command_onclick_value = "location.href=" + "'" + node_id + '/raw_command/' + selected_command.replace(/ /g, '_') + "'";
+         $('#command').attr("onclick", command_onclick_value);
+         $('#raw_command').attr("onclick", raw_command_onclick_value);
      });
  });
 </script>
@@ -67,14 +69,17 @@
                 <th>Action</th>
                 <td>
                     <div class="row ml-1">
-                        <input class="form-control col-md-6" type="search" id="command" autocomplete="on" list="command_datalist">
+                        <input class="form-control col-md-6" type="search" id="command_input" autocomplete="on" list="command_datalist">
                         <datalist id="command_datalist">
                             {% for command in command_list %}
                             <option value="{{ command }}">
                                 {% endfor %}
                         </datalist>
-                        <div class="btn-group col-md-4">
-                            <button id="execute" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_run'">Execute</button>
+                        <div class="btn-group ml-2">
+                            <button id="command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/command/show_run'">Command</button>
+                        </div>
+                        <div class="btn-group ml-2">
+                            <button id="raw_command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/raw_command/show_run'">Command(Raw)</button>
                         </div>
                     </div>
                     <div class="row ml-1">
