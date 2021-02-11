@@ -24,7 +24,11 @@ class NodesResource(Resource):
         return nodes_schema.jsonify(Node.query.all())
 
     def post(self):
-        data, errors = node_schema.load(request.get_json())
+        try:
+            data = node_schema.load(request.get_json())
+        except ValidationError as err:
+            errors = err.messages
+            valid_data = err.valid_data
         db.session.add(data)
         db.session.commit()
         return "create node"
