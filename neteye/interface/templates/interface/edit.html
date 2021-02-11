@@ -91,7 +91,7 @@
         <form action="{{ url_for('interface.update', id=id ) }}" method=post class="form-horizontal " id="interface_edit">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ form.node_id.label(class_="col-md-3 col-form-label") }}{{ form.node_id(class_="form-control col-md-6", value=node, readonly="readonly") }}
+                {{ form.node_id.label(class_="col-md-3 col-form-label") }}{{ form.node_id(class_="form-control col-md-6", value=node) }}
             </div>
             <div class="form-group row">
                 {{ form.name.label(class_="col-md-3 col-form-label") }}{{ form.name(class_="form-control col-md-6", value=name) }}
