@@ -6,10 +6,10 @@ flask-nav
 flask-bootstrap
 marshmallow-sqlalchemy
 flask-restplus
-flask-marshmallow
+flask-marshmallow==0.11.0
 Flask-Continuum
 sqlalchemy-utils
-netmiko
+netmiko==2.4.2
 napalm
 pandas
 dynaconf
