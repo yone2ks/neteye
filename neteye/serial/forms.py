@@ -10,7 +10,7 @@ def get_nodes():
     return Node.query.all()
 
 class SerialForm(FlaskForm):
-    node = QuerySelectField(
+    node_id = QuerySelectField(
         "Node:", validators=[Required()], query_factory=get_nodes, get_label="hostname"
     )
     serial = StringField("Serial:", validators=[Required()])
