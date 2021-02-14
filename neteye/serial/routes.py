@@ -17,7 +17,7 @@ serial_bp = bp_factory("serial")
 def index():
     serials = (
         Serial.query.join(Node, Serial.node_id == Node.id)
-        .add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id)
+        .add_columns(Serial.id, Node.hostname, Serial.serial_number, Serial.product_id)
         .all()
     )
     return render_template("serial/index.html", serials=serials)
@@ -40,7 +40,7 @@ def new():
 def create():
     serial = Serial(
         node_id=request.form["node_id"],
-        serial=request.form["serial"],
+        serial_number=request.form["serial_number"],
         product_id=request.form["product_id"]
     )
     db.session.add(serial)
@@ -53,14 +53,14 @@ def edit(id):
     serial = Serial.query.get(id)
     form = SerialForm()
     node_id = serial.node_id
-    serial_number = serial.serial
+    serial_number = serial.serial_number
     product_id = serial.product_id
     return render_template(
         "serial/edit.html",
         id=id,
         form=form,
         node_id=node_id,
-        serial=serial_number,
+        serial_number=serial_number,
         product_id=product_id,
     )
 
@@ -69,7 +69,7 @@ def edit(id):
 def update(id):
     serial = Serial.query.get(id)
     serial.node_id = request.form["node_id"]
-    serial.serial = request.form["serial"]
+    serial.serial_number = request.form["serial_number"]
     serial.product_id = request.form["product_id"]
     db.session.commit()
     return redirect(url_for("serial.show", id=id))
@@ -90,7 +90,7 @@ def filter():
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
     if field == "serial":
-        serials = Serial.query.filter(Serial.serial.contains(filter_str)).paginate(
+        serials = Serial.query.filter(Serial.serial_number.contains(filter_str)).paginate(
             page, settings.PER_PAGE
         )
     elif field == "product_id":

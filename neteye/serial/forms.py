@@ -13,7 +13,7 @@ class SerialForm(FlaskForm):
     node_id = QuerySelectField(
         "Node:", validators=[Required()], query_factory=get_nodes, get_label="hostname"
     )
-    serial = StringField("Serial:", validators=[Required()])
+    serial_number = StringField("Serial Number:", validators=[Required()])
     product_id = StringField("Product ID:", validators=[Required()])
     description = StringField("Description:")
     submit = SubmitField("Submit")

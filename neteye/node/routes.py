@@ -364,7 +364,7 @@ def try_connect_node(ip_address):
 def import_serial(show_inventory, node):
     for serial_info in show_inventory:
         serial = Serial(
-            node_id=node.id, serial=serial_info["sn"], product_id=serial_info["pid"]
+            node_id=node.id, serial_number=serial_info["sn"], product_id=serial_info["pid"]
         )
         if not Serial.exists(serial_info["sn"]):
             db.session.add(serial)
