@@ -38,6 +38,7 @@ def new():
     hostname = None
     description = None
     ip_address = None
+    port = None
     device_type = "autodetect"
     username = None
     password = None
@@ -49,6 +50,7 @@ def new():
         hostname=hostname,
         description=description,
         ip_address=ip_address,
+        port=port,
         device_type=device_type,
         username=username,
         password=password,
@@ -63,6 +65,7 @@ def create():
         hostname=request.form["hostname"],
         description=request.form["description"],
         ip_address=request.form["ip_address"],
+        port=request.form["port"],
         device_type=request.form["device_type"],
         username=request.form["username"],
         password=request.form["password"],
@@ -80,6 +83,7 @@ def edit(id):
     hostname = node.hostname
     description = node.description
     ip_address = node.ip_address
+    port = node.port
     device_type = node.device_type
     username = node.username
     password = node.password
@@ -92,6 +96,7 @@ def edit(id):
         hostname=hostname,
         description=description,
         ip_address=ip_address,
+        port=port,
         device_type=device_type,
         username=username,
         password=password,
@@ -106,6 +111,7 @@ def update(id):
     node.hostname = request.form["hostname"]
     node.description = request.form["description"]
     node.ip_address = request.form["ip_address"]
+    node.port = request.form["port"]
     node.device_type = request.form["device_type"]
     node.username = request.form["username"]
     node.password = request.form["password"]

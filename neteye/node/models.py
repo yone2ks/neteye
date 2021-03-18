@@ -15,6 +15,7 @@ class Node(Base):
     hostname = Column(String, unique=True, nullable=False)
     description = Column(String)
     ip_address = Column(String, nullable=False)
+    port = Column(Integer, nullable=False)
     device_type = Column(String)
     model = Column(String)
     os_type = Column(String)
@@ -48,6 +49,7 @@ class Node(Base):
         return {
             "device_type": self.device_type,
             "ip": self.ip_address,
+            "port": self.port,
             "username": self.username,
             "password": self.password,
             "secret": self.enable,

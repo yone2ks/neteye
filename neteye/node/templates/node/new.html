@@ -54,6 +54,9 @@
                 {{ form.ip_address.label(class_="col-md-3 col-form-label") }}{{ form.ip_address(class_="form-control col-md-6") }}
             </div>
             <div class="form-group row">
+                {{ form.port.label(class_="col-md-3 col-form-label") }}{{ form.port(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
                 {{ form.device_type.label(class_="col-md-3 col-form-label") }}{{ form.device_type(list="device_type_datalist", class_="form-control col-md-6", value=device_type) }}
                 <datalist id="device_type_datalist">
                     {% for device_type in device_type_datalist %}
