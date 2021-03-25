@@ -6,6 +6,7 @@ from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
 
+from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
@@ -22,7 +23,8 @@ node_bp = bp_factory("node")
 @node_bp.route("")
 def index():
     nodes = Node.query.all()
-    return render_template("node/index.html", nodes=nodes)
+    data = nodes_schema.dump(nodes)
+    return render_template("node/index.html", nodes=nodes, data=data)
 
 
 @node_bp.route("/<id>")

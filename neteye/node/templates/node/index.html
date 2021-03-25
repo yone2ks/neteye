@@ -1,6 +1,34 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Nodes{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "id"},
+{data: "hostname"},
+{data: "description", defaultContent: ""},
+{data: "ip_address"},
+{data: "device_type", defaultContent: ""},
+{data: "model", defaultContent: ""},
+{data: "os_version", defaultContent: ""},
+{title: "Action", render: function( data, type, row, meta) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'node/' + row.id + '\'">Show</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'node/' + row.id + '/edit' + '\'">Edit</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<form action="/node/' + row.id + '/delete"' + ' method="post">'
+    + '<button class="btn btn-sm btn-danger" type="submit" onclick="return confirm(\'Are you sure?\');">Delete</button>'
+    + '</form>'
+    + '</div>'
+    ; }
+}
+],
+{% endblock datatables_cloumns %}
+
 {% block thead %}
             <tr>
                 <th>ID</th>
@@ -13,34 +41,7 @@
                 <th>Action</th>
             </tr>
 {% endblock thead %}
-{% block tbody %}
-            {% for node in nodes %}
-            <tr>
-                <td>{{ node.id }}</td>
-                <td>{{ node.hostname }}</td>
-                <td>{{ node.description }}</td>
-                <td>{{ node.ip_address }}</td>
-                <td>{{ node.device_type }}</td>
-                <td>{{ node.model }}</td>
-                <td>{{ node.os_version }}</td>
-                <td>
-                    <div class="btn-toolbar" style="flex-wrap: nowrap;">
-                        <div class="btn-group mr-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='node/{{node.id}}'">Show</button>
-                        </div>
-                        <div class="btn-group mr-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='node/{{node.id}}/edit'">Edit</button>
-                        </div>
-                        <div class="btn-group mr-2">
-                            <form action="{{ url_for('node.delete', id=node.id) }}" method="post">
-                                <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-{% endblock tbody %}
+
 {% block card_footer %}
             <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.new') }}'">New Node</button>
 {% endblock card_footer %}
