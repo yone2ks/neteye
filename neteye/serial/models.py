@@ -12,6 +12,7 @@ class Serial(Base):
     serial_number = Column(String)
     product_id = Column(String)
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
+    node = relationship("Node")
 
     def __repr__(self):
         return "serial_id={id} serial_number={serial_number} product_id={product_id} node_id={node_id}".format(
