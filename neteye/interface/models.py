@@ -12,8 +12,8 @@ class Interface(Base):
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
-    node = relationship("Node", back_populates="interfaces")
-    name = Column(String)
+    node = relationship("Node")
+    name = Column(String, nullable=False)
     description = Column(String)
     ip_address = Column(String)
     mask = Column(String)
