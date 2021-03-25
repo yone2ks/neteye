@@ -1,3 +1,4 @@
+import napalm
 import netmiko
 from netmiko.ssh_autodetect import SSHDetect
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
@@ -17,6 +18,7 @@ class Node(Base):
     ip_address = Column(String, nullable=False)
     port = Column(Integer, nullable=False)
     device_type = Column(String)
+    napalm_driver = Column(String)
     model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
