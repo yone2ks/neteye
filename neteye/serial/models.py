@@ -9,7 +9,7 @@ from neteye.base.models import Base
 class Serial(Base):
     __tablename__ = "serials"
 
-    serial_number = Column(String)
+    serial_number = Column(String, nullable=False)
     product_id = Column(String)
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
     node = relationship("Node")

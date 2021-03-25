@@ -3,6 +3,7 @@ import pandas as pd
 from dynaconf import settings
 from flask import flash, redirect, render_template, request, session, url_for
 
+from neteye.apis.serial_namespace import serial_schema, serials_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node
@@ -15,12 +16,9 @@ serial_bp = bp_factory("serial")
 
 @serial_bp.route("")
 def index():
-    serials = (
-        Serial.query.join(Node, Serial.node_id == Node.id)
-        .add_columns(Serial.id, Node.hostname, Serial.serial_number, Serial.product_id)
-        .all()
-    )
-    return render_template("serial/index.html", serials=serials)
+    serials = Serial.query.all()
+    data = serials_schema.dump(serials)
+    return render_template("serial/index.html", serials=serials, data=data)
 
 
 @serial_bp.route("/<id>")

@@ -1,6 +1,8 @@
 from flask import jsonify, request
 from flask_restplus import Namespace, Resource
+from marshmallow import fields
 
+from neteye.apis.node_namespace import NodeSchema
 from neteye.apis.routes import api_bp
 from neteye.extensions import api, db, ma
 from neteye.serial.models import Serial
@@ -10,6 +12,7 @@ class SerialSchema(ma.ModelSchema):
     class Meta:
         model = Serial
 
+    node = fields.Nested(NodeSchema)
 
 serials_schema = SerialSchema(many=True)
 serial_schema = SerialSchema()

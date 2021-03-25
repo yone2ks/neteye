@@ -1,6 +1,32 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Serials{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "id"},
+{data: "node.hostname"},
+{data: "serial_number"},
+{data: "product_id", defaultContent: ""},
+{title: "Action", render: function( data, type, row, meta) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'serial/' + row.id + '\'">Show</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'serial/' + row.id + '/edit' + '\'">Edit</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<form action="/serial/' + row.id + '/delete"' + ' method="post">'
+    + '<button class="btn btn-sm btn-danger" type="submit" onclick="return confirm(\'Are you sure?\');">Delete</button>'
+    + '</form>'
+    + '</div>'
+    ; }
+    }
+    ],
+    {% endblock datatables_cloumns %}
+
+
 {% block thead %}
 <tr>
     <th>ID</th>
@@ -10,31 +36,7 @@
     <th>Action</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for serial in serials %}
-<tr>
-    <td>{{ serial.id }}</td>
-    <td>{{ serial.hostname }}</td>
-    <td>{{ serial.serial_number }}</td>
-    <td>{{ serial.product_id }}</td>
-    <td>
-        <div class="btn-toolbar" style="flex-wrap: nowrap;">
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary" type="button" onclick="location.href='serial/{{serial.id}}'">Show</button>
-            </div>
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary" type="button" onclick="location.href='serial/{{serial.id}}/edit'">Edit</buttonl>
-            </div>
-            <div class="btn-group mr-2">
-                <form action="{{ url_for('serial.delete', id=serial.id) }}" method="post">
-                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
-                </form>
-            </div>
-        </div>
-    </td>
-</tr>
-{% endfor %}
-{% endblock tbody %}
+
 {% block card_footer %}
 <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('serial.new') }}'">New Serial</button>
 {% endblock card_footer %}
