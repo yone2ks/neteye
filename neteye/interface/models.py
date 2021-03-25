@@ -1,5 +1,6 @@
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String, UniqueConstraint)
+from sqlalchemy.orm import backref, relationship
 from sqlalchemy_utils import UUIDType
 
 from neteye.base.models import Base
@@ -11,6 +12,7 @@ class Interface(Base):
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
+    node = relationship("Node", back_populates="interfaces")
     name = Column(String)
     description = Column(String)
     ip_address = Column(String)
