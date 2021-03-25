@@ -1,6 +1,36 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Cables{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "id"},
+{data: "src_interface.node.hostname"},
+{data: "src_interface.name"},
+{data: "dst_interface.node.hostname"},
+{data: "dst_interface.name"},
+{data: "cable_type"},
+{data: "link_speed"},
+{data: "description", defaultContent: ""},
+{title: "Action", render: function( data, type, row, meta) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'cable/' + row.id + '\'">Show</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'cable/' + row.id + '/edit' + '\'">Edit</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<form action="/cable/' + row.id + '/delete"' + ' method="post">'
+    + '<button class="btn btn-sm btn-danger" type="submit" onclick="return confirm(\'Are you sure?\');">Delete</button>'
+    + '</form>'
+    + '</div>'
+    ; }
+    }
+    ],
+{% endblock datatables_cloumns %}
+
+
 {% block thead %}
 <tr>
     <th>ID</th>
@@ -14,32 +44,7 @@
     <th>Action</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for cable in cables %}
-<tr>
-    <td>{{ cable.id }}</td>
-    <td>{{ cable.src_node_hostname }}</td>
-    <td>{{ cable.src_interface_name }}</td>
-    <td>{{ cable.dst_node_hostname }}</td>
-    <td>{{ cable.dst_interface_name }}</td>
-    <td>{{ cable.cable_type }}</td>
-    <td>{{ cable.link_speed }}</td>
-    <td>{{ cable.description }}</td>
-    <td>
-        <div class="btn-toolbar">
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary" type="button" onclick="location.href='cable/{{cable.id}}/edit'">Edit</button>
-            </div>
-            <div class="btn-group mr-2">
-                <form action="{{ url_for('cable.delete', id=cable.id) }}" method="post">
-                    <button class="btn btn-sm btn-danger" type="submit" id="cable_delete" onclick="return confirm('Are you sure?');">Delete</button>
-                </form>
-            </div>
-        </div>
-    </td>
-</tr>
-{% endfor %}
-{% endblock tbody %}
+
 {% block card_footer %}
 <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('cable.new') }}'">New Cable</button>
 {% endblock card_footer %}
