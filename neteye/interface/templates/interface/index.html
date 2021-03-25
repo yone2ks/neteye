@@ -1,6 +1,33 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Interfaces{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "id"},
+{data: "node.hostname"},
+{data: "name"},
+{data: "ip_address"},
+{data: "description", defaultContent: ""},
+{title: "Action", render: function( data, type, row, meta) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'interface/' + row.id + '\'">Show</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<button class="btn btn-sm btn-primary" type="button" onclick="location.href=\'interface/' + row.id + '/edit' + '\'">Edit</button>'
+    + '</div>'
+    + '<div class="btn-group mr-2">'
+    + '<form action="/interface/' + row.id + '/delete"' + ' method="post">'
+    + '<button class="btn btn-sm btn-danger" type="submit" onclick="return confirm(\'Are you sure?\');">Delete</button>'
+    + '</form>'
+    + '</div>'
+    ; }
+    }
+    ],
+    {% endblock datatables_cloumns %}
+
+
 {% block thead %}
 <tr>
     <th>ID</th>
@@ -11,32 +38,7 @@
     <th>Action</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for interface in interfaces %}
-<tr>
-    <td>{{ interface.id }}</td>
-    <td>{{ interface.hostname }}</td>
-    <td>{{ interface.name }}</td>
-    <td>{{ interface.ip_address }}</td>
-    <td>{{ interface.description }}</td>
-    <td>
-        <div class="btn-toolbar" style="flex-wrap: nowrap;">
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary" type="button" onclick="location.href='interface/{{interface.id}}'">Show</button>
-            </div>
-            <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-primary" type="button" onclick="location.href='interface/{{interface.id}}/edit'">Edit</buttonl>
-            </div>
-            <div class="btn-group mr-2">
-                <form action="{{ url_for('interface.delete', id=interface.id) }}" method="post">
-                    <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
-                </form>
-            </div>
-        </div>
-    </td>
-</tr>
-{% endfor %}
-{% endblock tbody %}
+
 {% block card_footer %}
 <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('interface.new') }}'">New Interface</button>
 {% endblock card_footer %}

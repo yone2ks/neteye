@@ -1,6 +1,8 @@
 from flask import jsonify, request
 from flask_restplus import Namespace, Resource
+from marshmallow import fields
 
+from neteye.apis.node_namespace import NodeSchema
 from neteye.apis.routes import api_bp
 from neteye.extensions import api, db, ma
 from neteye.interface.models import Interface
@@ -9,6 +11,8 @@ from neteye.interface.models import Interface
 class InterfaceSchema(ma.ModelSchema):
     class Meta:
         model = Interface
+
+    node = fields.Nested(NodeSchema)
 
 
 interfaces_schema = InterfaceSchema(many=True)
