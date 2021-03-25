@@ -1,6 +1,18 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Arp Entries{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "id"},
+{data: "ip_address"},
+{data: "mac_address"},
+{data: "interface.node.hostname"},
+{data: "interface.name"},
+{data: "vendor"},
+],
+{% endblock datatables_cloumns %}
+
 {% block thead %}
 <tr>
     <th>ID</th>
@@ -11,15 +23,4 @@
     <th>Vendor</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for arp_entry in arp_entries %}
-<tr>
-    <td>{{ arp_entry.id }}</td>
-    <td>{{ arp_entry.ip_address }}</td>
-    <td>{{ arp_entry.mac_address }}</td>
-    <td>{{ arp_entry.hostname }}</td>
-    <td>{{ arp_entry.interface }}</td>
-    <td>{{ arp_entry.vendor }}</td>
-</tr>
-{% endfor %}
-{% endblock tbody %}
+
