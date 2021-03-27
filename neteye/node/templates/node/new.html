@@ -66,6 +66,18 @@
                 </datalist>
             </div>
             <div class="form-group row">
+                {{ form.napalm_driver.label(class_="col-md-3 col-form-label") }}{{ form.napalm_driver(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.model.label(class_="col-md-3 col-form-label") }}{{ form.model(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.os_type.label(class_="col-md-3 col-form-label") }}{{ form.os_type(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
+                {{ form.os_version.label(class_="col-md-3 col-form-label") }}{{ form.os_version(class_="form-control col-md-6") }}
+            </div>
+            <div class="form-group row">
                 {{ form.username.label(class_="col-md-3 col-form-label") }}{{ form.username(class_="form-control col-md-6") }}
             </div>
             <div class="form-group row">
