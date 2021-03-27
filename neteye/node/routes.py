@@ -42,10 +42,6 @@ def new():
     ip_address = None
     port = None
     device_type = "autodetect"
-    napalm_driver = None
-    model = None
-    os_type = None
-    os_version = None
     username = None
     password = None
     enable = None
@@ -58,10 +54,6 @@ def new():
         ip_address=ip_address,
         port=port,
         device_type=device_type,
-        napalm_driver=napalm_driver,
-        model=model,
-        os_type=os_type,
-        os_version=os_version,
         username=username,
         password=password,
         enable=enable,
@@ -77,10 +69,6 @@ def create():
         ip_address=request.form["ip_address"],
         port=request.form["port"],
         device_type=request.form["device_type"],
-        napalm_driver=request.form["napalm_driver"],
-        model=request.form["model"],
-        os_type=request.form["os_type"],
-        os_version=request.form["os_version"],
         username=request.form["username"],
         password=request.form["password"],
         enable=request.form["enable"],
