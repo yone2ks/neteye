@@ -5,30 +5,16 @@ import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
-from sqlalchemy_continuum import transaction_class, version_class
 
-from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
-from neteye.cable.models import Cable
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
-from neteye.interface.models import Interface
-from neteye.node.models import Node
-from neteye.serial.models import Serial
+
+from .models import (OPERATION_TYPE, arp_entry_transaction, arp_entry_version,
+                     cable_transaction, cable_version, interface_transaction,
+                     interface_version, node_transaction, node_version,
+                     serial_transaction, serial_version)
 
 history_bp = bp_factory("history")
-
-OPERATION_TYPE = {0: "INSERT", 1: "UPDATE", 2: "DELETE"}
-
-node_version = version_class(Node)
-node_transaction = transaction_class(Node)
-interface_version = version_class(Interface)
-interface_transaction = transaction_class(Interface)
-serial_version = version_class(Serial)
-serial_transaction = transaction_class(Serial)
-cable_version = version_class(Cable)
-cable_transaction = transaction_class(Cable)
-arp_entry_version = version_class(ArpEntry)
-arp_entry_transaction = transaction_class(ArpEntry)
 
 
 @history_bp.route("/node_history")
