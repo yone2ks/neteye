@@ -30,10 +30,12 @@ cable_transaction = transaction_class(Cable)
 arp_entry_version = version_class(ArpEntry)
 arp_entry_transaction = transaction_class(ArpEntry)
 
+
 @history_bp.route("/node_history")
 def node_history():
     node_history = db.session.query(node_version, node_transaction).filter(node_version.transaction_id == node_transaction.id).all()
     return render_template("history/node_history.html", node_history=node_history, OPERATION_TYPE=OPERATION_TYPE)
+
 
 @history_bp.route("/interface_history")
 def interface_history():
