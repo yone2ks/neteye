@@ -1,11 +1,17 @@
+import datetime
 from logging import debug, error, info, warning
 
 import netmiko
 import pandas as pd
+from dateutil import parser, tz
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
 
+from neteye.apis.history_namespace import (node_transaction_schema,
+                                           node_transactions_schema,
+                                           node_version_schema,
+                                           node_versions_schema)
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 
@@ -17,10 +23,19 @@ from .models import (OPERATION_TYPE, arp_entry_transaction, arp_entry_version,
 history_bp = bp_factory("history")
 
 
+def _pretty_data(transaction_version_data):
+    pretty_data = transaction_version_data.copy()
+    for record in pretty_data:
+        issued_at = datetime.datetime.strptime(record['issued_at'], '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=datetime.timezone.utc)
+        record['issued_at'] = issued_at.astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S %Z')
+        record['operation_type'] = OPERATION_TYPE[record['operation_type']]
+    return pretty_data
+
 @history_bp.route("/node_history")
 def node_history():
     node_history = db.session.query(node_version, node_transaction).filter(node_version.transaction_id == node_transaction.id).all()
-    return render_template("history/node_history.html", node_history=node_history, OPERATION_TYPE=OPERATION_TYPE)
+    data = [{**(node_transaction_schema.dump(transaction.Transaction)), **(node_version_schema.dump(transaction.NodeVersion))} for transaction in node_history]
+    return render_template("history/node_history.html", data=_pretty_data(data))
 
 
 @history_bp.route("/interface_history")
