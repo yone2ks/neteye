@@ -1,6 +1,20 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Cable History{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "issued_at", defaultContent: ""},
+{data: "id", defaultContent: ""},
+{data: "src_interface_id", defaultContent: ""},
+{data: "dst_interface_id", defaultContent: ""},
+{data: "description", defaultContent: ""},
+{data: "cable_type", defaultContent: ""},
+{data: "link_speed", defaultContent: ""},
+{data: "operation_type", defaultContent: ""}
+],
+{% endblock datatables_cloumns %}
+
 {% block thead %}
 <tr>
     <th>Date</th>
@@ -13,17 +27,3 @@
     <th>Operation Type</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for transaction in cable_history %}
-<tr>
-    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-    <td>{{ transaction.CableVersion.id }}</td>
-    <td>{{ transaction.CableVersion.src_interface_id }}</td>
-    <td>{{ transaction.CableVersion.dst_interface_id }}</td>
-    <td>{{ transaction.CableVersion.description }}</td>
-    <td>{{ transaction.CableVersion.cable_type }}</td>
-    <td>{{ transaction.CableVersion.link_speed }}</td>
-    <td>{{ OPERATION_TYPE[transaction.CableVersion.operation_type] }}</td>
-</tr>
-{% endfor %}
-{% endblock tbody %}

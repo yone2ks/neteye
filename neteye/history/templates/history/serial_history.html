@@ -1,25 +1,25 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Serial History{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "issued_at", defaultContent: ""},
+{data: "id", defaultContent: ""},
+{data: "node_id", defaultContent: ""},
+{data: "serial_number", defaultContent: ""},
+{data: "product_id", defaultContent: ""},
+{data: "operation_type", defaultContent: ""}
+],
+{% endblock datatables_cloumns %}
+
 {% block thead %}
 <tr>
     <th>Date</th>
     <th>Serial ID</th>
     <th>Node ID</th>
-    <th>Serial</th>
+    <th>Serial Number</th>
     <th>Product ID</th>
     <th>Operation Type</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for transaction in serial_history %}
-<tr>
-    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-    <td>{{ transaction.SerialVersion.id }}</td>
-    <td>{{ transaction.SerialVersion.node_id }}</td>
-    <td>{{ transaction.SerialVersion.serial }}</td>
-    <td>{{ transaction.SerialVersion.product_id }}</td>
-    <td>{{ OPERATION_TYPE[transaction.SerialVersion.operation_type] }}</td>
-</tr>
-{% endfor %}
-{% endblock tbody %}

@@ -1,6 +1,19 @@
-{% extends "base_datatables_template.html" %}
+{% extends "base_datatables_template_for_source_data.html" %}
 
 {% block card_header %}Interface History{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columns: [
+{data: "issued_at", defaultContent: ""},
+{data: "id", defaultContent: ""},
+{data: "node_id", defaultContent: ""},
+{data: "name", defaultContent: ""},
+{data: "ip_address", defaultContent: ""},
+{data: "description", defaultContent: ""},
+{data: "operation_type", defaultContent: ""}
+],
+{% endblock datatables_cloumns %}
+
 {% block thead %}
 <tr>
     <th>Date</th>
@@ -12,16 +25,3 @@
     <th>Operation Type</th>
 </tr>
 {% endblock thead %}
-{% block tbody %}
-{% for transaction in interface_history %}
-<tr>
-    <td>{{ transaction.Transaction.issued_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-    <td>{{ transaction.InterfaceVersion.id }}</td>
-    <td>{{ transaction.InterfaceVersion.node_id }}</td>
-    <td>{{ transaction.InterfaceVersion.name }}</td>
-    <td>{{ transaction.InterfaceVersion.ip_address }}</td>
-    <td>{{ transaction.InterfaceVersion.description }}</td>
-    <td>{{ OPERATION_TYPE[transaction.InterfaceVersion.operation_type] }}</td>
-</tr>
-{% endfor %}
-{% endblock tbody %}
