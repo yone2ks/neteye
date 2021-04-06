@@ -6,7 +6,9 @@ SECURITY_REGISTERABLE = true
 SECURITY_PASSWORD_SALT = 'salt'
 SECURITY_SEND_REGISTER_EMAIL = false
 SQLALCHEMY_DATABASE_URI = 'sqlite://///var/tmp/neteye.db'
-TIMEOUT = 1
+NETMIKO_TIMEOUT = 1
+NETMIKO_GLOBAL_DELAY_FACTOR = 1
+NETMIKO_MAX_LOOP = 20
   [default.credentials]
     [default.credentials.1]
     USERNAME = 'admin'

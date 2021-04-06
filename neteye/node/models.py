@@ -6,6 +6,7 @@ from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import backref, relationship
 
 from neteye.base.models import Base
+from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
 
@@ -47,7 +48,7 @@ class Node(Base):
     def exists(hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
-    def gen_params(self, timeout=10):
+    def gen_params(self, global_delay_factor=1, timeout=10):
         return {
             "device_type": self.device_type,
             "ip": self.ip_address,
@@ -55,6 +56,7 @@ class Node(Base):
             "username": self.username,
             "password": self.password,
             "secret": self.enable,
+            "global_delay_factor": global_delay_factor,
             "timeout": timeout,
         }
 
@@ -68,6 +70,20 @@ class Node(Base):
             netmiko.ssh_exception.SSHException,
         ) as err:
             self.device_type = "cisco_ios_telnet"
+
+    def command(self, command):
+        if not connection_pool.connection_exists(self.ip_address):
+            connection_pool.add_connection(self.gen_params(settings["default"]["NETMIKO_GLOBAL_DELAY_FACTOR"], settings["default"]["NETMIKO_TIMEOUT"]))
+        conn = connection_pool.get_connection(self.ip_address)
+        conn.enable()
+        return conn.send_command(command, use_textfsm=True)
+
+    def raw_command(self, command):
+        if not connection_pool.connection_exists(self.ip_address):
+            connection_pool.add_connection(self.gen_params(settings["default"]["NETMIKO_GLOBAL_DELAY_FACTOR"], settings["default"]["NETMIKO_TIMEOUT"]))
+        conn = connection_pool.get_connection(self.ip_address)
+        conn.enable()
+        return conn.send_command(command, use_textfsm=False)
 
     def gen_conn(self):
         return netmiko.ConnectHandler(**self.gen_params())
