@@ -65,3 +65,21 @@ class NodeResourceFilter(Resource):
         filter_str = request.args.get("filter_str")
         results = Node.query.filter(getattr(Node, field) == filter_str).all()
         return nodes_schema.jsonify(results)
+
+
+@nodes_api.route("/<string:id>/command/<string:command>")
+class NodeResourceCommand(Resource):
+    def get(self, id, command):
+        command = command.replace("_", " ")
+        node = Node.query.get(id)
+        result = node.command(command)
+        return jsonify(result)
+
+
+@nodes_api.route("/<string:id>/raw_command/<string:command>")
+class NodeResourceRawCommand(Resource):
+    def get(self, id, command):
+        command = command.replace("_", " ")
+        node = Node.query.get(id)
+        result = node.raw_command(command)
+        return jsonify(result)
