@@ -70,6 +70,7 @@ class Node(Base):
             netmiko.ssh_exception.SSHException,
         ) as err:
             self.device_type = "cisco_ios_telnet"
+            self.port = 23
 
     def command(self, command):
         if not connection_pool.connection_exists(self.ip_address):
