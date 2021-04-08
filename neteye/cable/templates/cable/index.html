@@ -5,12 +5,12 @@
 {% block datatables_cloumns %}
 columns: [
 {data: "id"},
-{data: "src_interface.node.hostname"},
-{data: "src_interface.name"},
-{data: "dst_interface.node.hostname"},
-{data: "dst_interface.name"},
-{data: "cable_type"},
-{data: "link_speed"},
+{data: "src_interface.node.hostname", defaultContent: ""},
+{data: "src_interface.name", defaultContent: ""},
+{data: "dst_interface.node.hostname", defaultContent: ""},
+{data: "dst_interface.name", defaultContent: ""},
+{data: "cable_type", defaultContent: ""},
+{data: "link_speed", defaultContent: ""},
 {data: "description", defaultContent: ""},
 {title: "Action", render: function( data, type, row, meta) {
 return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'

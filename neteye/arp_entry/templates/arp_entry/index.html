@@ -5,11 +5,11 @@
 {% block datatables_cloumns %}
 columns: [
 {data: "id"},
-{data: "ip_address"},
-{data: "mac_address"},
-{data: "interface.node.hostname"},
-{data: "interface.name"},
-{data: "vendor"},
+{data: "ip_address", defaultContent: ""},
+{data: "mac_address", defaultContent: ""},
+{data: "interface.node.hostname", defaultContent: ""},
+{data: "interface.name", defaultContent: ""},
+{data: "vendor", defaultContent: ""},
 ],
 {% endblock datatables_cloumns %}
 

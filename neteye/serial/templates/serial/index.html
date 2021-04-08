@@ -5,8 +5,8 @@
 {% block datatables_cloumns %}
 columns: [
 {data: "id"},
-{data: "node.hostname"},
-{data: "serial_number"},
+{data: "node.hostname", defaultContent: ""},
+{data: "serial_number", defaultContent: ""},
 {data: "product_id", defaultContent: ""},
 {title: "Action", render: function( data, type, row, meta) {
 return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'

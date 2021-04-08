@@ -5,9 +5,9 @@
 {% block datatables_cloumns %}
 columns: [
 {data: "id"},
-{data: "node.hostname"},
-{data: "name"},
-{data: "ip_address"},
+{data: "node.hostname", defaultContent: ""},
+{data: "name", defaultContent: ""},
+{data: "ip_address", defaultContent: ""},
 {data: "description", defaultContent: ""},
 {title: "Action", render: function( data, type, row, meta) {
 return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
