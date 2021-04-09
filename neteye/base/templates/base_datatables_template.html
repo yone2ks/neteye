@@ -49,6 +49,9 @@
          orderCellsTop: true,
          fixedHeader: false,
          stateSave: true,
+         stateSaveParams: function (settings, data) {
+             data.search.search = "";
+         },
          deferRender: true
      } );
 
