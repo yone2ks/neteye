@@ -1,7 +1,6 @@
 import json
 from logging import debug, error, info, warning
 
-import netmiko
 import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *

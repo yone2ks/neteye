@@ -1,4 +1,3 @@
-import netmiko
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
 from sqlalchemy.orm import backref, relationship

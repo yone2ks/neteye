@@ -1,7 +1,6 @@
 import datetime
 from logging import debug, error, info, warning
 
-import netmiko
 import pandas as pd
 from dateutil import parser, tz
 from flask import flash, redirect, render_template, request, session, url_for

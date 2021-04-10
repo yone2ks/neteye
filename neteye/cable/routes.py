@@ -1,4 +1,3 @@
-import netmiko
 import pandas as pd
 from dynaconf import settings
 from flask import flash, redirect, render_template, request, session, url_for
