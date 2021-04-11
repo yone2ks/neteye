@@ -1,5 +1,6 @@
 import napalm
 import netmiko
+import scrapli
 from netmiko.ssh_autodetect import SSHDetect
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
@@ -9,6 +10,8 @@ from neteye.base.models import Base
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.serial.models import Serial
+
+NETMIKO_PLATFORMS = netmiko.platforms
 
 
 class Node(Base):

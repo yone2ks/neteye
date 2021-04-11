@@ -15,7 +15,7 @@ from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.serial.models import Serial
 
 from .forms import NodeForm
-from .models import Node
+from .models import NETMIKO_PLATFORMS, Node
 
 node_bp = bp_factory("node")
 
@@ -45,7 +45,7 @@ def new():
     username = None
     password = None
     enable = None
-    device_type_datalist = netmiko.platforms
+    device_type_datalist = NETMIKO_PLATFORMS
     return render_template(
         "node/new.html",
         form=form,
@@ -94,7 +94,7 @@ def edit(id):
     username = node.username
     password = node.password
     enable = node.enable
-    device_type_datalist = netmiko.platforms
+    device_type_datalist = NETMIKO_PLATFORMS
     return render_template(
         "node/edit.html",
         id=id,
