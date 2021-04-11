@@ -1,5 +1,4 @@
 import netmiko
-from netmiko.ssh_autodetect import SSHDetect
 
 
 class ConnectionPool:
