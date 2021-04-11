@@ -56,11 +56,6 @@ api.add_namespace(nodes_api)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
-# Create DB and Connection Pool
+# Create DB
 with app.app_context():
     db.create_all()
-    # for node in  Node.query.all():
-    #     try:
-    #         connection_pool.add_connection(node.gen_params())
-    #     except Exception as e:
-    #         print(e)
