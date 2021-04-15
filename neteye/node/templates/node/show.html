@@ -58,6 +58,10 @@
                 <td>{{ node.napalm_driver }}</td>
             </tr>
             <tr>
+                <th>Scrapli Driver</th>
+                <td>{{ node.scrapli_driver }}</td>
+            </tr>
+            <tr>
                 <th>Model</th>
                 <td>{{ node.model }}</td>
             </tr>
@@ -81,7 +85,7 @@
                 <th>Action</th>
                 <td>
                     <div class="row ml-1">
-                        <input class="form-control col-md-6" type="search" id="command_input" autocomplete="on" list="command_datalist">
+                        <input class="form-control col-md-6" type="search" id="command_input" autocomplete="off" list="command_datalist">
                         <datalist id="command_datalist">
                             {% for command in command_list %}
                             <option value="{{ command }}">

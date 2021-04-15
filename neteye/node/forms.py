@@ -10,6 +10,7 @@ class NodeForm(FlaskForm):
     port = IntegerField("Port:", default=22, validators=[Required()])
     device_type = StringField("Device Type:", validators=[Required()])
     napalm_driver = StringField("Napalm Driver:")
+    scrapli_driver = StringField("Scrapli Driver:")
     model = StringField("Model:")
     os_type = StringField("OS Type:")
     os_version = StringField("OS Version:")

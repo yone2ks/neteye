@@ -15,7 +15,7 @@ from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.serial.models import Serial
 
 from .forms import NodeForm
-from .models import NETMIKO_PLATFORMS, Node
+from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node
 
 node_bp = bp_factory("node")
 
@@ -87,7 +87,8 @@ def edit(id):
     ip_address = node.ip_address
     port = node.port
     device_type = node.device_type
-    napalm_driver= node.napalm_driver
+    napalm_driver = node.napalm_driver
+    scrapli_driver = node.scrapli_driver
     model = node.model
     os_type = node.os_type
     os_version = node.os_version
@@ -95,6 +96,8 @@ def edit(id):
     password = node.password
     enable = node.enable
     device_type_datalist = NETMIKO_PLATFORMS
+    napalm_driver_datalist = NAPALM_DRIVERS
+    scrapli_driver_datalist = SCRAPLI_DRIVERS
     return render_template(
         "node/edit.html",
         id=id,
@@ -105,6 +108,7 @@ def edit(id):
         port=port,
         device_type=device_type,
         napalm_driver=napalm_driver,
+        scrapli_driver=scrapli_driver,
         model=model,
         os_type=os_type,
         os_version=os_version,
@@ -112,6 +116,8 @@ def edit(id):
         password=password,
         enable=enable,
         device_type_datalist=device_type_datalist,
+        napalm_driver_datalist=napalm_driver_datalist,
+        scrapli_driver_datalist=scrapli_driver_datalist,
     )
 
 
@@ -124,6 +130,7 @@ def update(id):
     node.port = request.form["port"]
     node.device_type = request.form["device_type"]
     node.napalm_driver = request.form["napalm_driver"]
+    node.scrapli_driver = request.form["scrapli_driver"]
     node.model = request.form["model"]
     node.os_type = request.form["os_type"]
     node.os_version = request.form["os_version"]
