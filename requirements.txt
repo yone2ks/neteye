@@ -17,4 +17,5 @@ pandas
 dynaconf
 toml
 netaddr
+dictdiffer
 
