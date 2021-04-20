@@ -2,6 +2,8 @@ from logging import debug, error, info, warning
 
 import netmiko
 import pandas as pd
+import sqlalchemy
+from dictdiffer import diff
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
@@ -12,6 +14,7 @@ from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
+from neteye.lib.neteye_utils.neteye_differ import neteye_delta_commit
 from neteye.serial.models import Serial
 
 from .forms import NodeForm
@@ -355,14 +358,11 @@ def try_connect_node(ip_address):
 
 
 def import_serial(show_inventory, node):
+    before_serials = [{"node_id": serial.node_id, "serial_number": serial.serial_number, "product_id": serial.product_id} for serial in node.serials]
+    after_serials = []
     for serial_info in show_inventory:
-        serial = Serial(
-            node_id=node.id, serial_number=serial_info["sn"], product_id=serial_info["pid"]
-        )
-        if not Serial.exists(serial_info["sn"]):
-            db.session.add(serial)
-        db.session.commit()
-
+        after_serials.append({"node_id": node.id, "serial_number": serial_info["sn"], "product_id": serial_info["pid"]})
+    neteye_delta_commit(Serial, before_serials, after_serials)
 
 def import_node_model(show_inventory, node):
     node.model = show_inventory[0]["pid"]
