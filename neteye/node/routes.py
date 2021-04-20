@@ -3,7 +3,6 @@ from logging import debug, error, info, warning
 import netmiko
 import pandas as pd
 import sqlalchemy
-from dictdiffer import diff
 from flask import flash, redirect, render_template, request, session, url_for
 from netaddr import *
 from sqlalchemy.sql import exists
