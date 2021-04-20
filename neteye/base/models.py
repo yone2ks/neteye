@@ -20,3 +20,14 @@ class Base(db.Model, VersioningMixin):
         return "<id={id} created_at={created_at} updated_at={updated_at}".format(
             id=self.id, created_at=self.created_at, updated_at=self.updated_at
         )
+
+    def commit(self):
+        db.session.commit()
+
+    def add(self):
+        db.session.add(self)
+        self.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        self.commit()
