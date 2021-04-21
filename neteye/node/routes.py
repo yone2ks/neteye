@@ -4,7 +4,6 @@ import netmiko
 import pandas as pd
 import sqlalchemy
 from flask import flash, redirect, render_template, request, session, url_for
-from netaddr import *
 from sqlalchemy.sql import exists
 
 from neteye.apis.node_namespace import node_schema, nodes_schema

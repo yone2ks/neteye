@@ -16,6 +16,5 @@ napalm
 pandas
 dynaconf
 toml
-netaddr
 dictdiffer
 

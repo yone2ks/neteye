@@ -3,7 +3,6 @@ from logging import debug, error, info, warning
 
 import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
-from netaddr import *
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import exists
 

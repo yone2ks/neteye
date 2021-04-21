@@ -4,7 +4,6 @@ from logging import debug, error, info, warning
 import pandas as pd
 from dateutil import parser, tz
 from flask import flash, redirect, render_template, request, session, url_for
-from netaddr import *
 from sqlalchemy.sql import exists
 
 from neteye.apis.history_namespace import (arp_entry_transaction_schema,
