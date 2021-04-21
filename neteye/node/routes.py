@@ -13,7 +13,7 @@ from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
-from neteye.lib.neteye_utils.neteye_differ import neteye_delta_commit
+from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.serial.models import Serial
 
 from .forms import NodeForm
@@ -357,11 +357,16 @@ def try_connect_node(ip_address):
 
 
 def import_serial(show_inventory, node):
-    before_serials = [{"node_id": serial.node_id, "serial_number": serial.serial_number, "product_id": serial.product_id} for serial in node.serials]
+    before_serials = [{"node_id": serial.node_id,
+                       "serial_number": serial.serial_number,
+                       "product_id": serial.product_id}
+                      for serial in node.serials]
     after_serials = []
     for serial_info in show_inventory:
-        after_serials.append({"node_id": node.id, "serial_number": serial_info["sn"], "product_id": serial_info["pid"]})
-    neteye_delta_commit(Serial, before_serials, after_serials)
+        after_serials.append({"node_id": node.id,
+                              "serial_number": serial_info["sn"],
+                              "product_id": serial_info["pid"]})
+    delta_commit(Serial, before_serials, after_serials)
 
 def import_node_model(show_inventory, node):
     node.model = show_inventory[0]["pid"]
@@ -377,17 +382,19 @@ def import_node_hostname(show_version, node):
 
 
 def import_interface(show_ip_int_brief, node):
+    before_interfaces = [{"node_id": interface.node_id,
+                       "name": interface.name,
+                       "ip_address": interface.ip_address,
+                       "status": interface.status}
+                      for interface in node.interfaces]
+    after_interfaces = []
     for interface_info in show_ip_int_brief:
-        interface = Interface(
-            node_id=node.id,
-            name=interface_info["intf"],
-            ip_address=interface_info["ipaddr"],
-            status=interface_info["status"],
-            description="",
-        )
-        if not Interface.exists(node.id, interface_info["intf"]):
-            db.session.add(interface)
-        db.session.commit()
+        after_interfaces.append({
+            "node_id": node.id,
+            "name": interface_info["intf"],
+            "ip_address": interface_info["ipaddr"],
+            "status": interface_info["status"]})
+    delta_commit(Interface, before_interfaces, after_interfaces)
 
 
 def import_interface_description(show_interfaces_description, node):
