@@ -17,6 +17,7 @@ from neteye.serial.models import Serial
 NETMIKO_PLATFORMS = netmiko.platforms
 NAPALM_DRIVERS = napalm.SUPPORTED_DRIVERS
 SCRAPLI_DRIVERS = napalm.SUPPORTED_DRIVERS
+NOT_SUPPORTED = "not supported"
 
 class Node(Base):
     __tablename__ = "nodes"
@@ -87,14 +88,14 @@ class Node(Base):
         if self.device_type in napalm_driver_mapping.mapping_dict.keys():
             self.napalm_driver = napalm_driver_mapping.mapping_dict[self.device_type]
         else:
-            self.napalm_driver = "not detected"
+            self.napalm_driver = NOT_SUPPORTED
 
     def detect_scrapli_driver(self):
         scrapli_driver_mapping = DeviceTypeToDriverMapping("scrapli")
         if self.device_type in scrapli_driver_mapping.mapping_dict.keys():
             self.scrapli_driver = scrapli_driver_mapping.mapping_dict[self.device_type]
         else:
-            self.scrapli_driver = "not detected"
+            self.scrapli_driver = NOT_SUPPORTED
 
     def command(self, command):
         if not connection_pool.connection_exists(self.ip_address):
