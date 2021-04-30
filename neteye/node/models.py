@@ -154,7 +154,6 @@ class Node(Base):
         return conn.get_interfaces()
 
     def scrapli_command(self, command):
-        print(connection_pool.exists(self, DRIVER_TYPE_SCRAPLI))
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
