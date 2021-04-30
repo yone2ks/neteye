@@ -4,6 +4,7 @@ import netmiko
 import pandas as pd
 import sqlalchemy
 from flask import flash, redirect, render_template, request, session, url_for
+from netaddr import *
 from sqlalchemy.sql import exists
 
 from neteye.apis.node_namespace import node_schema, nodes_schema
@@ -224,7 +225,7 @@ def show_interfaces_description(id):
     command = "show interfaces description"
     node = Node.query.get(id)
     result = node.command(command)
-    import_interface_description(result, node)
+    # import_interface_description(result, node)
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
@@ -367,6 +368,7 @@ def import_serial(show_inventory, node):
                               "product_id": serial_info["pid"]})
     delta_commit(Serial, before_serials, after_serials)
 
+
 def import_node_model(show_inventory, node):
     node.model = show_inventory[0]["pid"]
     if not Node.exists(node.hostname):
@@ -382,10 +384,10 @@ def import_node_hostname(show_version, node):
 
 def import_interface(show_ip_int_brief, node):
     before_interfaces = [{"node_id": interface.node_id,
-                       "name": interface.name,
-                       "ip_address": interface.ip_address,
-                       "status": interface.status}
-                      for interface in node.interfaces]
+                          "name": interface.name,
+                          "ip_address": interface.ip_address,
+                          "status": interface.status}
+                         for interface in node.interfaces]
     after_interfaces = []
     for interface_info in show_ip_int_brief:
         after_interfaces.append({
