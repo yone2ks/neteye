@@ -20,6 +20,7 @@ class InterfaceForm(FlaskForm):
     mask = StringField("Mask:")
     speed = StringField("Speed:")
     duplex = StringField("Duplex:")
+    mtu = StringField("MTU:")
     status = StringField("Status:")
     submit = SubmitField("Submit")
     reset = SubmitField("Reset")

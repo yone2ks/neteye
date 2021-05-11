@@ -19,6 +19,7 @@ class Interface(Base):
     mask = Column(String)
     speed = Column(String)
     duplex = Column(String)
+    mtu = Column(String)
     status = Column(String)
 
     def __repr__(self):

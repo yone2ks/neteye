@@ -42,6 +42,7 @@ def create():
         mask=request.form["mask"],
         speed=request.form["speed"],
         duplex=request.form["duplex"],
+        mtu=request.form["mtu"],
         status=request.form["status"],
     )
     db.session.add(interface)
@@ -60,6 +61,7 @@ def edit(id):
     mask = interface.mask
     speed = interface.speed
     duplex = interface.duplex
+    mtu = interface.mtu
     status = interface.status
     return render_template(
         "interface/edit.html",
@@ -72,6 +74,7 @@ def edit(id):
         mask=mask,
         speed=speed,
         duplex=duplex,
+        mtu=mtu,
         status=status,
     )
 
@@ -86,6 +89,7 @@ def update(id):
     interface.mask = request.form["mask"]
     interface.speed = request.form["speed"]
     interface.duplex = request.form["duplex"]
+    interface.mtu = request.form["mtu"]
     interface.status = request.form["status"]
     db.session.commit()
     return redirect(url_for("interface.show", id=id))
