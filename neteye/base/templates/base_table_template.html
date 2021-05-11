@@ -1,0 +1,26 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {% block card_header %}{% endblock card_header %}
+    </div>
+    <div class="card-body">
+        {% block card_body %}
+        <table id="index" class="table table-hover table-outline table-striped table-bordered col-lg-12 mt-2 mb-2">
+            <thead>
+                {% block thead %}{% endblock thead %}
+            </thead>
+            <tbody>
+                {% block tbody %}{% endblock tbody %}
+            </tbody>
+        </table>
+        {% endblock card_body %}
+    </div>
+    <div class="card-footer">
+        {% block card_footer %}{% endblock card_footer %}
+    </div>
+</div>
+{% endblock main %}
