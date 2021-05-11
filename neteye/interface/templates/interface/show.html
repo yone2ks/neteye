@@ -1,51 +1,48 @@
-{% extends "base_template.html" %}
+{% extends "base_table_template.html" %}
 
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Show Interface
-    </div>
-    <div class="card-body">
-    <table class="table table-striped table-bordered">
-        <tbody>
-            <tr>
-                <th>ID</th>
-                <td>{{ interface.id }}</td>
-            </tr>
-            <tr>
-                <th>Hostname</th>
-                <td>{{ node.hostname }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ interface.name }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ interface.description }}</td>
-            </tr>
-            <tr>
-                <th>IP Address</th>
-                <td>{{ interface.ip_address }}</td>
-            </tr>
-            <tr>
-                <th>Mask</th>
-                <td>{{ interface.mask }}</td>
-            </tr>
-            <tr>
-                <th>Speed</th>
-                <td>{{ interface.speed }}</td>
-            </tr>
-            <tr>
-                <th>Duplex</th>
-                <td>{{ interface.duplex }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ interface.status }}</td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
-</div>
-{% endblock main %}
+{% block card_header %}Show Interface{% endblock card_header %}
+
+{% block tbody %}
+<tbody>
+    <tr>
+        <th>ID</th>
+        <td>{{ interface.id }}</td>
+    </tr>
+    <tr>
+        <th>Hostname</th>
+        <td>{{ node.hostname }}</td>
+    </tr>
+    <tr>
+        <th>Name</th>
+        <td>{{ interface.name }}</td>
+    </tr>
+    <tr>
+        <th>Description</th>
+        <td>{{ interface.description }}</td>
+    </tr>
+    <tr>
+        <th>IP Address</th>
+        <td>{{ interface.ip_address }}</td>
+    </tr>
+    <tr>
+        <th>Mask</th>
+        <td>{{ interface.mask }}</td>
+    </tr>
+    <tr>
+        <th>Speed</th>
+        <td>{{ interface.speed }}</td>
+    </tr>
+    <tr>
+        <th>Duplex</th>
+        <td>{{ interface.duplex }}</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>{{ interface.status }}</td>
+    </tr>
+</tbody>
+{% endblock tbody %}
+
+{% block card_footer %}
+<button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('interface.edit', id=interface.id) }}'">Edit Interface</button>
+{% endblock card_footer %}
