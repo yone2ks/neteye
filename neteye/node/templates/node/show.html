@@ -1,4 +1,4 @@
-{% extends "base_template.html" %}
+{% extends "base_table_template.html" %}
 {% block javascript %}
 {{ super() }}
 
@@ -17,117 +17,113 @@
 {% endblock javascript %}
 
 
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Show Node
-    </div>
-    <div class="card-body">
-    <table class="table table-striped table-bordered">
-        <tbody>
-            <tr>
-                <th>ID</th>
-                <td>{{ node.id }}</td>
-            </tr>
-            <tr>
-                <th>Hostname</th>
-                <td>{{ node.hostname }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ node.description }}</td>
-            </tr>
-            <tr>
-                <th>IP Address</th>
-                <td>{{ node.ip_address }}</td>
-            </tr>
-            <tr>
-                <th>Port</th>
-                <td>{{ node.port }}</td>
-            </tr>
-            <tr>
-                <th>Username</th>
-                <td>{{ node.username }}</td>
-            </tr>
-            <tr>
-                <th>Device Type</th>
-                <td>{{ node.device_type }}</td>
-            </tr>
-            <tr>
-                <th>Napalm Driver</th>
-                <td>{{ node.napalm_driver }}</td>
-            </tr>
-            <tr>
-                <th>Scrapli Driver</th>
-                <td>{{ node.scrapli_driver }}</td>
-            </tr>
-            <tr>
-                <th>Model</th>
-                <td>{{ node.model }}</td>
-            </tr>
-            <tr>
-                <th>OS Type</th>
-                <td>{{ node.os_type }}</td>
-            </tr>
-            <tr>
-                <th>OS Version</th>
-                <td>{{ node.os_version }}</td>
-            </tr>
-            <tr>
-                <th>Serial</th>
-                <td>
-                    {% for serial in node.serials %}
-                    {{ serial.serial_number }}
-                    {% endfor %}
-                </td>
-            </tr>
-            <tr>
-                <th>Action</th>
-                <td>
-                    <div class="row ml-1">
-                        <input class="form-control col-md-6" type="search" id="command_input" autocomplete="off" list="command_datalist">
-                        <datalist id="command_datalist">
-                            {% for command in command_list %}
-                            <option value="{{ command }}">
-                                {% endfor %}
-                        </datalist>
-                        <div class="btn-group ml-2">
-                            <button id="command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/command/show_run'">Command</button>
-                        </div>
-                        <div class="btn-group ml-2">
-                            <button id="raw_command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/raw_command/show_run'">Command(Raw)</button>
-                        </div>
-                    </div>
-                    <div class="row ml-1">
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_run'">Show Run</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_inventory'">Show Inventory</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_version'">Show Version</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_int_brief'">Show IP Int Brief</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_interfaces_description'">Show Int Desc</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_route'">Show IP Route</button>
-                        </div>
-                        <div class="btn-group mr-2 mt-2">
-                            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='import_node_from_id/{{node.id}}'">Import Node</button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
-</div>
-{% endblock main %}
+{% block card_header %}Show Node{% endblock card_header %}
+
+{% block tbody %}
+    <tr>
+        <th>ID</th>
+        <td>{{ node.id }}</td>
+    </tr>
+    <tr>
+        <th>Hostname</th>
+        <td>{{ node.hostname }}</td>
+    </tr>
+    <tr>
+        <th>Description</th>
+        <td>{{ node.description }}</td>
+    </tr>
+    <tr>
+        <th>IP Address</th>
+        <td>{{ node.ip_address }}</td>
+    </tr>
+    <tr>
+        <th>Port</th>
+        <td>{{ node.port }}</td>
+    </tr>
+    <tr>
+        <th>Username</th>
+        <td>{{ node.username }}</td>
+    </tr>
+    <tr>
+        <th>Device Type</th>
+        <td>{{ node.device_type }}</td>
+    </tr>
+    <tr>
+        <th>Napalm Driver</th>
+        <td>{{ node.napalm_driver }}</td>
+    </tr>
+    <tr>
+        <th>Scrapli Driver</th>
+        <td>{{ node.scrapli_driver }}</td>
+    </tr>
+    <tr>
+        <th>Model</th>
+        <td>{{ node.model }}</td>
+    </tr>
+    <tr>
+        <th>OS Type</th>
+        <td>{{ node.os_type }}</td>
+    </tr>
+    <tr>
+        <th>OS Version</th>
+        <td>{{ node.os_version }}</td>
+    </tr>
+    <tr>
+        <th>Serial</th>
+        <td>
+            {% for serial in node.serials %}
+            {{ serial.serial_number }}
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
+        <th>Action</th>
+        <td>
+            <div class="row ml-1">
+                <input class="form-control col-md-6" type="search" id="command_input" autocomplete="off" list="command_datalist">
+                <datalist id="command_datalist">
+                    {% for command in command_list %}
+                    <option value="{{ command }}">
+                        {% endfor %}
+                </datalist>
+                <div class="btn-group ml-2">
+                    <button id="command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/command/show_run'">Command</button>
+                </div>
+                <div class="btn-group ml-2">
+                    <button id="raw_command" class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/raw_command/show_run'">Command(Raw)</button>
+                </div>
+            </div>
+            <div class="row ml-1">
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_run'">Show Run</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_inventory'">Show Inventory</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_version'">Show Version</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_arp'">Show IP Arp</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_int_brief'">Show IP Int Brief</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_interfaces_description'">Show Int Desc</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show_ip_route'">Show IP Route</button>
+                </div>
+                <div class="btn-group mr-2 mt-2">
+                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='import_node_from_id/{{node.id}}'">Import Node</button>
+                </div>
+            </div>
+        </td>
+    </tr>
+{% endblock tbody %}
+
+{% block card_footer %}
+<button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.edit', id=node.id) }}'">Edit Node</button>
+{% endblock card_footer %}
+
