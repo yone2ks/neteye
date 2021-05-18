@@ -41,7 +41,7 @@ def _pretty_data(transaction_version_data):
     pretty_data = transaction_version_data.copy()
     for record in pretty_data:
         issued_at = datetime.datetime.strptime(record['issued_at'], '%Y-%m-%dT%H:%M:%S.%f').replace(tzinfo=datetime.timezone.utc)
-        record['issued_at'] = issued_at.astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S %Z')
+        record['issued_at'] = issued_at.astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         record['operation_type'] = OPERATION_TYPE[record['operation_type']]
     return pretty_data
 
