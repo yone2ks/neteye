@@ -40,8 +40,7 @@ def create():
         serial_number=request.form["serial_number"],
         product_id=request.form["product_id"]
     )
-    db.session.add(serial)
-    db.session.commit()
+    serial.add()
     return redirect(url_for("serial.index"))
 
 
@@ -68,7 +67,7 @@ def update(id):
     serial.node_id = request.form["node_id"]
     serial.serial_number = request.form["serial_number"]
     serial.product_id = request.form["product_id"]
-    db.session.commit()
+    serial.commit()
     return redirect(url_for("serial.show", id=id))
 
 
@@ -76,8 +75,7 @@ def update(id):
 @serial_bp.route("/<id>/delete", methods=["POST"])
 def delete(id):
     serial = Serial.query.get(id)
-    db.session.delete(serial)
-    db.session.commit()
+    serial.delete()
     return redirect(url_for("serial.index"))
 
 
