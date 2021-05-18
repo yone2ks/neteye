@@ -94,6 +94,7 @@ class Node(Base):
             "port": self.port,
             "auth_username": self.username,
             "auth_password": self.password,
+            "auth_secondary": self.enable,
             "auth_strict_key": False,
             "platform": self.scrapli_driver,
             "transport": "telnet" if "telnet" in self.device_type else "ssh2"
