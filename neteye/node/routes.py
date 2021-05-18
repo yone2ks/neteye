@@ -225,7 +225,7 @@ def show_interfaces_description(id):
     command = "show interfaces description"
     node = Node.query.get(id)
     result = node.command(command)
-    # import_interface_description(result, node)
+    import_interface_description(result, node)
     return render_template(
         "node/command.html",
         result=pd.DataFrame(result).to_html(
@@ -270,6 +270,20 @@ def raw_command(id, command):
     node = Node.query.get(id)
     result = node.raw_command(command).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/napalm_get_facts")
+def napalm_get_facts(id):
+    node = Node.query.get(id)
+    result = node.napalm_get_facts()
+    return render_template("node/napalm.html", result=result, command="napalm_get_facts")
+
+
+@node_bp.route("/<id>/napalm_get_interfaces")
+def napalm_get_interfaces(id):
+    node = Node.query.get(id)
+    result = node.napalm_get_interfaces()
+    return render_template("node/parsed_command.html", result=result, command="napalm_get_interfaces")
 
 
 @node_bp.route("/import_node_from_id/<id>")
@@ -357,85 +371,102 @@ def try_connect_node(ip_address):
 
 
 def import_serial(show_inventory, node):
-    before_serials = [{"node_id": serial.node_id,
-                       "serial_number": serial.serial_number,
-                       "product_id": serial.product_id}
-                      for serial in node.serials]
-    after_serials = []
-    for serial_info in show_inventory:
-        after_serials.append({"node_id": node.id,
-                              "serial_number": serial_info["sn"],
-                              "product_id": serial_info["pid"]})
-    delta_commit(Serial, before_serials, after_serials)
+    before_serials = {serial.serial_number for serial in node.serials}
+    before = {serial.serial_number: {
+        "id": serial.id,
+        "node_id": serial.node_id,
+        "serial_number": serial.serial_number,
+        "product_id": serial.product_id}
+                      for serial in node.serials}
+    after_serials = {serial_info["sn"] for serial_info in show_inventory}
+    after = {serial_info["sn"]: {
+        "node_id": node.id,
+        "serial_number": serial_info["sn"],
+        "product_id": serial_info["pid"]}
+              for serial_info in show_inventory}
+    delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
 
 
 def import_node_model(show_inventory, node):
     node.model = show_inventory[0]["pid"]
     if not Node.exists(node.hostname):
-        db.session.add(node)
-    db.session.commit()
+        node.add()
+    node.commit()
 
 
 def import_node_hostname(show_version, node):
     node.hostname = show_version[0]["hostname"]
     node.os_version = show_version[0]["version"]
-    db.session.commit()
+    if not Node.exists(node.hostname):
+        node.add()
+    node.commit()
 
 
 def import_interface(show_ip_int_brief, node):
-    before_interfaces = [{"node_id": interface.node_id,
-                          "name": interface.name,
-                          "ip_address": interface.ip_address,
-                          "status": interface.status}
-                         for interface in node.interfaces]
-    after_interfaces = []
-    for interface_info in show_ip_int_brief:
-        after_interfaces.append({
-            "node_id": node.id,
-            "name": interface_info["intf"],
-            "ip_address": interface_info["ipaddr"],
-            "status": interface_info["status"]})
-    delta_commit(Interface, before_interfaces, after_interfaces)
+    before_interfaces = {interface.name for interface in node.interfaces}
+    before = {interface.name: {
+        "id": interface.id,
+        "node_id": interface.node_id,
+        "name": interface.name,
+        "ip_address": interface.ip_address,
+        "status": interface.status}
+              for interface in node.interfaces}
+    after_interfaces = {interface_info["intf"] for interface_info in show_ip_int_brief}
+    after = {interface_info["intf"]: {
+        "node_id": node.id,
+        "name": interface_info["intf"],
+        "ip_address": interface_info["ipaddr"],
+        "status": interface_info["status"]}
+             for interface_info in show_ip_int_brief}
+    delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
 
 
 def import_interface_description(show_interfaces_description, node):
     intf_conv = IntfAbbrevConverter("cisco_ios")
-    for interface_info in show_interfaces_description:
-        if Interface.exists(node.id, intf_conv.to_long(interface_info["port"])):
-            interface = Interface.query.filter(
-                Interface.node_id == node.id,
-                Interface.name == intf_conv.to_long(interface_info["port"]),
-            ).first()
-            interface.description = interface_info["descrip"]
-            db.session.commit()
+    before_interfaces = {interface.name for interface in node.interfaces}
+    before = {interface.name: {
+        "id": interface.id,
+        "node_id": interface.node_id,
+        "name": interface.name,
+        "status": interface.status,
+        "description": interface.description}
+              for interface in node.interfaces}
+    after_interfaces = {intf_conv.to_long(interface_info["port"]) for interface_info in show_interfaces_description}
+    after = {intf_conv.to_long(interface_info["port"]): {
+        "node_id": node.id,
+        "name": intf_conv.to_long(interface_info["port"]),
+        "status": interface_info["status"],
+        "description": interface_info["descrip"]}
+             for interface_info  in show_interfaces_description}
+    delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
 
 
 def import_ip_arp(show_ip_arp, node):
-    for arp_entry_info in show_ip_arp:
-        try:
-            vendor = (
-                EUI(arp_entry_info["mac"], dialect=mac_unix_expanded)
-                .oui.registration()
-                .org
-            )
-        except Exception as e:
-            vendor = ""
-        interface = Interface.query.filter(
-            Interface.node_id == node.id,
-            Interface.name == arp_entry_info['interface']
-        ).first()
-        interface_id = interface.id if interface is not None else None
-        arp_entry = ArpEntry(
-            ip_address=arp_entry_info["address"],
-            mac_address=arp_entry_info["mac"],
-            interface_id=interface_id,
-            protocol=arp_entry_info["protocol"],
-            arp_type=arp_entry_info["type"],
-            vendor=vendor,
-        )
-        if not ArpEntry.exists(arp_entry_info["address"], interface_id):
-            db.session.add(arp_entry)
-        db.session.commit()
+    before_interface_ids = {interface.id for interface in node.interfaces}
+    before_arp_entries = set()
+    before = {}
+    for interface_id in before_interface_ids:
+        arp_entry = ArpEntry.query.filter(ArpEntry.interface_id == interface_id).first()
+        if arp_entry:
+            before_arp_entries.add(arp_entry.ip_address)
+            before[arp_entry.ip_address] = {
+                "id": arp_entry.id,
+                "ip_address": arp_entry.ip_address,
+                "mac_address": arp_entry.mac_address,
+                "interface_id": arp_entry.interface_id,
+                "protocol": arp_entry.protocol,
+                "arp_type": arp_entry.arp_type,
+                "vendor": arp_entry.vendor}
+    after_arp_entries = {arp_entry_info["address"] for arp_entry_info in show_ip_arp}
+    after = {arp_entry_info["address"]: {
+        "ip_address": arp_entry_info["address"],
+        "mac_address": arp_entry_info["mac"],
+        "interface_id": Interface.query.filter(Interface.node_id == node.id, Interface.name == arp_entry_info["interface"]).first().id,
+        "protocol": arp_entry_info["protocol"],
+        "arp_type": arp_entry_info["type"],
+        "vendor": EUI(arp_entry_info["mac"], dialect=mac_unix_expanded).oui.registration().org or ""}
+             for arp_entry_info in show_ip_arp}
+    delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
 
 
 def import_target_node(node):
