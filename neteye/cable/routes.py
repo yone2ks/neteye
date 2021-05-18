@@ -58,8 +58,7 @@ def create():
         link_speed=request.form["link_speed"],
         description=request.form["description"],
     )
-    db.session.add(cable)
-    db.session.commit()
+    cable.add()
     return redirect(url_for("cable.index"))
 
 
@@ -91,13 +90,12 @@ def update(id):
     cable.dst_interface_id = request.form["dst_interface"]
     cable.cable_type = request.form["cable_type"]
     cable.link_speed = request.form["link_speed"]
-    db.session.commit()
+    cable.commit()
     return redirect(url_for("cable.index"))
 
 
 @cable_bp.route("/<id>/delete", methods=["POST"])
 def delete(id):
     cable = Cable.query.get(id)
-    db.session.delete(cable)
-    db.session.commit()
+    cable.delete()
     return redirect(url_for("cable.index"))
