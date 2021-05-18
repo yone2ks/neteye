@@ -45,8 +45,7 @@ def create():
         mtu=request.form["mtu"],
         status=request.form["status"],
     )
-    db.session.add(interface)
-    db.session.commit()
+    interface.add()
     return redirect(url_for("interface.index"))
 
 
@@ -91,15 +90,14 @@ def update(id):
     interface.duplex = request.form["duplex"]
     interface.mtu = request.form["mtu"]
     interface.status = request.form["status"]
-    db.session.commit()
+    interface.commit()
     return redirect(url_for("interface.show", id=id))
 
 
 @interface_bp.route("/<id>/delete", methods=["POST"])
 def delete(id):
     interface = Interface.query.get(id)
-    db.session.delete(interface)
-    db.session.commit()
+    interface.delete()
     return redirect(url_for("interface.index"))
 
 
