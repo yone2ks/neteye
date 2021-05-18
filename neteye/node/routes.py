@@ -457,15 +457,25 @@ def import_ip_arp(show_ip_arp, node):
                 "protocol": arp_entry.protocol,
                 "arp_type": arp_entry.arp_type,
                 "vendor": arp_entry.vendor}
-    after_arp_entries = {arp_entry_info["address"] for arp_entry_info in show_ip_arp}
-    after = {arp_entry_info["address"]: {
-        "ip_address": arp_entry_info["address"],
-        "mac_address": arp_entry_info["mac"],
-        "interface_id": Interface.query.filter(Interface.node_id == node.id, Interface.name == arp_entry_info["interface"]).first().id,
-        "protocol": arp_entry_info["protocol"],
-        "arp_type": arp_entry_info["type"],
-        "vendor": EUI(arp_entry_info["mac"], dialect=mac_unix_expanded).oui.registration().org or ""}
-             for arp_entry_info in show_ip_arp}
+    after_arp_entries = set()
+    after = {}
+    for arp_entry_info in show_ip_arp:
+        if arp_entry_info["interface"]:
+            if not Interface.exists(node.id, arp_entry_info["interface"]):
+                interface = Interface(
+                    node_id=node.id,
+                    name=arp_entry_info["interface"]
+                )
+                interface.add()
+                interface.commit()
+            after_arp_entries.add(arp_entry_info["address"])
+            after[arp_entry_info["address"]] = {
+                "ip_address": arp_entry_info["address"],
+                "mac_address": arp_entry_info["mac"],
+                "interface_id": Interface.query.filter(Interface.node_id == node.id, Interface.name == arp_entry_info["interface"]).first().id,
+                "protocol": arp_entry_info["protocol"],
+                "arp_type": arp_entry_info["type"],
+                "vendor": EUI(arp_entry_info["mac"], dialect=mac_unix_expanded).oui.registration().org or ""}
     delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
 
 
