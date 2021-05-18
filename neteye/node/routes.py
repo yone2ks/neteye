@@ -75,8 +75,7 @@ def create():
         password=request.form["password"],
         enable=request.form["enable"],
     )
-    db.session.add(node)
-    db.session.commit()
+    node.add()
     return redirect(url_for("node.index"))
 
 
@@ -139,15 +138,14 @@ def update(id):
     node.username = request.form["username"]
     node.password = request.form["password"]
     node.enable = request.form["enable"]
-    db.session.commit()
+    node.commit()
     return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/delete", methods=["POST"])
 def delete(id):
     node = Node.query.get(id)
-    db.session.delete(node)
-    db.session.commit()
+    node.delete()
     return redirect(url_for("node.index"))
 
 

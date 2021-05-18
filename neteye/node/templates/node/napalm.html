@@ -1,0 +1,11 @@
+{% extends "base_table_template.html" %}
+
+{% block card_header %}{{ command }}{% endblock card_header %}
+{% block tbody %}
+{% for key, value in result.items() %}
+<tr>
+    <th>{{ key }}</th>
+    <td>{{ value }}<td>
+</tr>
+{% endfor %}
+{% endblock tbody %}
