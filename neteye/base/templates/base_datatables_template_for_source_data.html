@@ -56,6 +56,9 @@
          },
          deferRender: true
      } );
+     table
+         .order([{% block datatables_order %}{% endblock datatables_order %}])
+         .draw();
 
      var state = table.state();
      $('#index thead tr').clone(true).appendTo('#index thead');

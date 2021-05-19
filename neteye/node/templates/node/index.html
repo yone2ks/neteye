@@ -25,10 +25,14 @@ return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
     + '</form>'
     + '</div>'
     ; }
-}
+    }
     ],
-order: [[1, 'asc']],
 {% endblock datatables_cloumns %}
+
+{% block datatables_order %}
+[1, "asc"]
+{% endblock datatables_order %}
+
 
 {% block thead %}
             <tr>

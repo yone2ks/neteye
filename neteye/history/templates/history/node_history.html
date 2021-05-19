@@ -18,6 +18,10 @@ columns: [
 ],
 {% endblock datatables_cloumns %}
 
+{% block datatables_order %}
+[0, "desc"]
+{% endblock datatables_order %}
+
 {% block thead %}
 <tr>
     <th>Date</th>

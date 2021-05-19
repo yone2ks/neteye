@@ -57,6 +57,7 @@
 
      table.search('')
           .columns().search('')
+          .order([{% block datatables_order %}{% endblock datatables_order %}])
           .draw();
 
      var state = table.state();
