@@ -78,7 +78,7 @@ class Node(Base):
             "keepalive": keepalive,
         }
 
-    def gen_napalm_params(self):
+    def gen_napalm_params(self, timeout=10):
         enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
         optional_args = {enable_param: self.enable, "port": self.port}
         return {
@@ -86,9 +86,10 @@ class Node(Base):
             "username": self.username,
             "password": self.password,
             "optional_args": optional_args,
+            "timeout": timeout
         }
 
-    def gen_scrapli_params(self):
+    def gen_scrapli_params(self, timeout_socket=10, timeout_transport=10, timeout_ops=10):
         return {
             "host": self.ip_address,
             "port": self.port,
@@ -97,7 +98,10 @@ class Node(Base):
             "auth_secondary": self.enable,
             "auth_strict_key": False,
             "platform": self.scrapli_driver,
-            "transport": "telnet" if "telnet" in self.device_type else "ssh2"
+            "transport": "telnet" if "telnet" in self.device_type else "ssh2",
+            "timeout_socket": timeout_socket,
+            "timeout_transport": timeout_transport,
+            "timeout_ops": timeout_ops
         }
 
     def detect_device_type(self):
@@ -186,11 +190,15 @@ class Node(Base):
 
     def gen_napalm_connection(self):
         driver = napalm.get_network_driver(self.napalm_driver)
-        conn = driver(**self.gen_napalm_params())
+        conn = driver(**self.gen_napalm_params(
+            settings["default"]["NAPALM_TIMEOUT"]))
         conn.open()
         return conn
 
     def gen_scrapli_connection(self):
-        conn = scrapli.Scrapli(**self.gen_scrapli_params())
+        conn = scrapli.Scrapli(**self.gen_scrapli_params(
+            settings["default"]["SCRAPLI_TIMEOUT_SOCKET"],
+            settings["default"]["SCRAPLI_TIMEOUT_TRANSPORT"],
+            settings["default"]["SCRAPLI_TIMEOUT_OPS"]))
         conn.open()
         return conn
