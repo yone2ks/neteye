@@ -2,7 +2,7 @@ import toml
 from flask_bootstrap import Bootstrap
 from flask_continuum import Continuum
 from flask_marshmallow import Marshmallow
-from flask_restplus import Api
+from flask_restx import Api
 from flask_security import (Security, SQLAlchemySessionUserDatastore,
                             login_required)
 from flask_sqlalchemy import SQLAlchemy

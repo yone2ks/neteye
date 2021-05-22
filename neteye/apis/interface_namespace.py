@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_restplus import Namespace, Resource
+from flask_restx import Namespace, Resource
 from marshmallow import fields
 
 from neteye.apis.node_namespace import NodeSchema

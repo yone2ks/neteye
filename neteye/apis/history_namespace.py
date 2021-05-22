@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_restplus import Namespace, Resource
+from flask_restx import Namespace, Resource
 
 from neteye.apis.routes import api_bp
 from neteye.extensions import api, db, ma
