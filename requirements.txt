@@ -1,6 +1,7 @@
 flask
 flask-sqlalchemy
-flask-security
+flask-babel
+flask-security-too
 flask-wtf
 flask-nav
 flask-bootstrap

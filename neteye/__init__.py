@@ -15,8 +15,8 @@ from neteye.apis.serial_namespace import serials_api
 from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
-from neteye.extensions import (api, bootstrap, connection_pool, continuum, db,
-                               ma, security)
+from neteye.extensions import (api, babel, bootstrap, connection_pool,
+                               continuum, db, ma, security)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -36,6 +36,7 @@ FlaskDynaconf(app)
 db.init_app(app)
 continuum.init_app(app)
 bootstrap.init_app(app)
+babel.init_app(app)
 security.init_app(app, SQLAlchemySessionUserDatastore(db.session, User, Role))
 ma.init_app(app)
 api.init_app(api_bp)

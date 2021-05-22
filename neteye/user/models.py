@@ -1,7 +1,9 @@
+from flask_security import RoleMixin, UserMixin
+from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
+                        String)
+from sqlalchemy.orm import backref, relationship
+
 from neteye.extensions import db
-from flask_security import UserMixin, RoleMixin
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
-from sqlalchemy.orm import relationship, backref
 
 
 class RolesUsers(db.Model):
@@ -27,6 +29,7 @@ class User(db.Model, UserMixin):
     current_login_ip = Column(String(100))
     login_count = Column(Integer)
     active = Column(Boolean())
+    fs_uniquifier = Column(String(255), unique=True, nullable=False)
     confirmed_at = Column(DateTime())
     roles = relationship(
         "Role", secondary="roles_users", backref=backref("users", lazy="dynamic")

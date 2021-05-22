@@ -1,4 +1,5 @@
 import toml
+from flask_babel import Babel
 from flask_bootstrap import Bootstrap
 from flask_continuum import Continuum
 from flask_marshmallow import Marshmallow
@@ -12,6 +13,7 @@ from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
+babel = Babel()
 security = Security()
 continuum = Continuum(db=db)
 api = Api()
