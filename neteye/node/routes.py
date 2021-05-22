@@ -270,14 +270,52 @@ def raw_command(id, command):
     return render_template("node/command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/napalm_get_facts")
+@node_bp.route("/<id>/netmiko/<command>")
+def netmiko_command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    result = node.netmiko_command(command)
+    if isinstance(result, str):
+        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        return render_template("node/command.html", result=result, command=command)
+    return render_template("node/parsed_command.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/raw_netmiko/<command>")
+def netmiko_raw_command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    result = node.netmiko_raw_command(command).replace("\r\n", "<br />").replace("\n", "<br />")
+    return render_template("node/command.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/netmiko/<command>")
+def scrapli_command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    result = node.scrapli_command(command)
+    if isinstance(result, str):
+        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        return render_template("node/command.html", result=result, command=command)
+    return render_template("node/parsed_command.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/raw_netmiko/<command>")
+def scrapli_raw_command(id, command):
+    command = command.replace("_", " ")
+    node = Node.query.get(id)
+    result = node.scrapli_raw_command(command).replace("\r\n", "<br />").replace("\n", "<br />")
+    return render_template("node/command.html", result=result, command=command)
+
+
+@node_bp.route("/<id>/napalm/get_facts")
 def napalm_get_facts(id):
     node = Node.query.get(id)
     result = node.napalm_get_facts()
     return render_template("node/napalm.html", result=result, command="napalm_get_facts")
 
 
-@node_bp.route("/<id>/napalm_get_interfaces")
+@node_bp.route("/<id>/napalm/get_interfaces")
 def napalm_get_interfaces(id):
     node = Node.query.get(id)
     result = node.napalm_get_interfaces()

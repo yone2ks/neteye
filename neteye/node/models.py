@@ -15,14 +15,14 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
 from neteye.serial.models import Serial
 
 DRIVER_TYPE_NETMIKO = "netmiko"
-DRIVER_TYPE_NAPALM = "napalm"
 DRIVER_TYPE_SCRAPLI = "scrapli"
+DRIVER_TYPE_NAPALM = "napalm"
 NOT_SUPPORTED = "not supported"
 napalm_driver_mapping = DeviceTypeToDriverMapping(DRIVER_TYPE_NAPALM)
 scrapli_driver_mapping = DeviceTypeToDriverMapping(DRIVER_TYPE_SCRAPLI)
 NETMIKO_PLATFORMS = netmiko.platforms
-NAPALM_DRIVERS = napalm.SUPPORTED_DRIVERS
 SCRAPLI_DRIVERS = Scrapli.CORE_PLATFORM_MAP.keys()
+NAPALM_DRIVERS = napalm.SUPPORTED_DRIVERS
 
 
 class Node(Base):
@@ -33,8 +33,8 @@ class Node(Base):
     ip_address = Column(String, nullable=False)
     port = Column(Integer, nullable=False)
     device_type = Column(String)
-    napalm_driver = Column(String)
     scrapli_driver = Column(String)
+    napalm_driver = Column(String)
     model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
@@ -78,17 +78,6 @@ class Node(Base):
             "keepalive": keepalive,
         }
 
-    def gen_napalm_params(self, timeout=10):
-        enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
-        optional_args = {enable_param: self.enable, "port": self.port}
-        return {
-            "hostname": self.ip_address,
-            "username": self.username,
-            "password": self.password,
-            "optional_args": optional_args,
-            "timeout": timeout
-        }
-
     def gen_scrapli_params(self, timeout_socket=10, timeout_transport=10, timeout_ops=10):
         return {
             "host": self.ip_address,
@@ -104,6 +93,18 @@ class Node(Base):
             "timeout_ops": timeout_ops
         }
 
+
+    def gen_napalm_params(self, timeout=10):
+        enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
+        optional_args = {enable_param: self.enable, "port": self.port}
+        return {
+            "hostname": self.ip_address,
+            "username": self.username,
+            "password": self.password,
+            "optional_args": optional_args,
+            "timeout": timeout
+        }
+
     def detect_device_type(self):
         try:
             self.device_type = SSHDetect(
@@ -116,17 +117,17 @@ class Node(Base):
             self.device_type = "cisco_ios_telnet"
             self.port = 23
 
-    def detect_napalm_driver(self):
-        if self.device_type in napalm_driver_mapping.mapping_dict.keys():
-            self.napalm_driver = napalm_driver_mapping.mapping_dict[self.device_type]
-        else:
-            self.napalm_driver = NOT_SUPPORTED
-
     def detect_scrapli_driver(self):
         if self.device_type in scrapli_driver_mapping.mapping_dict.keys():
             self.scrapli_driver = scrapli_driver_mapping.mapping_dict[self.device_type]
         else:
             self.scrapli_driver = NOT_SUPPORTED
+
+    def detect_napalm_driver(self):
+        if self.device_type in napalm_driver_mapping.mapping_dict.keys():
+            self.napalm_driver = napalm_driver_mapping.mapping_dict[self.device_type]
+        else:
+            self.napalm_driver = NOT_SUPPORTED
 
     def command(self, command):
         if not self.scrapli_driver == NOT_SUPPORTED:
@@ -152,12 +153,6 @@ class Node(Base):
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
         return conn.send_command(command, use_textfsm=False)
 
-    def napalm_get_interfaces(self):
-        if not connection_pool.exists(self, DRIVER_TYPE_NAPALM):
-            connection_pool.add_connection(self, DRIVER_TYPE_NAPALM)
-        conn = connection_pool.get_connection(self, DRIVER_TYPE_NAPALM)
-        return conn.get_interfaces()
-
     def scrapli_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
@@ -175,6 +170,18 @@ class Node(Base):
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         return conn.send_command(command).result
 
+    def napalm_get_facts(self):
+        if not connection_pool.exists(self, DRIVER_TYPE_NAPALM):
+            connection_pool.add_connection(self, DRIVER_TYPE_NAPALM)
+        conn = connection_pool.get_connection(self, DRIVER_TYPE_NAPALM)
+        return conn.get_facts()
+
+    def napalm_get_interfaces(self):
+        if not connection_pool.exists(self, DRIVER_TYPE_NAPALM):
+            connection_pool.add_connection(self, DRIVER_TYPE_NAPALM)
+        conn = connection_pool.get_connection(self, DRIVER_TYPE_NAPALM)
+        return conn.get_interfaces()
+
     def gen_connection(self, driver_type):
         if driver_type == DRIVER_TYPE_NAPALM:
             return self.gen_napalm_connection()
@@ -188,17 +195,17 @@ class Node(Base):
             settings["default"]["NETMIKO_GLOBAL_DELAY_FACTOR"],
             settings["default"]["NETMIKO_TIMEOUT"]))
 
-    def gen_napalm_connection(self):
-        driver = napalm.get_network_driver(self.napalm_driver)
-        conn = driver(**self.gen_napalm_params(
-            settings["default"]["NAPALM_TIMEOUT"]))
-        conn.open()
-        return conn
-
     def gen_scrapli_connection(self):
         conn = scrapli.Scrapli(**self.gen_scrapli_params(
             settings["default"]["SCRAPLI_TIMEOUT_SOCKET"],
             settings["default"]["SCRAPLI_TIMEOUT_TRANSPORT"],
             settings["default"]["SCRAPLI_TIMEOUT_OPS"]))
+        conn.open()
+        return conn
+
+    def gen_napalm_connection(self):
+        driver = napalm.get_network_driver(self.napalm_driver)
+        conn = driver(**self.gen_napalm_params(
+            settings["default"]["NAPALM_TIMEOUT"]))
         conn.open()
         return conn
