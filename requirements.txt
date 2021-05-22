@@ -1,4 +1,5 @@
 flask
+sqlalchemy<1.4
 flask-sqlalchemy
 flask-babel
 flask-security-too
@@ -11,8 +12,7 @@ flask-marshmallow==0.11.0
 Flask-Continuum
 sqlalchemy-utils
 netaddr
-netmiko==2.4.2
-scrapli
+netmiko
 scrapli[full]
 napalm
 pandas
