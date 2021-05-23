@@ -19,9 +19,10 @@ from neteye.serial.models import Serial
 from .forms import NodeForm
 from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node
 
+root_bp = bp_factory("")
 node_bp = bp_factory("node")
 
-
+@root_bp.route("/")
 @node_bp.route("")
 def index():
     nodes = Node.query.all()

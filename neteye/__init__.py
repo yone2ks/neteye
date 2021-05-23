@@ -21,7 +21,7 @@ from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
 from neteye.node.models import Node
-from neteye.node.routes import node_bp
+from neteye.node.routes import node_bp, root_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
 from neteye.user.models import Role, User
@@ -41,6 +41,7 @@ security.init_app(app, SQLAlchemySessionUserDatastore(db.session, User, Role))
 ma.init_app(app)
 api.init_app(api_bp)
 
+app.register_blueprint(root_bp)
 app.register_blueprint(base_bp)
 app.register_blueprint(node_bp)
 app.register_blueprint(interface_bp)
