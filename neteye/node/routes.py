@@ -384,6 +384,7 @@ def try_connect_node(ip_address):
             node = Node(
                 hostname="hostname",
                 ip_address=ip_address,
+                port=22,
                 device_type = "autodetect",
                 username=cred["USERNAME"],
                 password=cred["PASSWORD"],
