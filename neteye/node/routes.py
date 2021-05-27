@@ -177,14 +177,7 @@ def show_inventory(id):
     result = node.command(command)
     import_serial(result, node)
     import_node_model(result, node)
-    return render_template(
-        "node/command.html",
-        result=pd.DataFrame(result).to_html(
-            table_id="index",
-            classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
-        ),
-        command=command,
-    )
+    return render_template("node/parsed_command.html", result=result, command=command)
 
 
 @node_bp.route("/<id>/show_version")
@@ -193,14 +186,7 @@ def show_version(id):
     node = Node.query.get(id)
     result = node.command(command)
     import_node_hostname(result, node)
-    return render_template(
-        "node/command.html",
-        result=pd.DataFrame(result).to_html(
-            table_id="index",
-            classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
-        ),
-        command=command,
-    )
+    return render_template("node/parsed_command.html", result=result, command=command)
 
 
 @node_bp.route("/<id>/show_ip_int_brief")
@@ -209,14 +195,7 @@ def show_ip_int_breif(id):
     node = Node.query.get(id)
     result = node.command(command)
     import_interface(result, node)
-    return render_template(
-        "node/command.html",
-        result=pd.DataFrame(result).to_html(
-            table_id="index",
-            classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
-        ),
-        command=command,
-    )
+    return render_template("node/parsed_command.html", result=result, command=command)
 
 
 @node_bp.route("/<id>/show_interfaces_description")
@@ -225,15 +204,7 @@ def show_interfaces_description(id):
     node = Node.query.get(id)
     result = node.command(command)
     import_interface_description(result, node)
-    return render_template(
-        "node/command.html",
-        result=pd.DataFrame(result).to_html(
-            table_id="index",
-            classes="table table-responsive-sm table-hover table-outline table-striped mt-2 mb-2 dataTable table-bordered",
-        ),
-        command=command,
-    )
-
+    return render_template("node/parsed_command.html", result=result, command=command)
 
 @node_bp.route("/<id>/show_ip_arp")
 def show_ip_arp(id):
