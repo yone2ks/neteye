@@ -2,12 +2,22 @@
 {% block javascript %}
 {{ super() }}
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
 
- <script>
+<script>
  $(document).ready(function() {
-     $('#index').DataTable();
+     var clipboardjs = new ClipboardJS('.copy_to_clipboard')
+     clipboardjs.on('success', function(e) {
+         e.clearSelection();
+     });
+
+     tippy('.copy_to_clipboard', {
+         content: 'Copyed!',
+         trigger: 'click',
+     });
+
  } );
 </script>
 {% endblock javascript %}
@@ -16,6 +26,8 @@
 <div class="card">
     <div class="card-header">
         {{ command }}
+
+        <button class="pull-right btn btn-sm btn-primary copy_to_clipboard" data-clipboard-target=".card-body">Copy to Clipboard</button>
     </div>
     <div class="card-body">
         {{ result|safe }}
