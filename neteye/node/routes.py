@@ -4,6 +4,7 @@ import netmiko
 import pandas as pd
 import sqlalchemy
 from flask import flash, redirect, render_template, request, session, url_for
+from flask_security import auth_required
 from netaddr import *
 from sqlalchemy.sql import exists
 
@@ -24,6 +25,7 @@ node_bp = bp_factory("node")
 
 @root_bp.route("/")
 @node_bp.route("")
+@auth_required()
 def index():
     nodes = Node.query.all()
     data = nodes_schema.dump(nodes)
