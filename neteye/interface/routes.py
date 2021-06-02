@@ -1,7 +1,9 @@
 import pandas as pd
 from dynaconf import settings
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import (flash, jsonify, redirect, render_template, request, session,
+                   url_for)
 
+from datatables import ColumnDT, DataTables
 from neteye.apis.interface_namespace import interface_schema, interfaces_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
@@ -14,9 +16,22 @@ interface_bp = bp_factory("interface")
 
 @interface_bp.route("")
 def index():
-    interfaces = Interface.query.all()
-    data=interfaces_schema.dump(interfaces)
-    return render_template("interface/index.html", interfaces=interfaces, data=data)
+    return render_template("interface/index.html")
+
+
+@interface_bp.route("/data")
+def data():
+    columns = [
+        ColumnDT(Interface.id),
+        ColumnDT(Node.hostname),
+        ColumnDT(Interface.name),
+        ColumnDT(Interface.ip_address),
+        ColumnDT(Interface.description),
+    ]
+    query = db.session.query().select_from(Interface).join(Node)
+    params = request.args.to_dict()
+    row_table = DataTables(params, query, columns)
+    return jsonify(row_table.output_result())
 
 
 @interface_bp.route("/<id>")
