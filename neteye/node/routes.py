@@ -42,7 +42,6 @@ def data():
         ColumnDT(Node.device_type),
         ColumnDT(Node.model),
         ColumnDT(Node.os_version),
-        ColumnDT(Node.id),
     ]
     query = db.session.query().select_from(Node)
     params = request.args.to_dict()
