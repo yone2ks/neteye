@@ -2,6 +2,10 @@
 
 {% block card_header %}Nodes{% endblock card_header %}
 
+{% block ajax_source %}
+"/node/data"
+{% endblock ajax_source %}
+
 {% block datatables_cloumns %}
 columnDefs: [
 {
@@ -30,16 +34,16 @@ return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
 {% endblock datatables_order %}
 
 {% block thead %}
-            <tr>
-                <th>ID</th>
-                <th>Hostname</th>
-                <th>Description</th>
-                <th>IP Address</th>
-                <th>Device Type</th>
-                <th>Model</th>
-                <th>OS Version</th>
-                <th>Action</th>
-            </tr>
+    <tr>
+        <th>ID</th>
+        <th>Hostname</th>
+        <th>Description</th>
+        <th>IP Address</th>
+        <th>Device Type</th>
+        <th>Model</th>
+        <th>OS Version</th>
+        <th>Action</th>
+    </tr>
 {% endblock thead %}
 
 {% block card_footer %}
