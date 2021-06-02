@@ -1,0 +1,106 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+{% block stylesheet %}
+{{ super() }}
+<link href="https://cdn.datatables.net/buttons/1.6.4/css/buttons.dataTables.min.css" rel="stylesheet"></link>
+
+{% endblock stylesheet %}
+{% block javascript %}
+{{ super() }}
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js></script>
+<script src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
+
+
+<script>
+ $(document).ready(function() {
+     var table = $('#index').DataTable( {
+         lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+         processing: true,
+         serverSide: true,
+         ajax: '/node/data',
+         {% block datatables_cloumns %}{% endblock datatables_cloumns %}
+         dom: '<"dt_filter_wrapper col-lg-12"<"pull-right"f>><"dt_length_wrapper col-lg-2"<"pull-left"l>><"dt_length_wrapper col-lg-10 mt-2"<"pull-right"B>><"table-responsive"t><"dt_info_wrapper col-lg-8"<"pull-left"i>><"dt_paginate_wrapper col-lg-4"<"pull-right"p>>',
+         buttons: [
+             {
+                 extend: 'collection',
+                 text: 'Export',
+                 buttons: [
+                     'excelHtml5',
+                     'csvHtml5',
+                     'pdfHtml5'
+                 ],
+                 exportOptions: {
+                     modifier: {
+                         page: 'all',
+                         selected: true
+                     }
+                 },
+             },
+             {
+                 extend: 'colvis',
+                 text: 'Column Visibility',
+             },
+         ],
+         autoWidth: false,
+         orderCellsTop: true,
+         fixedHeader: false,
+         stateSave: true,
+         stateSaveParams: function (settings, data) {
+             data.search.search = "";
+         },
+         deferRender: true
+     } );
+     table
+         .order([{% block datatables_order %}{% endblock datatables_order %}])
+         .draw();
+
+     var state = table.state.loaded();
+     $('#index thead tr').clone(true).appendTo('#index thead');
+     $('#index thead tr:eq(1) th').each(function (i) {
+         var title = $(this).text();
+         $(this).html( '<input type="text" placeholder="Search '+title+'" value="'+state.columns[i].search.search+'" />' );
+         $('input', this).on( 'keyup change', function () {
+             if (table.column(i).search() !== this.value) {
+                 table
+                     .column(i)
+                     .search( this.value )
+                     .draw();
+             }
+         });
+     });
+ } );
+</script>
+{% block additional_javascript %}{% endblock additional_javascript %}
+{% endblock javascript %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {% block card_header %}{% endblock card_header %}
+    </div>
+    <div class="card-body">
+        {% block card_body %}
+        <table id="index" class="table table-hover table-outline table-striped table-bordered col-lg-12 mt-2 mb-2">
+            <thead>
+                {% block thead %}{% endblock thead %}
+            </thead>
+            <tbody>
+                {% block tbody %}{% endblock tbody %}
+            </tbody>
+        </table>
+        {% endblock card_body %}
+    </div>
+    <div class="card-footer">
+        {% block card_footer %}{% endblock card_footer %}
+    </div>
+</div>
+{% endblock main %}
