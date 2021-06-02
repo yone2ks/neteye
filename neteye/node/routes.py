@@ -3,11 +3,13 @@ from logging import debug, error, info, warning
 import netmiko
 import pandas as pd
 import sqlalchemy
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import (flash, jsonify, redirect, render_template, request, session,
+                   url_for)
 from flask_security import auth_required
 from netaddr import *
 from sqlalchemy.sql import exists
 
+from datatables import ColumnDT, DataTables
 from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
@@ -27,9 +29,25 @@ node_bp = bp_factory("node")
 @node_bp.route("")
 @auth_required()
 def index():
-    nodes = Node.query.all()
-    data = nodes_schema.dump(nodes)
-    return render_template("node/index.html", nodes=nodes, data=data)
+    return render_template("node/index.html")
+
+
+@node_bp.route("/data")
+def data():
+    columns = [
+        ColumnDT(Node.id),
+        ColumnDT(Node.hostname),
+        ColumnDT(Node.description),
+        ColumnDT(Node.ip_address),
+        ColumnDT(Node.device_type),
+        ColumnDT(Node.model),
+        ColumnDT(Node.os_version),
+        ColumnDT(Node.id),
+    ]
+    query = db.session.query().select_from(Node)
+    params = request.args.to_dict()
+    row_table = DataTables(params, query, columns)
+    return jsonify(row_table.output_result())
 
 
 @node_bp.route("/<id>")
