@@ -1,11 +1,12 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, ValidationError
 from marshmallow import fields
 
 from neteye.apis.node_namespace import NodeSchema
 from neteye.apis.routes import api_bp
 from neteye.extensions import api, db, ma
 from neteye.interface.models import Interface
+from neteye.node.models import Node
 
 
 class InterfaceSchema(ma.ModelSchema):
@@ -26,6 +27,24 @@ interfaces_api = Namespace("interfaces")
 class InterfacesResource(Resource):
     def get(self):
         return interfaces_schema.jsonify(Interface.query.all())
+
+
+    def post(self):
+        data = request.get_json()
+        node = Node.query.get(data['node_id'])
+        interface = Interface(
+        node_id=data["node_id"],
+        name=data["name"],
+        description=data["description"],
+        ip_address=data["ip_address"],
+        mask=data["mask"],
+        speed=data["speed"],
+        duplex=data["duplex"],
+        mtu=data["mtu"],
+        status=data["status"],
+        )
+        interface.add()
+        return "create interface"
 
 
 @interfaces_api.route("/<int:id>")
