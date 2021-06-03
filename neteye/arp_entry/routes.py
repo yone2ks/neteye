@@ -31,7 +31,7 @@ def data():
         ColumnDT(Interface.name),
         ColumnDT(ArpEntry.vendor),
     ]
-    query = db.session.query().select_from(ArpEntry).join(Node).join(Interface)
+    query = db.session.query().select_from(ArpEntry).join(Interface).join(Node)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
     return jsonify(row_table.output_result())
