@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, ValidationError
 
 from neteye.apis.routes import api_bp
 from neteye.extensions import api, db, ma
@@ -31,7 +31,7 @@ class NodesResource(Resource):
             valid_data = err.valid_data
         db.session.add(data)
         db.session.commit()
-        return "create node"
+        return node_schema.jsonify(data)
 
 
 @nodes_api.route("/<int:id>")
