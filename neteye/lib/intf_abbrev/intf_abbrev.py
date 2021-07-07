@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 
 class IntfAbbrevConverter:
@@ -26,7 +27,15 @@ class IntfAbbrevConverter:
         return long_intf.replace(long_key, self.long_dict[long_key])
 
     def normalization(self, intf_name):
-        if intf_name in self.abbrev_dict.keys():
+        if self.is_abbrev(intf_name):
             return self.to_long(intf_name)
         else:
             return intf_name
+
+    def is_abbrev(self, intf_name):
+        base_intf = re.search(r'(?i)[a-z]+', intf_name).group()
+        for key in self.abbrev_dict.keys():
+            if base_intf == key:
+                return True
+
+        return False
