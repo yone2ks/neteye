@@ -29,7 +29,7 @@ class Node(Base):
     __tablename__ = "nodes"
 
     hostname = Column(String, unique=True, nullable=False)
-    description = Column(String)
+    description = Column(String, default="")
     ip_address = Column(String, nullable=False)
     port = Column(Integer, nullable=False)
     device_type = Column(String)

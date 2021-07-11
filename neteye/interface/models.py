@@ -14,7 +14,7 @@ class Interface(Base):
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
     node = relationship("Node")
     name = Column(String, nullable=False)
-    description = Column(String)
+    description = Column(String, default="")
     ip_address = Column(String)
     mask = Column(String)
     speed = Column(String)
