@@ -27,6 +27,7 @@ def data():
         ColumnDT(Node.hostname),
         ColumnDT(Serial.serial_number),
         ColumnDT(Serial.product_id),
+        ColumnDT(Serial.description),
     ]
     query = db.session.query().select_from(Serial).join(Node)
     params = request.args.to_dict()
@@ -52,7 +53,8 @@ def create():
     serial = Serial(
         node_id=request.form["node_id"],
         serial_number=request.form["serial_number"],
-        product_id=request.form["product_id"]
+        product_id=request.form["product_id"],
+        description=request.form["description"]
     )
     serial.add()
     return redirect(url_for("serial.index"))
@@ -65,6 +67,7 @@ def edit(id):
     node_id = serial.node_id
     serial_number = serial.serial_number
     product_id = serial.product_id
+    description = serial.description
     return render_template(
         "serial/edit.html",
         id=id,
@@ -72,6 +75,7 @@ def edit(id):
         node_id=node_id,
         serial_number=serial_number,
         product_id=product_id,
+        description=description,
     )
 
 
@@ -81,6 +85,7 @@ def update(id):
     serial.node_id = request.form["node_id"]
     serial.serial_number = request.form["serial_number"]
     serial.product_id = request.form["product_id"]
+    serial.description = request.form["description"]
     serial.commit()
     return redirect(url_for("serial.show", id=id))
 

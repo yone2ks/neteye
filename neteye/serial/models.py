@@ -11,6 +11,7 @@ class Serial(Base):
 
     serial_number = Column(String, nullable=False)
     product_id = Column(String)
+    description = Column(String, default="")
     node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
     node = relationship("Node")
 
