@@ -1,3 +1,4 @@
+from netaddr import *
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
 from sqlalchemy.orm import backref, relationship
@@ -17,6 +18,10 @@ class ArpEntry(Base):
     protocol = Column(String)
     arp_type = Column(String)
     vendor = Column(String)
+
+    def __init__(self, **kwargs):
+        super(ArpEntry, self).__init__(**kwargs)
+        self.vendor = EUI(self.mac_address, dialect=mac_unix_expanded).oui.registration().org or ""
 
     def __repr__(self):
         return "<ARP Entry id={id} ip_address={ip_address} mac_address={mac_address}".format(

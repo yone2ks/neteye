@@ -15,6 +15,8 @@ from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
+from neteye.lib.import_command_mapper.import_command_mapper import \
+    ImportCommandMapper
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.serial.models import Serial
@@ -194,8 +196,6 @@ def show_inventory(id):
     command = "show inventory"
     node = Node.query.get(id)
     result = node.command(command)
-    import_serial(result, node)
-    import_node_model(result, node)
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
@@ -204,7 +204,6 @@ def show_version(id):
     command = "show version"
     node = Node.query.get(id)
     result = node.command(command)
-    import_node_hostname(result, node)
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
@@ -213,7 +212,6 @@ def show_ip_int_breif(id):
     command = "show ip int brief"
     node = Node.query.get(id)
     result = node.command(command)
-    import_interface(result, node)
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
@@ -222,7 +220,6 @@ def show_interfaces_description(id):
     command = "show interfaces description"
     node = Node.query.get(id)
     result = node.command(command)
-    import_interface_description(result, node)
     return render_template("node/parsed_command.html", result=result, command=command)
 
 @node_bp.route("/<id>/show_ip_arp")
@@ -230,7 +227,6 @@ def show_ip_arp(id):
     command = "show ip arp"
     node = Node.query.get(id)
     result = node.command(command)
-    import_ip_arp(result, node)
     return render_template("node/show_ip_arp.html", result=result, command=command)
 
 
@@ -398,124 +394,138 @@ def try_connect_node(ip_address):
     raise Exception
 
 
-def import_serial(show_inventory, node):
-    before_serials = {serial.serial_number for serial in node.serials}
-    before = {serial.serial_number: {
-        "id": serial.id,
-        "node_id": serial.node_id,
-        "serial_number": serial.serial_number,
-        "product_id": serial.product_id}
-                      for serial in node.serials}
-    after_serials = {serial_info["sn"] for serial_info in show_inventory}
-    after = {serial_info["sn"]: {
-        "node_id": node.id,
-        "serial_number": serial_info["sn"],
-        "product_id": serial_info["pid"]}
-              for serial_info in show_inventory}
-    delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
+def import_serial(node):
+    import_command_mapper = ImportCommandMapper(node.device_type)
+    after_serials = set()
+    after = dict()
+    for import_command in import_command_mapper.mapping_dict["import_serial"]:
+        before_serials = {serial.serial_number for serial in node.serials}
+        before_field = {"serial_number", "product_id"}
+        before = {serial.serial_number: {
+            "id": serial.id,
+            "node_id": serial.node_id,
+            "serial_number": serial.serial_number,
+            "product_id": serial.product_id}
+                  for serial in node.serials}
+
+        result = node.command(import_command["command"])
+        if "serial_number" in import_command["field"]:
+            after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
+        else:
+            after_serials = before_serials
+        after_field = set(import_command["field"])
+        delta_field = before_field - after_field
+        for serial_info in result:
+            after_entry = {"node_id": node.id}
+            for field_name in import_command["field"]:
+                after_entry[field_name] = serial_info[import_command["field"][field_name]]
+            for field_name in delta_field:
+                if serial_info[import_command["field"]["serial_number"]] in before:
+                    after_entry[field_name] = before[serial_info[import_command["field"]["serial_number"]]][field_name]
+                else:
+                    after_entry[field_name] = None
+            after[serial_info[import_command["field"]["serial_number"]]] = after_entry
+
+        delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
 
 
-def import_node_model(show_inventory, node):
-    node.model = show_inventory[0]["pid"]
-    if not Node.exists(node.hostname):
-        node.add()
+def import_node(node):
+    import_command_mapper = ImportCommandMapper(node.device_type)
+    for import_command in import_command_mapper.mapping_dict["import_node"]:
+        result = node.command(import_command["command"])
+        for field_name in import_command["field"]:
+            setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
     node.commit()
 
 
-def import_node_hostname(show_version, node):
-    node.hostname = show_version[0]["hostname"]
-    node.os_version = show_version[0]["version"]
-    if not Node.exists(node.hostname):
-        node.add()
-    node.commit()
+def import_interface(node):
+    intf_conv = IntfAbbrevConverter(node.device_type)
+    import_command_mapper = ImportCommandMapper(node.device_type)
+    after_interfaces = set()
+    after = dict()
+    for import_command in import_command_mapper.mapping_dict["import_interface"]:
+        before_interfaces = {interface.name for interface in node.interfaces}
+        before_field = {"name", "ip_address", "description", "status"}
+        before = {interface.name: {
+            "id": interface.id,
+            "node_id": interface.node_id,
+            "name": interface.name,
+            "ip_address": interface.ip_address,
+            "description": interface.description,
+            "status": interface.status}
+                  for interface in node.interfaces}
+
+        result = node.command(import_command["command"])
+        if "name" in import_command["field"]:
+            after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
+        else:
+            after_interfaces = before_interfaces
+        after_field = set(import_command["field"])
+        delta_field = before_field - after_field
+        for interface_info in result:
+            after_entry = {"node_id": node.id}
+            for field_name in import_command["field"]:
+                if field_name == "name":
+                    after_entry[field_name] = intf_conv.normalization(interface_info[import_command["field"][field_name]])
+                else:
+                    after_entry[field_name] = interface_info[import_command["field"][field_name]]
+            for field_name in delta_field:
+                if intf_conv.normalization(interface_info[import_command["field"]["name"]]) in before:
+                    after_entry[field_name] = before[intf_conv.normalization(interface_info[import_command["field"]["name"]])][field_name]
+                else:
+                    after_entry[field_name] = None
+
+            after[intf_conv.normalization(interface_info[import_command["field"]["name"]])] = after_entry
+
+        delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
 
 
-def import_interface(show_ip_int_brief, node):
-    before_interfaces = {interface.name for interface in node.interfaces}
-    before = {interface.name: {
-        "id": interface.id,
-        "node_id": interface.node_id,
-        "name": interface.name,
-        "ip_address": interface.ip_address,
-        "status": interface.status}
-              for interface in node.interfaces}
-    after_interfaces = {interface_info["intf"] for interface_info in show_ip_int_brief}
-    after = {interface_info["intf"]: {
-        "node_id": node.id,
-        "name": interface_info["intf"],
-        "ip_address": interface_info["ipaddr"],
-        "status": interface_info["status"]}
-             for interface_info in show_ip_int_brief}
-    delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
-
-
-def import_interface_description(show_interfaces_description, node):
-    intf_conv = IntfAbbrevConverter("cisco_ios")
-    before_interfaces = {interface.name for interface in node.interfaces}
-    before = {interface.name: {
-        "id": interface.id,
-        "node_id": interface.node_id,
-        "name": interface.name,
-        "status": interface.status,
-        "description": interface.description}
-              for interface in node.interfaces}
-    after_interfaces = {intf_conv.to_long(interface_info["port"]) for interface_info in show_interfaces_description}
-    after = {intf_conv.to_long(interface_info["port"]): {
-        "node_id": node.id,
-        "name": intf_conv.to_long(interface_info["port"]),
-        "status": interface_info["status"],
-        "description": interface_info["descrip"]}
-             for interface_info  in show_interfaces_description}
-    delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
-
-
-def import_ip_arp(show_ip_arp, node):
-    before_interface_ids = {interface.id for interface in node.interfaces}
-    before_arp_entries = set()
-    before = {}
-    for interface_id in before_interface_ids:
-        arp_entry = ArpEntry.query.filter(ArpEntry.interface_id == interface_id).first()
-        if arp_entry:
-            before_arp_entries.add(arp_entry.ip_address)
-            before[arp_entry.ip_address] = {
-                "id": arp_entry.id,
-                "ip_address": arp_entry.ip_address,
-                "mac_address": arp_entry.mac_address,
-                "interface_id": arp_entry.interface_id,
-                "protocol": arp_entry.protocol,
-                "arp_type": arp_entry.arp_type,
-                "vendor": arp_entry.vendor}
+def import_arp_entry(node):
+    intf_conv = IntfAbbrevConverter(node.device_type)
+    import_command_mapper = ImportCommandMapper(node.device_type)
     after_arp_entries = set()
-    after = {}
-    for arp_entry_info in show_ip_arp:
-        if arp_entry_info["interface"]:
-            if not Interface.exists(node.id, arp_entry_info["interface"]):
-                interface = Interface(
-                    node_id=node.id,
-                    name=arp_entry_info["interface"]
-                )
-                interface.add()
-                interface.commit()
-            after_arp_entries.add(arp_entry_info["address"])
-            after[arp_entry_info["address"]] = {
-                "ip_address": arp_entry_info["address"],
-                "mac_address": arp_entry_info["mac"],
-                "interface_id": Interface.query.filter(Interface.node_id == node.id, Interface.name == arp_entry_info["interface"]).first().id,
-                "protocol": arp_entry_info["protocol"],
-                "arp_type": arp_entry_info["type"],
-                "vendor": EUI(arp_entry_info["mac"], dialect=mac_unix_expanded).oui.registration().org or ""}
-    delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
+    after = dict()
+    before_interface_ids = {interface.id for interface in node.interfaces}
+
+    for interface_id in before_interface_ids:
+        for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
+            before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
+            arp_entries = ArpEntry.query.filter(ArpEntry.interface_id == interface_id).all()
+            before_arp_entries = set()
+            before = dict()
+            if arp_entries:
+                for arp_entry in arp_entries:
+                    before_arp_entries.add(arp_entry.ip_address)
+                    before[arp_entry.ip_address] = {
+                        "id": arp_entry.id,
+                        "ip_address": arp_entry.ip_address,
+                        "mac_address": arp_entry.mac_address,
+                        "interface_id": arp_entry.interface_id,
+                        "protocol": arp_entry.protocol,
+                        "arp_type": arp_entry.arp_type,
+                        "vendor": arp_entry.vendor}
+
+            result = node.command(import_command["command"])
+            after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
+            after_field = set(import_command["field"])
+            delta_field = before_field - after_field
+            for arp_entry_info in result:
+                after_entry = {"interface_id": interface_id}
+                for field_name in import_command["field"]:
+                        after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
+                for field_name in delta_field:
+                    if arp_entry_info[import_command["field"]["ip_address"]] in before:
+                        after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
+                    else:
+                        after_entry[field_name] = None
+
+                after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
+
+            delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
 
 
 def import_target_node(node):
-    show_inventory = node.command("show inventory")
-    show_version = node.command("show version")
-    import_node_hostname(show_version, node)
-    import_node_model(show_inventory, node)
-    import_serial(show_inventory, node)
-    show_ip_int_brief = node.command("show ip int brief")
-    import_interface(show_ip_int_brief, node)
-    show_interfaces_description = node.command("show interfaces description")
-    import_interface_description(show_interfaces_description, node)
-    show_ip_arp = node.command("show ip arp")
-    import_ip_arp(show_ip_arp, node)
+    import_node(node)
+    import_serial(node)
+    import_interface(node)
+    import_arp_entry(node)
