@@ -7,76 +7,8 @@
 
 <script>
  $(document).ready(function(){
-     var src_node_id = $("#src_node").val()
-     var dst_node_id = $("#dst_node").val()
+     $("#node_id option[value='{{node_id}}']").prop('selected', true);
 
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
-     $.ajax({
-         url: src_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#src_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#src_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
-
-     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
-     $.ajax({
-         url: dst_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#dst_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#dst_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
- });
-
- $("#src_node").change(function(){
-     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
-     $.ajax({
-         url: url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#src_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#src_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
- });
-
- $("#dst_node").change(function(){
-     var url = '/api/interfaces/filter?field=node_id&filter_str=' + $('option:selected').val()
-     $.ajax({
-         url: url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#dst_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#dst_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
  });
 </script>
 {% endblock javascript %}
