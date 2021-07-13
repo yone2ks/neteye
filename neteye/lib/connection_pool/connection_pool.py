@@ -51,8 +51,8 @@ class ConnectionPool:
 
     def recreate_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        connection_adaptor = ConnectionAdaptor(connection=node.gen_connection(driver_type), driver_type=driver_type)
-        self.pool[connection_key] = connection_adaptor
+        self.delete_connection(node, driver_type)
+        self.add_connection(node, driver_type)
 
     def get_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
