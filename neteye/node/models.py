@@ -156,6 +156,8 @@ class Node(Base):
     def scrapli_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
+        else:
+            connection_pool.recreate_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         response = conn.send_command(command)
         parsed_output = response.textfsm_parse_output()
