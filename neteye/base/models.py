@@ -12,7 +12,7 @@ from neteye.extensions import db
 class Base(db.Model, VersioningMixin):
     __abstract__ = True
 
-    id = Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     updated_at = Column(DateTime, nullable=False, default=datetime.now)
 
