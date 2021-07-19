@@ -217,7 +217,7 @@ def show_ip_int_breif(id):
 
 @node_bp.route("/<id>/show_interfaces_description")
 def show_interfaces_description(id):
-    command = "show interfaces description"
+    command = "show int desc"
     node = Node.query.get(id)
     result = node.command(command)
     return render_template("node/parsed_command.html", result=result, command=command)
