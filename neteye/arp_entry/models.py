@@ -2,7 +2,6 @@ from netaddr import *
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy_utils import UUIDType
 
 from neteye.base.models import Base
 from neteye.interface.models import Interface
@@ -13,7 +12,7 @@ class ArpEntry(Base):
 
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
-    interface_id = Column(UUIDType(binary=False), ForeignKey("interfaces.id"), nullable=True)
+    interface_id = Column(String, ForeignKey("interfaces.id"), nullable=True)
     interface = relationship("Interface")
     protocol = Column(String)
     arp_type = Column(String)

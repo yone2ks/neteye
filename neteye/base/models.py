@@ -4,15 +4,17 @@ from datetime import datetime
 from flask_continuum import VersioningMixin
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
-from sqlalchemy_utils import UUIDType
 
 from neteye.extensions import db
 
 
+def gen_uuid_str():
+    return str(uuid.uuid4())
+
 class Base(db.Model, VersioningMixin):
     __abstract__ = True
 
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()))
+    id = Column(String, primary_key=True, default=gen_uuid_str)
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     updated_at = Column(DateTime, nullable=False, default=datetime.now)
 

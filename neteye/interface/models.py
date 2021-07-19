@@ -1,7 +1,6 @@
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String, UniqueConstraint)
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy_utils import UUIDType
 
 from neteye.base.models import Base
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
@@ -11,7 +10,7 @@ class Interface(Base):
     __tablename__ = "interfaces"
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
-    node_id = Column(UUIDType(binary=False), ForeignKey("nodes.id"))
+    node_id = Column(String, ForeignKey("nodes.id"))
     node = relationship("Node")
     name = Column(String, nullable=False)
     description = Column(String, default="")
