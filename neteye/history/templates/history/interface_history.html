@@ -1,18 +1,10 @@
-{% extends "base_datatables_template_for_source_data.html" %}
+{% extends "base_datatables_template_for_ajax.html" %}
 
 {% block card_header %}Interface History{% endblock card_header %}
 
-{% block datatables_cloumns %}
-columns: [
-{data: "issued_at", defaultContent: ""},
-{data: "id", defaultContent: ""},
-{data: "node_id", defaultContent: ""},
-{data: "name", defaultContent: ""},
-{data: "ip_address", defaultContent: ""},
-{data: "description", defaultContent: ""},
-{data: "operation_type", defaultContent: ""}
-],
-{% endblock datatables_cloumns %}
+{% block ajax_source %}
+"/history/interface_history_data"
+{% endblock ajax_source %}
 
 {% block datatables_order %}
 [0, "desc"]
