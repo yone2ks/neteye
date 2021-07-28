@@ -26,7 +26,6 @@
             "field": {
                 "name": "interface",
                 "status": "link_status",
-                "mac_address": "address",
                 "ip_address": "ip_address",
                 "duplex": "duplex",
                 "speed": "speed",
