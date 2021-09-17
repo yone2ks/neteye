@@ -23,6 +23,7 @@
 <script>
  $(document).ready(function() {
      var table = $('#index').DataTable( {
+         lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
          dom: '<"dt_filter_wrapper col-lg-12"<"pull-right"f>><"dt_length_wrapper col-lg-2"<"pull-left"l>><"dt_length_wrapper col-lg-10 mt-2"<"pull-right"B>><"table-responsive"t><"dt_info_wrapper col-lg-8"<"pull-left"i>><"dt_paginate_wrapper col-lg-4"<"pull-right"p>>',
          buttons: [
              {
