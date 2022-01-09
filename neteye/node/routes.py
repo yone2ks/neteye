@@ -87,18 +87,43 @@ def new():
 
 @node_bp.route("/create", methods=["POST"])
 def create():
-    node = Node(
-        hostname=request.form["hostname"],
-        description=request.form["description"],
-        ip_address=request.form["ip_address"],
-        port=request.form["port"],
-        device_type=request.form["device_type"],
-        username=request.form["username"],
-        password=request.form["password"],
-        enable=request.form["enable"],
-    )
-    node.add()
-    return redirect(url_for("node.index"))
+    form = NodeForm()
+    hostname=request.form["hostname"]
+    description=request.form["description"]
+    ip_address=request.form["ip_address"]
+    port=request.form["port"]
+    device_type=request.form["device_type"]
+    username=request.form["username"]
+    password=request.form["password"]
+    enable=request.form["enable"]
+    if form.validate_on_submit():
+        node = Node(
+            hostname=hostname,
+            description=description,
+            ip_address=ip_address,
+            port=port,
+            device_type=device_type,
+            username=username,
+            password=password,
+            enable=enable,
+        )
+        node.add()
+        return redirect(url_for("node.index"))
+    else:
+        device_type_datalist = NETMIKO_PLATFORMS
+        return render_template(
+            "node/new.html",
+            form=form,
+            hostname=hostname,
+            description=description,
+            ip_address=ip_address,
+            port=port,
+            device_type=device_type,
+            username=username,
+            password=password,
+            enable=enable,
+            device_type_datalist=device_type_datalist,
+        )
 
 
 @node_bp.route("/<id>/edit")
@@ -146,22 +171,62 @@ def edit(id):
 
 @node_bp.route("/<id>/update", methods=["POST"])
 def update(id):
-    node = Node.query.get(id)
-    node.hostname = request.form["hostname"]
-    node.description = request.form["description"]
-    node.ip_address = request.form["ip_address"]
-    node.port = request.form["port"]
-    node.device_type = request.form["device_type"]
-    node.napalm_driver = request.form["napalm_driver"]
-    node.scrapli_driver = request.form["scrapli_driver"]
-    node.model = request.form["model"]
-    node.os_type = request.form["os_type"]
-    node.os_version = request.form["os_version"]
-    node.username = request.form["username"]
-    node.password = request.form["password"]
-    node.enable = request.form["enable"]
-    node.commit()
-    return redirect(url_for("node.show", id=id))
+    form = NodeForm()
+    hostname = request.form["hostname"]
+    description = request.form["description"]
+    ip_address = request.form["ip_address"]
+    port = request.form["port"]
+    device_type = request.form["device_type"]
+    napalm_driver = request.form["napalm_driver"]
+    scrapli_driver = request.form["scrapli_driver"]
+    model = request.form["model"]
+    os_type = request.form["os_type"]
+    os_version = request.form["os_version"]
+    username = request.form["username"]
+    password = request.form["password"]
+    enable = request.form["enable"]
+    if form.validate_on_submit():
+        node = Node.query.get(id)
+        node.hostname = hostname
+        node.description = description
+        node.ip_address = ip_address
+        node.port = port
+        node.device_type = device_type
+        node.napalm_driver = napalm_driver
+        node.scrapli_driver = scrapli_driver
+        node.model = model
+        node.os_type = os_type
+        node.os_version = os_version
+        node.username = username
+        node.password = password
+        node.enable = enable
+        node.commit()
+        return redirect(url_for("node.show", id=id))
+    else:
+        device_type_datalist = NETMIKO_PLATFORMS
+        napalm_driver_datalist = NAPALM_DRIVERS
+        scrapli_driver_datalist = SCRAPLI_DRIVERS
+        return render_template(
+            "node/edit.html",
+            id=id,
+            form=form,
+            hostname=hostname,
+            description=description,
+            ip_address=ip_address,
+            port=port,
+            device_type=device_type,
+            napalm_driver=napalm_driver,
+            scrapli_driver=scrapli_driver,
+            model=model,
+            os_type=os_type,
+            os_version=os_version,
+            username=username,
+            password=password,
+            enable=enable,
+            device_type_datalist=device_type_datalist,
+            napalm_driver_datalist=napalm_driver_datalist,
+            scrapli_driver_datalist=scrapli_driver_datalist,
+        )
 
 
 @node_bp.route("/<id>/delete", methods=["POST"])
