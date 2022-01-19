@@ -39,17 +39,6 @@
 </script>
 {% endblock javascript %}
 
-{% macro render_field(field) %}
-{{ field.label(class_="col-md-3 col-form-label") }}
-{{ field(class_="form-control col-md-6", **kwargs) | safe }}
-{% if field.errors %}
-<div class="alert-danger offset-md-3 col-md-6">
-    {% for error in field.errors %}
-    {{ error }}<br />
-    {% endfor %}
-</div>
-{% endif %}
-{% endmacro %}
 
 {% block main %}
 <div class="card">
@@ -119,7 +108,7 @@
     </div>
     <div class="card-footer">
         {{ form.submit(class_="btn btn-sm btn-primary", form="node_update") }}
-        {{ form.reset(class_="btn btn-sm btn-danger") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="node_update") }}
     </div>
 </div>
 {% endblock main %}
