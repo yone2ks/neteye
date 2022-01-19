@@ -7,6 +7,18 @@
 * Licensed under MIT (https://coreui.io/license)
 -->
 
+{% macro render_field(field) %}
+{{ field.label(class_="col-md-3 col-form-label") }}
+{{ field(class_="form-control col-md-6", **kwargs) | safe }}
+{% if field.errors %}
+<div class="alert-danger offset-md-3 col-md-6">
+    {% for error in field.errors %}
+    {{ error }}<br />
+    {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
     <html lang="en">
       <head>
         {% block head %}
