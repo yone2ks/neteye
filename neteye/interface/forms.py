@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Required
+from wtforms.validators import DataRequired, InputRequired, IPAddress
 
 from neteye.node.models import Node
 
@@ -12,12 +12,12 @@ def get_nodes():
 
 class InterfaceForm(FlaskForm):
     node_id = QuerySelectField(
-        "Node:", validators=[Required()], query_factory=get_nodes, get_label="hostname"
+        "Node:", validators=[InputRequired()], query_factory=get_nodes, get_label="hostname"
     )
-    name = StringField("Name:", validators=[Required()])
+    name = StringField("Name:", validators=[InputRequired()])
     description = StringField("Description:")
-    ip_address = StringField("IP Address:")
-    mask = StringField("Mask:")
+    ip_address = StringField("IP Address:", validators=[IPAddress()])
+    mask = StringField("Mask:", validators=[IPAddress()])
     speed = StringField("Speed:")
     duplex = StringField("Duplex:")
     mtu = StringField("MTU:")

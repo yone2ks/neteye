@@ -1,4 +1,5 @@
 import pandas as pd
+from sqlalchemy.sql.expression import desc
 from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
@@ -49,19 +50,44 @@ def new():
 
 @interface_bp.route("/create", methods=["POST"])
 def create():
-    interface = Interface(
-        node_id=request.form["node_id"],
-        name=request.form["name"],
-        description=request.form["description"],
-        ip_address=request.form["ip_address"],
-        mask=request.form["mask"],
-        speed=request.form["speed"],
-        duplex=request.form["duplex"],
-        mtu=request.form["mtu"],
-        status=request.form["status"],
-    )
-    interface.add()
-    return redirect(url_for("interface.index"))
+    form = InterfaceForm()
+    node_id=request.form["node_id"]
+    name=request.form["name"]
+    description=request.form["description"]
+    ip_address=request.form["ip_address"]
+    mask=request.form["mask"]
+    speed=request.form["speed"]
+    duplex=request.form["duplex"]
+    mtu=request.form["mtu"]
+    status=request.form["status"]
+    if form.validate_on_submit():
+        interface = Interface(
+            node_id=node_id,
+            name=name,
+            description=description,
+            ip_address=ip_address,
+            mask=mask,
+            speed=speed,
+            duplex=duplex,
+            mtu=mtu,
+            status=status,
+        )
+        interface.add()
+        return redirect(url_for("interface.index"))
+    else:
+        return render_template(
+            "interface/new.html",
+            form=form,
+            node_id=node_id,
+            name=name,
+            description=description,
+            ip_address=ip_address,
+            mask=mask,
+            speed=speed,
+            duplex=duplex,
+            mtu=mtu,
+            status=status,
+        )
 
 
 @interface_bp.route("/<id>/edit")
@@ -95,18 +121,44 @@ def edit(id):
 
 @interface_bp.route("/<id>/update", methods=["POST"])
 def update(id):
-    interface = Interface.query.get(id)
-    interface.node_id = request.form["node_id"]
-    interface.name = request.form["name"]
-    interface.description = request.form["description"]
-    interface.ip_address = request.form["ip_address"]
-    interface.mask = request.form["mask"]
-    interface.speed = request.form["speed"]
-    interface.duplex = request.form["duplex"]
-    interface.mtu = request.form["mtu"]
-    interface.status = request.form["status"]
-    interface.commit()
-    return redirect(url_for("interface.show", id=id))
+    form = InterfaceForm()
+    node_id = request.form["node_id"]
+    name = request.form["name"]
+    description = request.form["description"]
+    ip_address = request.form["ip_address"]
+    mask = request.form["mask"]
+    speed = request.form["speed"]
+    duplex = request.form["duplex"]
+    mtu = request.form["mtu"]
+    status = request.form["status"]
+    if form.validate_on_submit():
+        interface = Interface.query.get(id)
+        interface.node_id = node_id
+        interface.name = name
+        interface.description = description
+        interface.ip_address = ip_address
+        interface.mask = mask
+        interface.speed = speed
+        interface.duplex = duplex
+        interface.mtu = mtu
+        interface.status = status
+        interface.commit()
+        return redirect(url_for("interface.show", id=id))
+    else:
+        return render_template(
+            "interface/edit.html",
+            id=id,
+            form=form,
+            node_id=node_id,
+            name=name,
+            description=description,
+            ip_address=ip_address,
+            mask=mask,
+            speed=speed,
+            duplex=duplex,
+            mtu=mtu,
+            status=status,
+        )
 
 
 @interface_bp.route("/<id>/delete", methods=["POST"])
