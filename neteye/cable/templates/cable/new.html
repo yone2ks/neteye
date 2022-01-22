@@ -9,10 +9,10 @@
 
 <script>
  $(document).ready(function(){
-     var src_node_id = $("#src_node").val()
-     var dst_node_id = $("#dst_node").val()
+     var src_node_id = $("#src_node").val();
+     var dst_node_id = $("#dst_node").val();
 
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
+     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id;
      $.ajax({
          url: src_interfaces_url,
          type: 'GET',
@@ -28,7 +28,7 @@
          }
      });
 
-     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id
+     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id;
      $.ajax({
          url: dst_interfaces_url,
          type: 'GET',
@@ -45,7 +45,7 @@
      });
 
      $("#src_node").change(function(){
-         var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
+         var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val();
          $.ajax({
              url: src_interfaces_url,
              type: 'GET',
@@ -63,7 +63,7 @@
      });
 
      $("#dst_node").change(function(){
-         var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val()
+         var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val();
          $.ajax({
              url: dst_interfaces_url,
              type: 'GET',
@@ -94,25 +94,25 @@
         <form action="{{ url_for('cable.create') }}" method=post class="form-horizontal " id="cable_create">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ form.src_node.label(class_="col-md-3 col-form-label") }}{{ form.src_node(class_="form-control col-md-6") }}
+                {{ render_field(form.src_node) }}
             </div>
             <div class="form-group row">
-                {{ form.src_interface.label(class_="col-md-3 col-form-label") }}{{ form.src_interface(class_="form-control col-md-6") }}
+                {{ render_field(form.src_interface) }}
             </div>
             <div class="form-group row">
-                {{ form.dst_node.label(class_="col-md-3 col-form-label") }}{{ form.dst_node(class_="form-control col-md-6") }}
+                {{ render_field(form.dst_node) }}
             </div>
             <div class="form-group row">
-                {{ form.dst_interface.label(class_="col-md-3 col-form-label") }}{{ form.dst_interface(class_="form-control col-md-6") }}
+                {{ render_field(form.dst_interface) }}
             </div>
             <div class="form-group row">
-                {{ form.cable_type.label(class_="col-md-3 col-form-label") }}{{ form.cable_type(class_="form-control col-md-6") }}
+                {{ render_field(form.cable_type) }}
             </div>
             <div class="form-group row">
-                {{ form.link_speed.label(class_="col-md-3 col-form-label") }}{{ form.link_speed(class_="form-control col-md-6") }}
+                {{ render_field(form.link_speed) }}
             </div>
             <div class="form-group row">
-                {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6") }}
+                {{ render_field(form.description) }}
             </div>
         </form>
     </div>
