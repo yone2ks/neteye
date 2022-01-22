@@ -20,19 +20,19 @@
         Edit Serial
     </div>
     <div class="card-body">
-        <form action="{{ url_for('serial.update', id=id ) }}" method=post class="form-horizontal " id="serial_edit">
+        <form action="{{ url_for('serial.update', id=id ) }}" method=post class="form-horizontal " id="serial_update">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ form.node_id.label(class_="col-md-3 col-form-label") }}{{ form.node_id(class_="form-control col-md-6", value=node_id) }}
+                {{ render_field(form.node_id, value=node_id) }}
             </div>
             <div class="form-group row">
-                {{ form.serial_number.label(class_="col-md-3 col-form-label") }}{{ form.serial_number(class_="form-control col-md-6", value=serial_number) }}
+                {{ render_field(form.serial_number, value=serial_number) }}
             </div>
             <div class="form-group row">
-                {{ form.product_id.label(class_="col-md-3 col-form-label") }}{{ form.product_id(class_="form-control col-md-6", value=product_id) }}
+                {{ render_field(form.product_id, value=product_id) }}
             </div>
             <div class="form-group row">
-                {{ form.description.label(class_="col-md-3 col-form-label") }}{{ form.description(class_="form-control col-md-6", value=description) }}
+                {{ render_field(form.description, value=description) }}
             </div>
         </form>
     </div>
