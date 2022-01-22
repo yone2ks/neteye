@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Required
+from wtforms.validators import DataRequired, InputRequired
 from neteye.extensions import db
 from neteye.node.models import Node
 from neteye.interface.models import Interface
@@ -14,18 +14,18 @@ def get_nodes():
 class CableForm(FlaskForm):
     src_node = QuerySelectField(
         "Src Node:",
-        validators=[Required()],
+        validators=[InputRequired()],
         query_factory=get_nodes,
         get_label="hostname",
     )
     dst_node = QuerySelectField(
         "Dst Node:",
-        validators=[Required()],
+        validators=[InputRequired()],
         query_factory=get_nodes,
         get_label="hostname",
     )
-    src_interface = SelectField(choices=[])
-    dst_interface = SelectField(choices=[])
+    src_interface = SelectField(validators=[InputRequired()], choices=[])
+    dst_interface = SelectField(validators=[InputRequired()], choices=[])
     description = StringField("description:")
     cable_type = SelectField(
         choices=[("twisted_pair", "Twisted-Pair"), ("optical_fiber", "Optical-Fiber")]
