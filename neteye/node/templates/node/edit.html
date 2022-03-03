@@ -48,6 +48,7 @@
     <div class="card-body">
     <form action="{{ url_for('node.update', id=id ) }}" method=post class="form-horizontal" id="node_update">
         <input name="_method" type="hidden" value="PUT"/>
+        {{ form.csrf_token }}
         <div class="form-group row">
             {{ render_field(form.hostname, value=hostname) }}
         </div>
