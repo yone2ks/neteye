@@ -1,5 +1,5 @@
 from typing import NamedTuple
-
+from ssh2.exceptions import SocketRecvError
 
 class ConnectionKey(NamedTuple):
     ip_address: str
@@ -18,7 +18,7 @@ class ConnectionAdaptor():
         if self.driver_type == "napalm":
             return self.connection.is_alive()
         elif self.driver_type == "scrapli":
-            return self.connection.isalive()
+            return False  # self.connection.isalive() beacause isalive of scrapli is not working
         else:
             return self.connection.is_alive()
 
@@ -26,7 +26,11 @@ class ConnectionAdaptor():
         if self.driver_type == "napalm":
             self.connection.close()
         elif self.driver_type == "scrapli":
-            self.connection.close()
+            try: 
+                self.connection.close()
+            except SocketRecvError:
+                self.connection.transport.close()
+                self.connection.channel.close()
         else:
             self.connection.disconnect()
 
