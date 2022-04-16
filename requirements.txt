@@ -4,9 +4,11 @@ SQLAlchemy==1.2.16
 Flask-SQLAlchemy==2.4.4
 Flask-Babel==0.12.2
 Flask-Security-Too==4.0.1
+wtforms==2.3.3
 Flask-WTF==0.14.3
 flask-nav==0.6
 Flask-Bootstrap==3.3.7.1
+markupsafe==2.0.1
 marshmallow-sqlalchemy==0.24.2
 flask-restx==0.4.0
 flask-marshmallow==0.11.0
