@@ -341,7 +341,7 @@ def netmiko_raw_command(id, command):
     return render_template("node/command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/netmiko/<command>")
+@node_bp.route("/<id>/scrapli/<command>")
 def scrapli_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -352,7 +352,7 @@ def scrapli_command(id, command):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/raw_netmiko/<command>")
+@node_bp.route("/<id>/raw_scrapli/<command>")
 def scrapli_raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
