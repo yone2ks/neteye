@@ -2,6 +2,7 @@ from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String, Text)
 from sqlalchemy.orm import backref, relationship
 
+from neteye.base.models import Base
 
 class CommandHistory(Base):
     __tablename__ = "command_histories"
