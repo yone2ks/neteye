@@ -34,7 +34,8 @@ from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from .models import (OPERATION_TYPE, arp_entry_transaction, arp_entry_version,
                      cable_transaction, cable_version, interface_transaction,
                      interface_version, node_transaction, node_version,
-                     serial_transaction, serial_version, CommandHistory)
+                     serial_transaction, serial_version)
+from .model_command_history import CommandHistory
 
 history_bp = bp_factory("history")
 
