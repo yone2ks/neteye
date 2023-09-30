@@ -13,6 +13,7 @@ from neteye.interface.models import Interface
 from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping import \
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
+from neteye.history.models import CommandHistory
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -129,11 +130,23 @@ class Node(Base):
         else:
             self.napalm_driver = NOT_SUPPORTED
 
+    def command_with_history(self, command, session_user):
+        result = self.command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
+
     def command(self, command):
         if not self.scrapli_driver == NOT_SUPPORTED:
             return self.scrapli_command(command)
         else:
             return self.netmiko_command(command)
+
+    def raw_command_with_history(self, command, session_user):
+        result = self.raw_command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
 
     def raw_command(self, command):
         if not self.scrapli_driver == NOT_SUPPORTED:
@@ -141,17 +154,35 @@ class Node(Base):
         else:
             return self.netmiko_raw_command(command)
 
+    def netmiko_command_with_history(self, command, session_user):
+        result = self.netmiko_command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
+
     def netmiko_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
         return conn.send_command(command, use_textfsm=True)
 
+    def netmiko_raw_command_with_history(self, command, session_user):
+        result = self.netmiko_raw_command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
+
     def netmiko_raw_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
         return conn.send_command(command, use_textfsm=False)
+
+    def scrapli_command_with_history(self, command, session_user):
+        result = self.scrapli_command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
 
     def scrapli_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
@@ -164,6 +195,12 @@ class Node(Base):
         if parsed_output:
             return parsed_output
         return response.result
+
+    def scrapli_raw_command_with_history(self, command, session_user):
+        result = self.scrapli_raw_command(command)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history.add()
+        return result
 
     def scrapli_raw_command(self, command):
         print(connection_pool.exists(self, DRIVER_TYPE_SCRAPLI))
