@@ -13,7 +13,7 @@ from neteye.interface.models import Interface
 from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping import \
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
-from neteye.history.models import CommandHistory
+from neteye.history.model_command_history import CommandHistory
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
