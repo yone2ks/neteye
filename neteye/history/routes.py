@@ -34,7 +34,7 @@ from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from .models import (OPERATION_TYPE, arp_entry_transaction, arp_entry_version,
                      cable_transaction, cable_version, interface_transaction,
                      interface_version, node_transaction, node_version,
-                     serial_transaction, serial_version)
+                     serial_transaction, serial_version, CommandHistory)
 
 history_bp = bp_factory("history")
 
@@ -202,4 +202,23 @@ def arp_entry_history_data():
     for row in row_table.output_result()["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['8'] = OPERATION_TYPE[row['8']]
+    return jsonify(row_table.output_result())
+
+@history_bp.route("/command_history")
+def command_history():
+    return render_template("history/command_history.html")
+
+
+@history_bp.route("/command_history_data")
+def command_history_data():
+    columns = [
+        ColumnDT(CommandHistory.issued_at),
+        ColumnDT(CommandHistory.node.id),
+        ColumnDT(CommandHistory.node.hostname),
+        ColumnDT(CommandHistory.command),
+        ColumnDT(CommandHistory.username),
+    ]
+    query = db.session.query().select_from(CommandHistory)
+    params = request.args.to_dict()
+    row_table = DataTables(params, query, columns)
     return jsonify(row_table.output_result())

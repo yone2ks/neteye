@@ -1,0 +1,21 @@
+{% extends "base_datatables_template_for_ajax.html" %}
+
+{% block card_header %}Node History{% endblock card_header %}
+
+{% block ajax_source %}
+"/history/node_history_data"
+{% endblock ajax_source %}
+
+{% block datatables_order %}
+[0, "desc"]
+{% endblock datatables_order %}
+
+{% block thead %}
+<tr>
+    <th>Date</th>
+    <th>Node ID</th>
+    <th>Hostname</th>
+    <th>Command</th>
+    <th>User</th>
+</tr>
+{% endblock thead %}
