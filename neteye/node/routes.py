@@ -251,7 +251,7 @@ def filter():
 def show_run(id):
     command = "show run"
     node = Node.query.get(id)
-    result = node.raw_command_with_history(command)
+    result = node.raw_command_with_history(command, session['username'])
     result = result.replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
@@ -318,7 +318,7 @@ def command(id, command):
 def raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
-    result = node.raw_command_with_history(command).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = node.raw_command_with_history(command, session['username']).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -326,7 +326,7 @@ def raw_command(id, command):
 def netmiko_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
-    result = node.netmiko_command_with_history(command)
+    result = node.netmiko_command_with_history(command, session['username'])
     if isinstance(result, str):
         result = result.replace("\r\n", "<br />").replace("\n", "<br />")
         return render_template("node/command.html", result=result, command=command)
@@ -337,7 +337,7 @@ def netmiko_command(id, command):
 def netmiko_raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
-    result = node.netmiko_raw_command_with_history(command).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = node.netmiko_raw_command_with_history(command, session['username']).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -345,7 +345,7 @@ def netmiko_raw_command(id, command):
 def scrapli_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
-    result = node.scrapli_command_with_history(command)
+    result = node.scrapli_command_with_history(command, session['username'])
     if isinstance(result, str):
         result = result.replace("\r\n", "<br />").replace("\n", "<br />")
         return render_template("node/command.html", result=result, command=command)
@@ -356,7 +356,7 @@ def scrapli_command(id, command):
 def scrapli_raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
-    result = node.scrapli_raw_command_with_history(command).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = node.scrapli_raw_command_with_history(command, session['username']).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -411,7 +411,7 @@ def explore_network(node):
     command = "show ip arp"
     show_ip_arp = [
         entry
-        for entry in node.command_with_history(command)
+        for entry in node.command_with_history(command, session['username'])
         if entry["age"] != "-"
     ]
     ng_node = []
@@ -473,7 +473,7 @@ def import_serial(node):
             "product_id": serial.product_id}
                   for serial in node.serials}
 
-        result = node.command_with_history(import_command["command"])
+        result = node.command_with_history(import_command["command"], session['username'])
         if "serial_number" in import_command["field"]:
             after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
         else:
@@ -497,7 +497,7 @@ def import_serial(node):
 def import_node(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     for import_command in import_command_mapper.mapping_dict["import_node"]:
-        result = node.command_with_history(import_command["command"])
+        result = node.command_with_history(import_command["command"], session['username'])
         for field_name in import_command["field"]:
             setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
     node.commit()
@@ -520,7 +520,7 @@ def import_interface(node):
             "status": interface.status}
                   for interface in node.interfaces}
 
-        result = node.command_with_history(import_command["command"])
+        result = node.command_with_history(import_command["command"], session['username'])
         if "name" in import_command["field"]:
             after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
         else:
@@ -570,7 +570,7 @@ def import_arp_entry(node):
                         "arp_type": arp_entry.arp_type,
                         "vendor": arp_entry.vendor}
 
-            result = node.command_with_history(import_command["command"])
+            result = node.command_with_history(import_command["command"], session['username'])
             after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
             after_field = set(import_command["field"])
             delta_field = before_field - after_field
