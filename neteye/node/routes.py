@@ -5,7 +5,7 @@ import pandas as pd
 import sqlalchemy
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
-from flask_security import auth_required
+from flask_security import auth_required, current_user
 from netaddr import *
 from sqlalchemy.sql import exists
 
@@ -251,7 +251,7 @@ def filter():
 def show_run(id):
     command = "show run"
     node = Node.query.get(id)
-    result = node.raw_command_with_history(command, session['username'])
+    result = node.raw_command_with_history(command, current_user.name)
     result = result.replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
