@@ -260,7 +260,7 @@ def show_run(id):
 def show_inventory(id):
     command = "show inventory"
     node = Node.query.get(id)
-    result = node.command_with_history(command, session['username'])
+    result = node.command_with_history(command, current_user.email)
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
