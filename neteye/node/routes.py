@@ -251,7 +251,7 @@ def filter():
 def show_run(id):
     command = "show run"
     node = Node.query.get(id)
-    result = node.raw_command_with_history(command, current_user.name)
+    result = node.raw_command_with_history(command, current_user.email)
     result = result.replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
 
