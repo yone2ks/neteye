@@ -213,9 +213,9 @@ def command_history():
 @history_bp.route("/command_history_data")
 def command_history_data():
     columns = [
-        ColumnDT(CommandHistory.issued_at),
-        ColumnDT(CommandHistory.node.id),
-        ColumnDT(CommandHistory.node.hostname),
+        ColumnDT(CommandHistory.created_at),
+        ColumnDT(CommandHistory.node_id),
+        ColumnDT(CommandHistory.hostname),
         ColumnDT(CommandHistory.command),
         ColumnDT(CommandHistory.username),
     ]
