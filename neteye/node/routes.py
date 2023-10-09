@@ -35,6 +35,7 @@ def index():
 
 
 @node_bp.route("/data")
+@auth_required()
 def data():
     columns = [
         ColumnDT(Node.id),
@@ -52,6 +53,7 @@ def data():
 
 
 @node_bp.route("/<id>")
+@auth_required()
 def show(id):
     node = Node.query.get(id)
     command_list = ntc_template_utils.get_command_list(node.device_type)
@@ -59,6 +61,7 @@ def show(id):
 
 
 @node_bp.route("/new")
+@auth_required()
 def new():
     form = NodeForm()
     hostname = None
@@ -86,6 +89,7 @@ def new():
 
 
 @node_bp.route("/create", methods=["POST"])
+@auth_required()
 def create():
     form = NodeForm()
     hostname=request.form["hostname"]
@@ -127,6 +131,7 @@ def create():
 
 
 @node_bp.route("/<id>/edit")
+@auth_required()
 def edit(id):
     node = Node.query.get(id)
     form = NodeForm()
@@ -170,6 +175,7 @@ def edit(id):
 
 
 @node_bp.route("/<id>/update", methods=["POST"])
+@auth_required()
 def update(id):
     form = NodeForm()
     hostname = request.form["hostname"]
@@ -230,6 +236,7 @@ def update(id):
 
 
 @node_bp.route("/<id>/delete", methods=["POST"])
+@auth_required()
 def delete(id):
     node = Node.query.get(id)
     node.delete()
@@ -237,6 +244,7 @@ def delete(id):
 
 
 @node_bp.route("/filter")
+@auth_required()
 def filter():
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
@@ -248,6 +256,7 @@ def filter():
 
 
 @node_bp.route("/<id>/show_run")
+@auth_required()
 def show_run(id):
     command = "show run"
     node = Node.query.get(id)
@@ -257,6 +266,7 @@ def show_run(id):
 
 
 @node_bp.route("/<id>/show_inventory")
+@auth_required()
 def show_inventory(id):
     command = "show inventory"
     node = Node.query.get(id)
@@ -265,6 +275,7 @@ def show_inventory(id):
 
 
 @node_bp.route("/<id>/show_version")
+@auth_required()
 def show_version(id):
     command = "show version"
     node = Node.query.get(id)
@@ -273,6 +284,7 @@ def show_version(id):
 
 
 @node_bp.route("/<id>/show_ip_int_brief")
+@auth_required()
 def show_ip_int_breif(id):
     command = "show ip int brief"
     node = Node.query.get(id)
@@ -281,6 +293,7 @@ def show_ip_int_breif(id):
 
 
 @node_bp.route("/<id>/show_interfaces_description")
+@auth_required()
 def show_interfaces_description(id):
     command = "show int desc"
     node = Node.query.get(id)
@@ -288,6 +301,7 @@ def show_interfaces_description(id):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 @node_bp.route("/<id>/show_ip_arp")
+@auth_required()
 def show_ip_arp(id):
     command = "show ip arp"
     node = Node.query.get(id)
@@ -296,6 +310,7 @@ def show_ip_arp(id):
 
 
 @node_bp.route("/<id>/show_ip_route")
+@auth_required()
 def show_ip_route(id):
     command = "show ip route"
     node = Node.query.get(id)
@@ -304,6 +319,7 @@ def show_ip_route(id):
 
 
 @node_bp.route("/<id>/command/<command>")
+@auth_required()
 def command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -315,6 +331,7 @@ def command(id, command):
 
 
 @node_bp.route("/<id>/raw_command/<command>")
+@auth_required()
 def raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -323,6 +340,7 @@ def raw_command(id, command):
 
 
 @node_bp.route("/<id>/netmiko/<command>")
+@auth_required()
 def netmiko_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -334,6 +352,7 @@ def netmiko_command(id, command):
 
 
 @node_bp.route("/<id>/raw_netmiko/<command>")
+@auth_required()
 def netmiko_raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -342,6 +361,7 @@ def netmiko_raw_command(id, command):
 
 
 @node_bp.route("/<id>/scrapli/<command>")
+@auth_required()
 def scrapli_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -353,6 +373,7 @@ def scrapli_command(id, command):
 
 
 @node_bp.route("/<id>/raw_scrapli/<command>")
+@auth_required()
 def scrapli_raw_command(id, command):
     command = command.replace("_", " ")
     node = Node.query.get(id)
@@ -361,6 +382,7 @@ def scrapli_raw_command(id, command):
 
 
 @node_bp.route("/<id>/napalm/get_facts")
+@auth_required()
 def napalm_get_facts(id):
     node = Node.query.get(id)
     result = node.napalm_get_facts()
@@ -368,6 +390,7 @@ def napalm_get_facts(id):
 
 
 @node_bp.route("/<id>/napalm/get_interfaces")
+@auth_required()
 def napalm_get_interfaces(id):
     node = Node.query.get(id)
     result = node.napalm_get_interfaces()
@@ -375,6 +398,7 @@ def napalm_get_interfaces(id):
 
 
 @node_bp.route("/import_node_from_id/<id>")
+@auth_required()
 def import_node_from_id(id):
     try:
         node = Node.query.get(id)
@@ -386,6 +410,7 @@ def import_node_from_id(id):
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
+@auth_required()
 def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
@@ -401,6 +426,7 @@ def import_node_from_ip(ip_address):
 
 
 @node_bp.route("/explore_node/<id>")
+@auth_required()
 def explore_node(id):
     node = Node.query.get(id)
     explore_network(node)
