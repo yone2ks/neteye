@@ -1,6 +1,20 @@
 {% extends "base_datatables_template_for_ajax.html" %}
 
-{% block card_header %}Node History{% endblock card_header %}
+{% block card_header %}Command History{% endblock card_header %}
+
+{% block datatables_cloumns %}
+columnDefs: [
+{
+"render": function(data, type, row) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap; justify-content: center;">'
+    + '<button class="btn btn-sm btn-primary w-50" type="button" onclick="location.href=\'command_history/' + row[5]  + '/result\'">Result</button>'
+    + '</div>'
+    ;
+    },
+    "targets": 5
+    }
+    ],
+{% endblock datatables_cloumns %}
 
 {% block ajax_source %}
 "/history/command_history_data"
@@ -17,5 +31,6 @@
     <th>Hostname</th>
     <th>Command</th>
     <th>User</th>
+    <th>Result</th>
 </tr>
 {% endblock thead %}

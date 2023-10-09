@@ -1,0 +1,39 @@
+{% extends "base_template.html" %}
+{% block javascript %}
+{{ super() }}
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+
+<script>
+ $(document).ready(function() {
+     var clipboardjs = new ClipboardJS('.copy_to_clipboard')
+     clipboardjs.on('success', function(e) {
+         e.clearSelection();
+     });
+
+     tippy('.copy_to_clipboard', {
+         content: 'Copyed!',
+         trigger: 'click',
+     });
+
+ } );
+</script>
+{% endblock javascript %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {{ command }}({{ hostname }})
+
+        <button class="pull-right btn btn-sm btn-primary copy_to_clipboard" data-clipboard-target=".card-body">Copy to Clipboard</button>
+    </div>
+    <div class="card-body">
+        {{ result|safe }}
+    </div>
+    <div class="card-footer text-right">
+      {{ date }}({{ username }})
+    </div>
+</div>
+{% endblock main %}

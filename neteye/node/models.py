@@ -1,3 +1,5 @@
+import json
+
 import napalm
 import netmiko
 import scrapli
@@ -132,7 +134,7 @@ class Node(Base):
 
     def command_with_history(self, command, session_user):
         result = self.command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
@@ -144,7 +146,7 @@ class Node(Base):
 
     def raw_command_with_history(self, command, session_user):
         result = self.raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
@@ -156,7 +158,7 @@ class Node(Base):
 
     def netmiko_command_with_history(self, command, session_user):
         result = self.netmiko_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
@@ -168,7 +170,7 @@ class Node(Base):
 
     def netmiko_raw_command_with_history(self, command, session_user):
         result = self.netmiko_raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
@@ -180,7 +182,7 @@ class Node(Base):
 
     def scrapli_command_with_history(self, command, session_user):
         result = self.scrapli_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
@@ -198,12 +200,11 @@ class Node(Base):
 
     def scrapli_raw_command_with_history(self, command, session_user):
         result = self.scrapli_raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=result)
+        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
         command_history.add()
         return result
 
     def scrapli_raw_command(self, command):
-        print(connection_pool.exists(self, DRIVER_TYPE_SCRAPLI))
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)

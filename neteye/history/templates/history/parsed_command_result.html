@@ -1,0 +1,21 @@
+{% extends "base_datatables_template.html" %}
+
+{% block card_header %}{{ command }}({{ hostname }}){% endblock card_header %}
+{% block thead %}
+<tr>
+    {% for key in result[0].keys() %}
+    <th>{{ key }}</th>
+    {% endfor %}
+</tr>
+{% endblock thead %}
+{% block tbody %}
+{% for row in result %}
+<tr>
+    {% for key in row.keys() %}
+    <td>{{ row[key] }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+{% endblock tbody %}
+
+{% block card_footer %}<div class="text-right">{{ date }}({{ username }})</div>{% endblock card_footer %}

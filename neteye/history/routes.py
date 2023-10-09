@@ -1,3 +1,4 @@
+import json
 import datetime
 from logging import debug, error, info, warning
 
@@ -218,8 +219,21 @@ def command_history_data():
         ColumnDT(CommandHistory.hostname),
         ColumnDT(CommandHistory.command),
         ColumnDT(CommandHistory.username),
+        ColumnDT(CommandHistory.id),
     ]
     query = db.session.query().select_from(CommandHistory)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
+    for row in row_table.output_result()["data"]:
+        row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
     return jsonify(row_table.output_result())
+
+@history_bp.route("/command_history/<id>/result")
+def command_history_result(id):
+    command_history = CommandHistory.query.get(id)
+    result = json.loads(command_history.result)
+    date = command_history.created_at.replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
+    if isinstance(result, str):
+        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        return render_template("history/command_result.html", result=result, command=command_history.command, hostname=command_history.hostname, username=command_history.username, date=date)
+    return render_template("history/parsed_command_result.html", result=result, command=command_history.command, hostname=command_history.hostname, username=command_history.username, date=date)
