@@ -8,7 +8,7 @@ class NodeForm(FlaskForm):
     description = StringField("Description:")
     ip_address = StringField("IP Address:", validators=[InputRequired(), IPAddress()])
     port = IntegerField("Port:", default=22, validators=[InputRequired()])
-    device_type = StringField("Device Type:", validators=[InputRequired()])
+    device_type = StringField("Device Type:", default="autodetect", validators=[InputRequired()])
     napalm_driver = StringField("Napalm Driver:")
     scrapli_driver = StringField("Scrapli Driver:")
     model = StringField("Model:")
