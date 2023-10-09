@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask_continuum import VersioningMixin
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
@@ -15,8 +15,8 @@ class Base(db.Model, VersioningMixin):
     __abstract__ = True
 
     id = Column(String, primary_key=True, default=gen_uuid_str)
-    created_at = Column(DateTime, nullable=False, default=datetime.now)
-    updated_at = Column(DateTime, nullable=False, default=datetime.now)
+    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
 
     def __repr__(self):
         return "<id={id} created_at={created_at} updated_at={updated_at}".format(
