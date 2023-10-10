@@ -2,6 +2,7 @@ import pandas as pd
 from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
+from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
 from neteye.apis.serial_namespace import serial_schema, serials_schema
@@ -16,11 +17,13 @@ serial_bp = bp_factory("serial")
 
 
 @serial_bp.route("")
+@auth_required()
 def index():
     return render_template("serial/index.html")
 
 
 @serial_bp.route("/data")
+@auth_required()
 def data():
     columns = [
         ColumnDT(Serial.id),
@@ -36,6 +39,7 @@ def data():
 
 
 @serial_bp.route("/<id>")
+@auth_required()
 def show(id):
     serial = Serial.query.get(id)
     node = Node.query.get(serial.node_id)
@@ -43,12 +47,14 @@ def show(id):
 
 
 @serial_bp.route("/new")
+@auth_required()
 def new():
     form = SerialForm()
     return render_template("serial/new.html", form=form)
 
 
 @serial_bp.route("/create", methods=["POST"])
+@auth_required()
 def create():
     serial = Serial(
         node_id=request.form["node_id"],
@@ -61,6 +67,7 @@ def create():
 
 
 @serial_bp.route("/<id>/edit")
+@auth_required()
 def edit(id):
     serial = Serial.query.get(id)
     form = SerialForm()
@@ -80,6 +87,7 @@ def edit(id):
 
 
 @serial_bp.route("/<id>/update", methods=["POST"])
+@auth_required()
 def update(id):
     serial = Serial.query.get(id)
     serial.node_id = request.form["node_id"]
@@ -92,6 +100,7 @@ def update(id):
 
 
 @serial_bp.route("/<id>/delete", methods=["POST"])
+@auth_required()
 def delete(id):
     serial = Serial.query.get(id)
     serial.delete()
@@ -99,6 +108,7 @@ def delete(id):
 
 
 @serial_bp.route("/filter")
+@auth_required()
 def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
