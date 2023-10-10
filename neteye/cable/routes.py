@@ -1,6 +1,7 @@
 import pandas as pd
 from dynaconf import settings
 from flask import flash, redirect, render_template, request, session, url_for
+from flask_security import auth_required, current_user
 from sqlalchemy.orm import aliased
 
 from neteye.apis.cable_namespace import cable_schema, cables_schema
@@ -20,6 +21,7 @@ dst_node_table = aliased(Node)
 
 
 @cable_bp.route("")
+@auth_required()
 def index():
     cables = Cable.query.all()
     data = cables_schema.dump(cables)
@@ -27,6 +29,7 @@ def index():
 
 
 @cable_bp.route("/new")
+@auth_required()
 def new():
     form = CableForm()
     src_node = None
@@ -50,6 +53,7 @@ def new():
 
 
 @cable_bp.route("/create", methods=["POST"])
+@auth_required()
 def create():
     cable = Cable(
         src_interface_id=request.form["src_interface"],
@@ -63,6 +67,7 @@ def create():
 
 
 @cable_bp.route("/<id>/edit")
+@auth_required()
 def edit(id):
     cable = Cable.query.get(id)
     form = CableForm()
@@ -73,6 +78,7 @@ def edit(id):
     return render_template(
         "cable/edit.html",
         id=id,
+
         form=form,
         src_node_id=src_interface.node_id,
         dst_node_id=dst_interface.node_id,
@@ -84,6 +90,7 @@ def edit(id):
 
 
 @cable_bp.route("/<id>/update", methods=["POST"])
+@auth_required()
 def update(id):
     cable = Cable.query.get(id)
     cable.src_interface_id = request.form["src_interface"]
@@ -95,6 +102,7 @@ def update(id):
 
 
 @cable_bp.route("/<id>/delete", methods=["POST"])
+@auth_required()
 def delete(id):
     cable = Cable.query.get(id)
     cable.delete()
