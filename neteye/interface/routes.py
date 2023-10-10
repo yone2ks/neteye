@@ -3,6 +3,7 @@ from sqlalchemy.sql.expression import desc
 from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
+from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
 from neteye.apis.interface_namespace import interface_schema, interfaces_schema
@@ -16,11 +17,13 @@ from .models import Interface
 interface_bp = bp_factory("interface")
 
 @interface_bp.route("")
+@auth_required()
 def index():
     return render_template("interface/index.html")
 
 
 @interface_bp.route("/data")
+@auth_required()
 def data():
     columns = [
         ColumnDT(Interface.id),
@@ -36,6 +39,7 @@ def data():
 
 
 @interface_bp.route("/<id>")
+@auth_required()
 def show(id):
     interface = Interface.query.get(id)
     node = Node.query.get(interface.node_id)
@@ -43,12 +47,14 @@ def show(id):
 
 
 @interface_bp.route("/new")
+@auth_required()
 def new():
     form = InterfaceForm()
     return render_template("interface/new.html", form=form)
 
 
 @interface_bp.route("/create", methods=["POST"])
+@auth_required()
 def create():
     form = InterfaceForm()
     node_id=request.form["node_id"]
@@ -91,6 +97,7 @@ def create():
 
 
 @interface_bp.route("/<id>/edit")
+@auth_required()
 def edit(id):
     interface = Interface.query.get(id)
     form = InterfaceForm()
@@ -120,6 +127,7 @@ def edit(id):
 
 
 @interface_bp.route("/<id>/update", methods=["POST"])
+@auth_required()
 def update(id):
     form = InterfaceForm()
     node_id = request.form["node_id"]
@@ -162,6 +170,7 @@ def update(id):
 
 
 @interface_bp.route("/<id>/delete", methods=["POST"])
+@auth_required()
 def delete(id):
     interface = Interface.query.get(id)
     interface.delete()
@@ -169,6 +178,7 @@ def delete(id):
 
 
 @interface_bp.route("/filter")
+@auth_required()
 def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
