@@ -2,6 +2,7 @@ import pandas as pd
 from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
+from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
 from neteye.apis.arp_entry_namespace import (arp_entries_schema,
@@ -17,11 +18,13 @@ arp_entry_bp = bp_factory("arp_entry")
 
 
 @arp_entry_bp.route("")
+@auth_required()
 def index():
     return render_template("arp_entry/index.html")
 
 
 @arp_entry_bp.route("/data")
+@auth_required()
 def data():
     columns = [
         ColumnDT(ArpEntry.id),
