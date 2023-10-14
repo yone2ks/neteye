@@ -26,7 +26,7 @@ class ConnectionAdaptor():
         if self.driver_type == "napalm":
             self.connection.close()
         elif self.driver_type == "scrapli":
-            try: 
+            try:
                 self.connection.close()
             except SocketRecvError:
                 self.connection.transport.close()
