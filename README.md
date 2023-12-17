@@ -23,7 +23,7 @@ NET_TEXTFSM=./neteye/ntc-templates/ntc_templates/templates/ python manage.py
 ```
 
 ## Demo
-![neteye-demo](https://github.com/yone2ks/neteye/assets/1281910/852a38d2-c1b3-45e0-abb6-a0858a2d610a)
+![neteye-demo](https://github.com/yone2ks/neteye/assets/1281910/a256fab6-320f-454e-93e0-13bfc31b74ed)
 
 
 ## Configuration
