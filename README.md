@@ -22,8 +22,21 @@ git clone https://github.com/networktocode/ntc-templates.git
 NET_TEXTFSM=./neteye/ntc-templates/ntc_templates/templates/ python manage.py
 ```
 
-## Demo
-![neteye-demo](https://github.com/yone2ks/neteye/assets/1281910/a256fab6-320f-454e-93e0-13bfc31b74ed)
+## Usage
+### Device Registration
+For Device Registration, input Hostname and IP Address, Password and so on. If Device Type is "autodetect", automatically device type is identified. 
+![neteye_device_registration](https://github.com/yone2ks/neteye/assets/1281910/1a20797d-e374-4355-b59a-17b0c30f9234)
+
+### Execute Command
+Enter a command and click the "Command" button to execute the command on the device. If there is a corresponding ntc-template, the "Command" button returns the command result in a tabular format. "Command(Raw)"" button always returns the command result in plain text format. 
+![neteye_execute_command](https://github.com/yone2ks/neteye/assets/1281910/fbb6f27b-e7e9-48bb-96bd-6ff34b593306)
+
+### Import Device Infomaiton
+Click "Import Node" button to import the device infomation(interface, serial, arp table).
+![neteye_import_node](https://github.com/yone2ks/neteye/assets/1281910/f50b2b7e-d627-4562-bd14-6c885ae46a0e)
+
+### History View
+In "History" menu, you can check the history of device information and executed commands.
 
 
 ## Configuration
