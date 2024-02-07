@@ -255,7 +255,7 @@ def filter():
     return render_template("node/index.html", nodes=nodes)
 
 
-@node_bp.route("/<id>/show_run")
+@node_bp.route("/<id>/show+run")
 @auth_required()
 def show_run(id):
     command = "show run"
@@ -265,7 +265,7 @@ def show_run(id):
     return render_template("node/command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/show_inventory")
+@node_bp.route("/<id>/show+inventory")
 @auth_required()
 def show_inventory(id):
     command = "show inventory"
@@ -274,7 +274,7 @@ def show_inventory(id):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/show_version")
+@node_bp.route("/<id>/show+version")
 @auth_required()
 def show_version(id):
     command = "show version"
@@ -283,7 +283,7 @@ def show_version(id):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/show_ip_int_brief")
+@node_bp.route("/<id>/show+ip+int+brief")
 @auth_required()
 def show_ip_int_breif(id):
     command = "show ip int brief"
@@ -292,7 +292,7 @@ def show_ip_int_breif(id):
     return render_template("node/parsed_command.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/show_interfaces_description")
+@node_bp.route("/<id>/show+interfaces+description")
 @auth_required()
 def show_interfaces_description(id):
     command = "show int desc"
@@ -300,7 +300,7 @@ def show_interfaces_description(id):
     result = node.command_with_history(command, current_user.email)
     return render_template("node/parsed_command.html", result=result, command=command)
 
-@node_bp.route("/<id>/show_ip_arp")
+@node_bp.route("/<id>/show+ip+arp")
 @auth_required()
 def show_ip_arp(id):
     command = "show ip arp"
@@ -309,7 +309,7 @@ def show_ip_arp(id):
     return render_template("node/show_ip_arp.html", result=result, command=command)
 
 
-@node_bp.route("/<id>/show_ip_route")
+@node_bp.route("/<id>/show+ip+route")
 @auth_required()
 def show_ip_route(id):
     command = "show ip route"
@@ -321,7 +321,7 @@ def show_ip_route(id):
 @node_bp.route("/<id>/command/<command>")
 @auth_required()
 def command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.command_with_history(command, current_user.email)
     if isinstance(result, str):
@@ -333,7 +333,7 @@ def command(id, command):
 @node_bp.route("/<id>/raw_command/<command>")
 @auth_required()
 def raw_command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
@@ -342,7 +342,7 @@ def raw_command(id, command):
 @node_bp.route("/<id>/netmiko/<command>")
 @auth_required()
 def netmiko_command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.netmiko_command_with_history(command, current_user.email)
     if isinstance(result, str):
@@ -354,7 +354,7 @@ def netmiko_command(id, command):
 @node_bp.route("/<id>/raw_netmiko/<command>")
 @auth_required()
 def netmiko_raw_command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.netmiko_raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
@@ -363,7 +363,7 @@ def netmiko_raw_command(id, command):
 @node_bp.route("/<id>/scrapli/<command>")
 @auth_required()
 def scrapli_command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.scrapli_command_with_history(command, current_user.email)
     if isinstance(result, str):
@@ -375,7 +375,7 @@ def scrapli_command(id, command):
 @node_bp.route("/<id>/raw_scrapli/<command>")
 @auth_required()
 def scrapli_raw_command(id, command):
-    command = command.replace("_", " ")
+    command = command.replace("+", " ")
     node = Node.query.get(id)
     result = node.scrapli_raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
     return render_template("node/command.html", result=result, command=command)
