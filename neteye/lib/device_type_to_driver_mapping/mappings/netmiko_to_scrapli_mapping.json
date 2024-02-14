@@ -8,5 +8,10 @@
     "cisco_xe_ssh": "cisco_iosxe",
     "cisco_nxos": "cisco_nxos",
     "arista_eos": "arista_eos",
-    "juniper_junos": "juniper_junos"
+    "juniper_junos": "juniper_junos",
+    "cisco_asa": "cisco_asa",
+    "fortinet": "fortinet_fortios",
+    "fortinet_ssh": "fortinet_fortios",
+    "paloalto_panos": "paloalto_panos",
+    "aruba_os": "aruba_aoscx"
 }
