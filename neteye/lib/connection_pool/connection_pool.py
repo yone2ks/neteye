@@ -16,11 +16,11 @@ class ConnectionAdaptor():
 
     def is_alive(self):
         if self.driver_type == "napalm":
-            return self.connection.is_alive()
+            return False # self.connection.is_alive() because commnet out according to netmiko and scrapli
         elif self.driver_type == "scrapli":
-            return False  # self.connection.isalive() beacause isalive of scrapli is not working
+            return False  # self.connection.isalive() beacause isalive of scrapli does not work properly
         else:
-            return self.connection.is_alive()
+            return False # self.connection.is_alive() beacause is_alive of netmiko does not work properly
 
     def close(self):
         if self.driver_type == "napalm":
