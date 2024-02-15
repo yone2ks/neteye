@@ -16,6 +16,7 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
+from neteye.lib.scrapli_community_helper.scrapli_community_helper import ScrapliCommunityHelper
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -82,20 +83,24 @@ class Node(Base):
         }
 
     def gen_scrapli_params(self, timeout_socket=10, timeout_transport=10, timeout_ops=10):
-        return {
-            "host": self.ip_address,
-            "port": self.port,
-            "auth_username": self.username,
-            "auth_password": self.password,
-            "auth_secondary": self.enable,
-            "auth_strict_key": False,
-            "platform": self.scrapli_driver,
-            "transport": "telnet" if "telnet" in self.device_type else "ssh2",
-            "timeout_socket": timeout_socket,
-            "timeout_transport": timeout_transport,
-            "timeout_ops": timeout_ops
+        params = {
+                "host": self.ip_address,
+                "port": self.port,
+                "auth_username": self.username,
+                "auth_password": self.password,
+                "auth_strict_key": False,
+                "platform": self.scrapli_driver,
+                "transport": "telnet" if "telnet" in self.device_type else "ssh2",
+                "timeout_socket": timeout_socket,
+                "timeout_transport": timeout_transport,
+                "timeout_ops": timeout_ops
         }
 
+        if ScrapliCommunityHelper.is_community_platform(self.scrapli_driver) and (not ScrapliCommunityHelper.is_network_driver(self.scrapli_driver)):
+            return params
+        else:
+            params["auth_secondary"] = self.enable
+            return params
 
     def gen_napalm_params(self, timeout=10):
         enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
