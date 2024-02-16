@@ -25,7 +25,7 @@ NOT_SUPPORTED = "not supported"
 napalm_driver_mapping = DeviceTypeToDriverMapping(DRIVER_TYPE_NAPALM)
 scrapli_driver_mapping = DeviceTypeToDriverMapping(DRIVER_TYPE_SCRAPLI)
 NETMIKO_PLATFORMS = netmiko.platforms
-SCRAPLI_DRIVERS = Scrapli.CORE_PLATFORM_MAP.keys()
+SCRAPLI_DRIVERS = list(Scrapli.CORE_PLATFORM_MAP.keys()) + list(ScrapliCommunityHelper.COMMUNITY_PLATFORM.keys())
 NAPALM_DRIVERS = napalm.SUPPORTED_DRIVERS
 
 
