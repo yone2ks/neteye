@@ -11,7 +11,7 @@ Neteye is a simple web database for network device, and a hub for network-to-cod
 6. Versioning: All information about network devices, as well as the execution and output results of commands, are all tracked. You can check the past information and change history.
 
 ## Requirement
-Python 3.7+ 
+Python 3.8.17+ 
 
 ## Installation
 ``` shell

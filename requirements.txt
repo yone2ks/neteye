@@ -16,10 +16,12 @@ Flask-Continuum==0.1.7
 SQLAlchemy-Utils==0.36.8
 sqlalchemy-datatables
 netaddr==0.8.0
-netmiko==2.4.2
-scrapli[full]==2021.1.30
-scrapli-community==2021.1.30
-napalm==2.5.0
+ssh2-python==1.0.0
+netmiko==4.3.0
+ntc_templates==4.3.0
+scrapli==2024.1.30
+scrapli_community==2024.1.30
+napalm==4.1.0
 pandas==1.2.2
 dynaconf==3.1.2
 toml==0.10.2
