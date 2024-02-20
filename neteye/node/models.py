@@ -198,6 +198,8 @@ class Node(Base):
             connection_pool.recreate_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         response = conn.send_command(command)
+        if not ScrapliCommunityHelper.is_network_driver(self.scrapli_driver):
+            response.textfsm_platform = self.device_type
         parsed_output = response.textfsm_parse_output()
         if parsed_output:
             return parsed_output
