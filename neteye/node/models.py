@@ -96,7 +96,7 @@ class Node(Base):
                 "timeout_ops": timeout_ops
         }
 
-        if ScrapliCommunityHelper.is_community_platform(self.scrapli_driver) and (not ScrapliCommunityHelper.is_network_driver(self.scrapli_driver)):
+        if ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
             return params
         else:
             params["auth_secondary"] = self.enable
@@ -198,7 +198,7 @@ class Node(Base):
             connection_pool.recreate_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         response = conn.send_command(command)
-        if not ScrapliCommunityHelper.is_network_driver(self.scrapli_driver):
+        if ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
             response.textfsm_platform = self.device_type
         parsed_output = response.textfsm_parse_output()
         if parsed_output:

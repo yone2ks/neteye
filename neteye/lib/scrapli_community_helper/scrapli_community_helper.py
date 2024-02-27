@@ -61,3 +61,7 @@ class ScrapliCommunityHelper:
     @classmethod
     def is_network_driver(cls, platform_name):
         return cls.COMMUNITY_PLATFORM[platform_name]["driver_type"] == "network"
+
+    @classmethod
+    def has_textfsm_platform_variable(cls, platform_name):
+        return cls.is_community_platform(platform_name) and (not cls.is_network_driver(platform_name))
