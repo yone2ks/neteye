@@ -30,8 +30,8 @@
         {
             "command": "show ip int brief",
             "field": {
-                "name": "intf",
-                "ip_address": "ipaddr",
+                "name": "interface",
+                "ip_address": "ip_address",
                 "status": "status"
             },
             "index": null
@@ -41,7 +41,7 @@
             "field": {
                 "name": "port",
                 "status": "status",
-                "description": "descrip"
+                "description": "description"
             },
             "index": null
         }
@@ -50,8 +50,8 @@
         {
             "command": "show ip arp",
             "field": {
-                "ip_address": "address",
-                "mac_address": "mac",
+                "ip_address": "ip_address",
+                "mac_address": "mac_address",
                 "protocol": "protocol",
                 "arp_type": "type"
             },
