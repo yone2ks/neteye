@@ -603,7 +603,7 @@ def import_arp_entry(node):
         after_field = set(import_command["field"])
         delta_field = before_field - after_field
         for arp_entry_info in result:
-            after_entry["interface_id"] = interfaces[intf_conv.normalization(arp_entry_info["interface"])]
+            after_entry = {"interface_id": interfaces[intf_conv.normalization(arp_entry_info["interface"])]}
             for field_name in import_command["field"]:
                 after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
             for field_name in delta_field:
