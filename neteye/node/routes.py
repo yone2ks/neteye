@@ -444,16 +444,16 @@ def explore_network(node):
     ]
     ng_node = []
     for arp_entry in show_ip_arp:
-        if not arp_entry["address"] in ng_node:
+        if not arp_entry["ip_address"] in ng_node:
             if not db.session.query(
-                exists().where(Interface.ip_address == arp_entry["address"])
+                exists().where(Interface.ip_address == arp_entry["ip_address"])
             ).scalar():
                 try:
-                    target_node = try_connect_node(arp_entry["address"])
+                    target_node = try_connect_node(arp_entry["ip_address"])
                     import_target_node(target_node)
                     explore_network(target_node)
                 except Exception as err:
-                    ng_node.append(arp_entry["address"])
+                    ng_node.append(arp_entry["ip_address"])
                     print(err)
 
 
