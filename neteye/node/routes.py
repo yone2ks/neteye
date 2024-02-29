@@ -576,43 +576,42 @@ def import_arp_entry(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     after_arp_entries = set()
     after = dict()
-    before_interface_ids = {interface.id for interface in node.interfaces}
+    interfaces = {interface.name: interface.id for interface in node.interfaces}
 
-    for interface_id in before_interface_ids:
-        for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
-            before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
-            arp_entries = ArpEntry.query.filter(ArpEntry.interface_id == interface_id).all()
-            before_arp_entries = set()
-            before = dict()
-            if arp_entries:
-                for arp_entry in arp_entries:
-                    before_arp_entries.add(arp_entry.ip_address)
-                    before[arp_entry.ip_address] = {
-                        "id": arp_entry.id,
-                        "ip_address": arp_entry.ip_address,
-                        "mac_address": arp_entry.mac_address,
-                        "interface_id": arp_entry.interface_id,
-                        "protocol": arp_entry.protocol,
-                        "arp_type": arp_entry.arp_type,
-                        "vendor": arp_entry.vendor}
+    for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
+        before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
+        arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interfaces.values()).all())
+        before_arp_entries = set()
+        before = dict()
+        if arp_entries:
+            for arp_entry in arp_entries:
+                before_arp_entries.add(arp_entry.ip_address)
+                before[arp_entry.ip_address] = {
+                    "id": arp_entry.id,
+                    "ip_address": arp_entry.ip_address,
+                    "mac_address": arp_entry.mac_address,
+                    "interface_id": arp_entry.interface_id,
+                    "protocol": arp_entry.protocol,
+                    "arp_type": arp_entry.arp_type,
+                    "vendor": arp_entry.vendor}
 
-            result = node.command_with_history(import_command["command"], current_user.email)
-            after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
-            after_field = set(import_command["field"])
-            delta_field = before_field - after_field
-            for arp_entry_info in result:
-                after_entry = {"interface_id": interface_id}
-                for field_name in import_command["field"]:
-                        after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
-                for field_name in delta_field:
-                    if arp_entry_info[import_command["field"]["ip_address"]] in before:
-                        after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
-                    else:
-                        after_entry[field_name] = None
+        result = node.command_with_history(import_command["command"], current_user.email)
+        after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
+        after_field = set(import_command["field"])
+        delta_field = before_field - after_field
+        for arp_entry_info in result:
+            after_entry = {"interface_id": interfaces[arp_entry_info["interface"]]}
+            for field_name in import_command["field"]:
+                after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
+            for field_name in delta_field:
+                if arp_entry_info[import_command["field"]["ip_address"]] in before:
+                    after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
+                else:
+                    after_entry[field_name] = None
 
-                after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
+            after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
 
-            delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
+        delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
 
 
 def import_target_node(node):
