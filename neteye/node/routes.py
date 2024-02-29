@@ -1,4 +1,4 @@
-from logging import getLogger
+from logging import getLogger, debug, info, error
 
 import netmiko
 import pandas as pd
