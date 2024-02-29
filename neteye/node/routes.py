@@ -1,4 +1,4 @@
-from logging import debug, error, info, warning
+from logging import getLogger
 
 import netmiko
 import pandas as pd
@@ -23,6 +23,8 @@ from neteye.serial.models import Serial
 
 from .forms import NodeForm
 from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node
+
+logger = getLogger(__name__)
 
 root_bp = bp_factory("")
 node_bp = bp_factory("node")
@@ -578,9 +580,10 @@ def import_arp_entry(node):
     after = dict()
     interfaces = {interface.name: interface.id for interface in node.interfaces}
 
+
     for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
         before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
-        arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interfaces.values()).all())
+        arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interfaces.values())).all()
         before_arp_entries = set()
         before = dict()
         if arp_entries:
@@ -600,7 +603,7 @@ def import_arp_entry(node):
         after_field = set(import_command["field"])
         delta_field = before_field - after_field
         for arp_entry_info in result:
-            after_entry = {"interface_id": interfaces[arp_entry_info["interface"]]}
+            after_entry["interface_id"] = interfaces[intf_conv.normalization(arp_entry_info["interface"])]
             for field_name in import_command["field"]:
                 after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
             for field_name in delta_field:
