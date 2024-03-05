@@ -23,10 +23,10 @@
     ],
     "import_interface": [
         {
-            "command": "show ip int brief",
+            "command": "show ip int brief vrf all",
             "field": {
-                "name": "intf",
-                "ip_address": "ipaddr",
+                "name": "interface",
+                "ip_address": "ip_address",
                 "status": "status"
             },
             "index": null
@@ -43,10 +43,10 @@
     ],
     "import_arp_entry": [
         {
-            "command": "show ip arp",
+            "command": "show ip arp vrf all",
             "field": {
-                "ip_address": "address",
-                "mac_address": "mac",
+                "ip_address": "ip_address",
+                "mac_address": "mac_address",
                 "protocol": "protocol",
                 "arp_type": "type"
             },
