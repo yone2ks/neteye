@@ -437,11 +437,11 @@ def explore_node(id):
 
 def explore_network(node):
     interface_ids = [interface.id for interface in node.interfaces]
-    target_ip_list = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
+    arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
     ng_node = []
-    for ip in target_ip_list:
+    for entry in arp_entries:
         try:
-            target_node = try_connect_node(ip)
+            target_node = try_connect_node(entry.ip_address)
             import_target_node(target_node)
         except Exception as err:
             break
