@@ -12,7 +12,7 @@ class ArpEntry(Base):
 
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
-    interface_id = Column(String, ForeignKey("interfaces.id"), nullable=True)
+    interface_id = Column(String, ForeignKey("interfaces.id"), nullable=False)
     interface = relationship("Interface")
     protocol = Column(String)
     arp_type = Column(String)
@@ -20,7 +20,10 @@ class ArpEntry(Base):
 
     def __init__(self, **kwargs):
         super(ArpEntry, self).__init__(**kwargs)
-        self.vendor = EUI(self.mac_address, dialect=mac_unix_expanded).oui.registration().org or ""
+        try:
+            self.vendor = EUI(self.mac_address, dialect=mac_unix_expanded).oui.registration().org
+        except NotRegisteredError as err:
+            self.vendor = ""
 
     def __repr__(self):
         return "<ARP Entry id={id} ip_address={ip_address} mac_address={mac_address}".format(
