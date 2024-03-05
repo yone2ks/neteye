@@ -437,9 +437,9 @@ def explore_node(id):
 
 def explore_network(node):
     interface_ids = [interface.id for interface in node.interfaces]
-    target_nodes = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
+    target_ip_list = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
     ng_node = []
-    for ip in target_nodes:
+    for ip in target_ip_list:
         try:
             target_node = try_connect_node(ip)
             import_target_node(target_node)
