@@ -46,8 +46,7 @@
             "command": "show ip arp vrf all",
             "field": {
                 "ip_address": "ip_address",
-                "mac_address": "mac_address",
-                "arp_type": "type"
+                "mac_address": "mac_address"
             },
             "index": null
         }
