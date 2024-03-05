@@ -47,7 +47,6 @@
             "field": {
                 "ip_address": "ip_address",
                 "mac_address": "mac_address",
-                "protocol": "protocol",
                 "arp_type": "type"
             },
             "index": null
