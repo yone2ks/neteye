@@ -436,25 +436,15 @@ def explore_node(id):
 
 
 def explore_network(node):
-    command = "show ip arp"
-    show_ip_arp = [
-        entry
-        for entry in node.command_with_history(command, current_user.email)
-        if entry["age"] != "-"
-    ]
+    interface_ids = [interface.id for interface in node.interfaces]
+    target_nodes = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
     ng_node = []
-    for arp_entry in show_ip_arp:
-        if not arp_entry["ip_address"] in ng_node:
-            if not db.session.query(
-                exists().where(Interface.ip_address == arp_entry["ip_address"])
-            ).scalar():
-                try:
-                    target_node = try_connect_node(arp_entry["ip_address"])
-                    import_target_node(target_node)
-                    explore_network(target_node)
-                except Exception as err:
-                    ng_node.append(arp_entry["ip_address"])
-                    print(err)
+    for ip in target_nodes:
+        try:
+            target_node = try_connect_node(ip)
+            import_target_node(target_node)
+        except Exception as err:
+            break
 
 
 def try_connect_node(ip_address):
