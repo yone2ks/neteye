@@ -461,8 +461,8 @@ def try_connect_node(ip_address):
             )
             return node
         except (
-            netmiko.ssh_exception.NetMikoTimeoutException,
-            netmiko.ssh_exception.SSHException,
+            netmiko.exceptions.NetMikoTimeoutException,
+            netmiko.exceptions.SSHException,
             ValueError
         ) as err:
             print(err)
