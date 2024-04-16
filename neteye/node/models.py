@@ -119,8 +119,8 @@ class Node(Base):
                 **self.gen_netmiko_params()
             ).autodetect()
         except (
-            netmiko.ssh_exception.NetMikoTimeoutException,
-            netmiko.ssh_exception.SSHException,
+            netmiko.exceptions.NetMikoTimeoutException,
+            netmiko.exceptions.SSHException,
         ) as err:
             self.device_type = "cisco_ios_telnet"
             self.port = 23
