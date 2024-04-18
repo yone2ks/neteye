@@ -19,7 +19,7 @@ git clone https://github.com/yone2ks/neteye.git
 cd neteye
 pip install -r requirements.txt
 git clone https://github.com/networktocode/ntc-templates.git
-NET_TEXTFSM=./neteye/ntc-templates/ntc_templates/templates/ python manage.py
+NET_TEXTFSM=./ntc-templates/ntc_templates/templates/ python manage.py
 ```
 
 ## Usage
