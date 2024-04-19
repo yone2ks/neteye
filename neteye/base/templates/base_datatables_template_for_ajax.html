@@ -24,6 +24,7 @@
  $(document).ready(function() {
      var table = $('#index').DataTable( {
          lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+         pageLength: 100,
          processing: true,
          serverSide: true,
          ajax: {% block ajax_source %}{% endblock ajax_source %},
