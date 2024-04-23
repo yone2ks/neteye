@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from ssh2.exceptions import SocketRecvError
+from ssh2.exceptions import SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError
 
 class ConnectionKey(NamedTuple):
     ip_address: str
@@ -15,12 +15,18 @@ class ConnectionAdaptor():
         self.driver_type = driver_type
 
     def is_alive(self):
-        if self.driver_type == "napalm":
-            return False # self.connection.is_alive() because commnet out according to netmiko and scrapli
-        elif self.driver_type == "scrapli":
-            return False  # self.connection.isalive() beacause isalive of scrapli does not work properly
-        else:
-            return False # self.connection.is_alive() beacause is_alive of netmiko does not work properly
+        try:
+            if self.driver_type == "napalm":
+                self.connection.cli(['\n'])
+                return True
+            elif self.driver_type == "scrapli":
+                self.connection.send_command('\n', timeout_ops=2)
+                return True
+            else:
+                self.connection.send_command('\n', delay_factor=4)
+                return True
+        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError):
+            return False
 
     def close(self):
         if self.driver_type == "napalm":
@@ -55,7 +61,8 @@ class ConnectionPool:
 
     def recreate_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        self.delete_connection(node, driver_type)
+        if self.pool[connection_key].is_alive():
+            self.delete_connection(node, driver_type)
         self.add_connection(node, driver_type)
 
     def get_connection(self, node, driver_type):
@@ -63,7 +70,7 @@ class ConnectionPool:
         if self.pool[connection_key].is_alive():
             return self.pool[connection_key].connection
         else:
-            self.recreate_connection(node, driver_type)
+            self.add_connection(node, driver_type)
             return self.pool[connection_key].connection
 
     def exists(self, node, driver_type):
