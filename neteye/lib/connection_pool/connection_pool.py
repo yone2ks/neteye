@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from ssh2.exceptions import SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError
+from scrapli.exceptions import ScrapliConnectionNotOpened
 
 class ConnectionKey(NamedTuple):
     ip_address: str
@@ -14,7 +15,7 @@ class ConnectionAdaptor():
         self.connection = connection
         self.driver_type = driver_type
 
-    def is_alive(self):
+    def is_alive(self):         # netmiko/sdrapli/naplam's is_alive method is not working
         try:
             if self.driver_type == "napalm":
                 self.connection.cli(['\n'])
@@ -25,7 +26,7 @@ class ConnectionAdaptor():
             else:
                 self.connection.send_command('\n', delay_factor=4)
                 return True
-        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError, BrokenPipeError, OSError):
+        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError, ScrapliConnectionNotOpened, BrokenPipeError, OSError):
             return False
 
     def close(self):
