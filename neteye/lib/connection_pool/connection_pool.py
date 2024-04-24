@@ -25,7 +25,7 @@ class ConnectionAdaptor():
             else:
                 self.connection.send_command('\n', delay_factor=4)
                 return True
-        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError):
+        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError, BrokenPipeError, OSError):
             return False
 
     def close(self):
