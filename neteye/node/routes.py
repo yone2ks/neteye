@@ -114,7 +114,7 @@ def create():
             enable=enable,
         )
         node.add()
-        return redirect(url_for("node.index"))
+        return redirect(url_for("node.show", id=node.id))
     else:
         device_type_datalist = NETMIKO_PLATFORMS
         return render_template(
