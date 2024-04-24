@@ -125,5 +125,9 @@
 
 {% block card_footer %}
 <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.edit', id=node.id) }}'">Edit Node</button>
+<div class="btn-group mr-2">
+    <form action="/node/{{node.id}}/delete" method="post">
+        <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
+    </form>
+</div>
 {% endblock card_footer %}
-
