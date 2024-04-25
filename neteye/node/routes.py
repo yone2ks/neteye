@@ -492,32 +492,34 @@ def import_serial(node):
                   for serial in node.serials}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        if "serial_number" in import_command["field"]:
-            after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
-        else:
-            after_serials = before_serials
-        after_field = set(import_command["field"])
-        delta_field = before_field - after_field
-        for serial_info in result:
-            after_entry = {"node_id": node.id}
-            for field_name in import_command["field"]:
-                after_entry[field_name] = serial_info[import_command["field"][field_name]]
-            for field_name in delta_field:
-                if serial_info[import_command["field"]["serial_number"]] in before:
-                    after_entry[field_name] = before[serial_info[import_command["field"]["serial_number"]]][field_name]
-                else:
-                    after_entry[field_name] = None
-            after[serial_info[import_command["field"]["serial_number"]]] = after_entry
+        if result is list:
+            if "serial_number" in import_command["field"]:
+                after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
+            else:
+                after_serials = before_serials
+            after_field = set(import_command["field"])
+            delta_field = before_field - after_field
+            for serial_info in result:
+                after_entry = {"node_id": node.id}
+                for field_name in import_command["field"]:
+                    after_entry[field_name] = serial_info[import_command["field"][field_name]]
+                for field_name in delta_field:
+                    if serial_info[import_command["field"]["serial_number"]] in before:
+                        after_entry[field_name] = before[serial_info[import_command["field"]["serial_number"]]][field_name]
+                    else:
+                        after_entry[field_name] = None
+                after[serial_info[import_command["field"]["serial_number"]]] = after_entry
 
-        delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
+            delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
 
 
 def import_node(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     for import_command in import_command_mapper.mapping_dict["import_node"]:
         result = node.command_with_history(import_command["command"], current_user.email)
-        for field_name in import_command["field"]:
-            setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
+        if result is list:
+            for field_name in import_command["field"]:
+                setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
     node.commit()
 
 
@@ -539,28 +541,29 @@ def import_interface(node):
                   for interface in node.interfaces}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        if "name" in import_command["field"]:
-            after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
-        else:
-            after_interfaces = before_interfaces
-        after_field = set(import_command["field"])
-        delta_field = before_field - after_field
-        for interface_info in result:
-            after_entry = {"node_id": node.id}
-            for field_name in import_command["field"]:
-                if field_name == "name":
-                    after_entry[field_name] = intf_conv.normalization(interface_info[import_command["field"][field_name]])
-                else:
-                    after_entry[field_name] = interface_info[import_command["field"][field_name]]
-            for field_name in delta_field:
-                if intf_conv.normalization(interface_info[import_command["field"]["name"]]) in before:
-                    after_entry[field_name] = before[intf_conv.normalization(interface_info[import_command["field"]["name"]])][field_name]
-                else:
-                    after_entry[field_name] = None
+        if result is list:
+            if "name" in import_command["field"]:
+                after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
+            else:
+                after_interfaces = before_interfaces
+            after_field = set(import_command["field"])
+            delta_field = before_field - after_field
+            for interface_info in result:
+                after_entry = {"node_id": node.id}
+                for field_name in import_command["field"]:
+                    if field_name == "name":
+                        after_entry[field_name] = intf_conv.normalization(interface_info[import_command["field"][field_name]])
+                    else:
+                        after_entry[field_name] = interface_info[import_command["field"][field_name]]
+                for field_name in delta_field:
+                    if intf_conv.normalization(interface_info[import_command["field"]["name"]]) in before:
+                        after_entry[field_name] = before[intf_conv.normalization(interface_info[import_command["field"]["name"]])][field_name]
+                    else:
+                        after_entry[field_name] = None
 
-            after[intf_conv.normalization(interface_info[import_command["field"]["name"]])] = after_entry
+                after[intf_conv.normalization(interface_info[import_command["field"]["name"]])] = after_entry
 
-        delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
+            delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
 
 
 def import_arp_entry(node):
@@ -589,23 +592,24 @@ def import_arp_entry(node):
                     "vendor": arp_entry.vendor}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
-        after_field = set(import_command["field"])
-        delta_field = before_field - after_field
-        for arp_entry_info in result:
-            if arp_entry_info["interface"] != "":
-                after_entry = {"interface_id": interfaces[intf_conv.normalization(arp_entry_info["interface"])]}
-                for field_name in import_command["field"]:
-                    after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
-                for field_name in delta_field:
-                    if arp_entry_info[import_command["field"]["ip_address"]] in before:
-                        after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
-                    else:
-                        after_entry[field_name] = None
+        if result is list:
+            after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
+            after_field = set(import_command["field"])
+            delta_field = before_field - after_field
+            for arp_entry_info in result:
+                if arp_entry_info["interface"] != "":
+                    after_entry = {"interface_id": interfaces[intf_conv.normalization(arp_entry_info["interface"])]}
+                    for field_name in import_command["field"]:
+                        after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
+                    for field_name in delta_field:
+                        if arp_entry_info[import_command["field"]["ip_address"]] in before:
+                            after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
+                        else:
+                            after_entry[field_name] = None
 
-            after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
+                after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
 
-        delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
+            delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
 
 
 def import_target_node(node):
