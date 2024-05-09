@@ -144,6 +144,7 @@ def edit(id):
     device_type = node.device_type
     napalm_driver = node.napalm_driver
     scrapli_driver = node.scrapli_driver
+    ntc_template_platform = node.ntc_template_platform
     model = node.model
     os_type = node.os_type
     os_version = node.os_version
@@ -164,6 +165,7 @@ def edit(id):
         device_type=device_type,
         napalm_driver=napalm_driver,
         scrapli_driver=scrapli_driver,
+        ntc_template_platform=ntc_template_platform,
         model=model,
         os_type=os_type,
         os_version=os_version,
@@ -187,6 +189,7 @@ def update(id):
     device_type = request.form["device_type"]
     napalm_driver = request.form["napalm_driver"]
     scrapli_driver = request.form["scrapli_driver"]
+    ntc_template_platform = request.form["ntc_template_platform"]
     model = request.form["model"]
     os_type = request.form["os_type"]
     os_version = request.form["os_version"]
@@ -202,6 +205,7 @@ def update(id):
         node.device_type = device_type
         node.napalm_driver = napalm_driver
         node.scrapli_driver = scrapli_driver
+        node.ntc_template_platform = ntc_template_platform
         node.model = model
         node.os_type = os_type
         node.os_version = os_version
@@ -225,6 +229,7 @@ def update(id):
             device_type=device_type,
             napalm_driver=napalm_driver,
             scrapli_driver=scrapli_driver,
+            ntc_template_platform=ntc_template_platform,
             model=model,
             os_type=os_type,
             os_version=os_version,

@@ -11,6 +11,7 @@ class NodeForm(FlaskForm):
     device_type = StringField("Device Type:", default="autodetect", validators=[InputRequired()])
     napalm_driver = StringField("Napalm Driver:")
     scrapli_driver = StringField("Scrapli Driver:")
+    ntc_template_platform = StringField("NTC Template Platform:")
     model = StringField("Model:")
     os_type = StringField("OS Type:")
     os_version = StringField("OS Version:")

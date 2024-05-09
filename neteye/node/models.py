@@ -2,6 +2,7 @@ import json
 
 import napalm
 import netmiko
+import netmiko.utilities
 import scrapli
 from netmiko.ssh_autodetect import SSHDetect
 from scrapli import Scrapli
@@ -39,6 +40,7 @@ class Node(Base):
     device_type = Column(String)
     scrapli_driver = Column(String)
     napalm_driver = Column(String)
+    ntc_template_platform = Column(String)
     model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
@@ -60,6 +62,7 @@ class Node(Base):
         if self.device_type == "autodetect": self.detect_device_type()
         self.detect_napalm_driver()
         self.detect_scrapli_driver()
+        self.ntc_template_platform = self.device_type
 
     def __repr__(self):
         return "<Node id={id} hostname={hostname} ip_address={ip_address}".format(
@@ -171,7 +174,16 @@ class Node(Base):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
-        return conn.send_command(command, use_textfsm=True)
+        if self.ntc_template_platform != self.device_type:
+            response = conn.send_command(command)
+            return netmiko.utilities.structured_data_converter(
+                raw_data=response,
+                command=command,
+                platform=self.ntc_template_platform,
+                use_textfsm=True
+            )
+        else:
+            return conn.send_command(command, use_textfsm=True)
 
     def netmiko_raw_command_with_history(self, command, session_user):
         result = self.netmiko_raw_command(command)
@@ -196,7 +208,9 @@ class Node(Base):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         response = conn.send_command(command)
-        if ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
+        if self.ntc_template_platform != self.device_type:
+            response.textfsm_platform = self.ntc_template_platform
+        elif ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
             response.textfsm_platform = self.device_type
         parsed_output = response.textfsm_parse_output()
         if parsed_output:
