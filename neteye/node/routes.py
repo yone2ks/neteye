@@ -497,7 +497,7 @@ def import_serial(node):
                   for serial in node.serials}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        if result is list:
+        if isinstance(result, list):
             if "serial_number" in import_command["field"]:
                 after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
             else:
@@ -522,7 +522,7 @@ def import_node(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     for import_command in import_command_mapper.mapping_dict["import_node"]:
         result = node.command_with_history(import_command["command"], current_user.email)
-        if result is list:
+        if isinstance(result, list):
             for field_name in import_command["field"]:
                 setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
     node.commit()
@@ -546,7 +546,7 @@ def import_interface(node):
                   for interface in node.interfaces}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        if result is list:
+        if isinstance(result, list):
             if "name" in import_command["field"]:
                 after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
             else:
@@ -597,7 +597,7 @@ def import_arp_entry(node):
                     "vendor": arp_entry.vendor}
 
         result = node.command_with_history(import_command["command"], current_user.email)
-        if result is list:
+        if isinstance(result, list):
             after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
             after_field = set(import_command["field"])
             delta_field = before_field - after_field
