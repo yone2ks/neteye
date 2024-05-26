@@ -70,7 +70,7 @@ class NodeResourceFilter(Resource):
 @nodes_api.route("/<string:id>/command/<string:command>")
 class NodeResourceCommand(Resource):
     def get(self, id, command):
-        command = command.replace("_", " ")
+        command = command.replace("+", " ")
         node = Node.query.get(id)
         result = node.command(command)
         return jsonify(result)
@@ -79,7 +79,7 @@ class NodeResourceCommand(Resource):
 @nodes_api.route("/<string:id>/raw_command/<string:command>")
 class NodeResourceRawCommand(Resource):
     def get(self, id, command):
-        command = command.replace("_", " ")
+        command = command.replace("+", " ")
         node = Node.query.get(id)
         result = node.raw_command(command)
         return jsonify(result)
