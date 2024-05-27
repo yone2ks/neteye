@@ -3,8 +3,7 @@ from logging import getLogger, debug, info, error
 import netmiko
 import pandas as pd
 import sqlalchemy
-from flask import (flash, jsonify, redirect, render_template, request, session,
-                   url_for)
+from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from netaddr import *
 from sqlalchemy.sql import exists
@@ -15,8 +14,7 @@ from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
-from neteye.lib.import_command_mapper.import_command_mapper import \
-    ImportCommandMapper
+from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.serial.models import Serial
@@ -28,6 +26,7 @@ logger = getLogger(__name__)
 
 root_bp = bp_factory("")
 node_bp = bp_factory("node")
+
 
 @root_bp.route("/")
 @node_bp.route("")
@@ -94,14 +93,14 @@ def new():
 @auth_required()
 def create():
     form = NodeForm()
-    hostname=request.form["hostname"]
-    description=request.form["description"]
-    ip_address=request.form["ip_address"]
-    port=request.form["port"]
-    device_type=request.form["device_type"]
-    username=request.form["username"]
-    password=request.form["password"]
-    enable=request.form["enable"]
+    hostname = request.form["hostname"]
+    description = request.form["description"]
+    ip_address = request.form["ip_address"]
+    port = request.form["port"]
+    device_type = request.form["device_type"]
+    username = request.form["username"]
+    password = request.form["password"]
+    enable = request.form["enable"]
     if form.validate_on_submit():
         node = Node(
             hostname=hostname,
@@ -307,6 +306,7 @@ def show_interfaces_description(id):
     result = node.command_with_history(command, current_user.email)
     return render_template("node/parsed_command.html", result=result, command=command)
 
+
 @node_bp.route("/<id>/show+ip+arp")
 @auth_required()
 def show_ip_arp(id):
@@ -342,7 +342,11 @@ def command(id, command):
 def raw_command(id, command):
     command = command.replace("+", " ")
     node = Node.query.get(id)
-    result = node.raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = (
+        node.raw_command_with_history(command, current_user.email)
+        .replace("\r\n", "<br />")
+        .replace("\n", "<br />")
+    )
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -363,7 +367,11 @@ def netmiko_command(id, command):
 def netmiko_raw_command(id, command):
     command = command.replace("+", " ")
     node = Node.query.get(id)
-    result = node.netmiko_raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = (
+        node.netmiko_raw_command_with_history(command, current_user.email)
+        .replace("\r\n", "<br />")
+        .replace("\n", "<br />")
+    )
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -384,7 +392,11 @@ def scrapli_command(id, command):
 def scrapli_raw_command(id, command):
     command = command.replace("+", " ")
     node = Node.query.get(id)
-    result = node.scrapli_raw_command_with_history(command, current_user.email).replace("\r\n", "<br />").replace("\n", "<br />")
+    result = (
+        node.scrapli_raw_command_with_history(command, current_user.email)
+        .replace("\r\n", "<br />")
+        .replace("\n", "<br />")
+    )
     return render_template("node/command.html", result=result, command=command)
 
 
@@ -393,7 +405,9 @@ def scrapli_raw_command(id, command):
 def napalm_get_facts(id):
     node = Node.query.get(id)
     result = node.napalm_get_facts()
-    return render_template("node/napalm.html", result=result, command="napalm_get_facts")
+    return render_template(
+        "node/napalm.html", result=result, command="napalm_get_facts"
+    )
 
 
 @node_bp.route("/<id>/napalm/get_interfaces")
@@ -401,7 +415,9 @@ def napalm_get_facts(id):
 def napalm_get_interfaces(id):
     node = Node.query.get(id)
     result = node.napalm_get_interfaces()
-    return render_template("node/parsed_command.html", result=result, command="napalm_get_interfaces")
+    return render_template(
+        "node/parsed_command.html", result=result, command="napalm_get_interfaces"
+    )
 
 
 @node_bp.route("/import_node_from_id/<id>")
@@ -459,7 +475,7 @@ def try_connect_node(ip_address):
                 hostname="hostname",
                 ip_address=ip_address,
                 port=22,
-                device_type = "autodetect",
+                device_type="autodetect",
                 username=cred["USERNAME"],
                 password=cred["PASSWORD"],
                 enable=cred["ENABLE"],
@@ -468,7 +484,7 @@ def try_connect_node(ip_address):
         except (
             netmiko.exceptions.NetMikoTimeoutException,
             netmiko.exceptions.SSHException,
-            ValueError
+            ValueError,
         ) as err:
             print(err)
             continue
@@ -489,17 +505,25 @@ def import_serial(node):
     for import_command in import_command_mapper.mapping_dict["import_serial"]:
         before_serials = {serial.serial_number for serial in node.serials}
         before_field = {"serial_number", "product_id"}
-        before = {serial.serial_number: {
-            "id": serial.id,
-            "node_id": serial.node_id,
-            "serial_number": serial.serial_number,
-            "product_id": serial.product_id}
-                  for serial in node.serials}
+        before = {
+            serial.serial_number: {
+                "id": serial.id,
+                "node_id": serial.node_id,
+                "serial_number": serial.serial_number,
+                "product_id": serial.product_id,
+            }
+            for serial in node.serials
+        }
 
-        result = node.command_with_history(import_command["command"], current_user.email)
+        result = node.command_with_history(
+            import_command["command"], current_user.email
+        )
         if isinstance(result, list):
             if "serial_number" in import_command["field"]:
-                after_serials = {serial_info[import_command["field"]["serial_number"]] for serial_info in result}
+                after_serials = {
+                    serial_info[import_command["field"]["serial_number"]]
+                    for serial_info in result
+                }
             else:
                 after_serials = before_serials
             after_field = set(import_command["field"])
@@ -507,24 +531,44 @@ def import_serial(node):
             for serial_info in result:
                 after_entry = {"node_id": node.id}
                 for field_name in import_command["field"]:
-                    after_entry[field_name] = serial_info[import_command["field"][field_name]]
+                    after_entry[field_name] = serial_info[
+                        import_command["field"][field_name]
+                    ]
                 for field_name in delta_field:
                     if serial_info[import_command["field"]["serial_number"]] in before:
-                        after_entry[field_name] = before[serial_info[import_command["field"]["serial_number"]]][field_name]
+                        after_entry[field_name] = before[
+                            serial_info[import_command["field"]["serial_number"]]
+                        ][field_name]
                     else:
                         after_entry[field_name] = None
-                after[serial_info[import_command["field"]["serial_number"]]] = after_entry
+                after[serial_info[import_command["field"]["serial_number"]]] = (
+                    after_entry
+                )
 
-            delta_commit(model=Serial, before_keys=before_serials, before=before, after_keys=after_serials, after=after)
+            delta_commit(
+                model=Serial,
+                before_keys=before_serials,
+                before=before,
+                after_keys=after_serials,
+                after=after,
+            )
 
 
 def import_node(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     for import_command in import_command_mapper.mapping_dict["import_node"]:
-        result = node.command_with_history(import_command["command"], current_user.email)
+        result = node.command_with_history(
+            import_command["command"], current_user.email
+        )
         if isinstance(result, list):
             for field_name in import_command["field"]:
-                setattr(node, field_name, result[import_command["index"]][import_command["field"][field_name]])
+                setattr(
+                    node,
+                    field_name,
+                    result[import_command["index"]][
+                        import_command["field"][field_name]
+                    ],
+                )
     node.commit()
 
 
@@ -536,19 +580,29 @@ def import_interface(node):
     for import_command in import_command_mapper.mapping_dict["import_interface"]:
         before_interfaces = {interface.name for interface in node.interfaces}
         before_field = {"name", "ip_address", "description", "status"}
-        before = {interface.name: {
-            "id": interface.id,
-            "node_id": interface.node_id,
-            "name": interface.name,
-            "ip_address": interface.ip_address,
-            "description": interface.description,
-            "status": interface.status}
-                  for interface in node.interfaces}
+        before = {
+            interface.name: {
+                "id": interface.id,
+                "node_id": interface.node_id,
+                "name": interface.name,
+                "ip_address": interface.ip_address,
+                "description": interface.description,
+                "status": interface.status,
+            }
+            for interface in node.interfaces
+        }
 
-        result = node.command_with_history(import_command["command"], current_user.email)
+        result = node.command_with_history(
+            import_command["command"], current_user.email
+        )
         if isinstance(result, list):
             if "name" in import_command["field"]:
-                after_interfaces = {intf_conv.normalization(interface_info[import_command["field"]["name"]]) for interface_info in result}
+                after_interfaces = {
+                    intf_conv.normalization(
+                        interface_info[import_command["field"]["name"]]
+                    )
+                    for interface_info in result
+                }
             else:
                 after_interfaces = before_interfaces
             after_field = set(import_command["field"])
@@ -557,18 +611,41 @@ def import_interface(node):
                 after_entry = {"node_id": node.id}
                 for field_name in import_command["field"]:
                     if field_name == "name":
-                        after_entry[field_name] = intf_conv.normalization(interface_info[import_command["field"][field_name]])
+                        after_entry[field_name] = intf_conv.normalization(
+                            interface_info[import_command["field"][field_name]]
+                        )
                     else:
-                        after_entry[field_name] = interface_info[import_command["field"][field_name]]
+                        after_entry[field_name] = interface_info[
+                            import_command["field"][field_name]
+                        ]
                 for field_name in delta_field:
-                    if intf_conv.normalization(interface_info[import_command["field"]["name"]]) in before:
-                        after_entry[field_name] = before[intf_conv.normalization(interface_info[import_command["field"]["name"]])][field_name]
+                    if (
+                        intf_conv.normalization(
+                            interface_info[import_command["field"]["name"]]
+                        )
+                        in before
+                    ):
+                        after_entry[field_name] = before[
+                            intf_conv.normalization(
+                                interface_info[import_command["field"]["name"]]
+                            )
+                        ][field_name]
                     else:
                         after_entry[field_name] = None
 
-                after[intf_conv.normalization(interface_info[import_command["field"]["name"]])] = after_entry
+                after[
+                    intf_conv.normalization(
+                        interface_info[import_command["field"]["name"]]
+                    )
+                ] = after_entry
 
-            delta_commit(model=Interface, before_keys=before_interfaces, before=before, after_keys=after_interfaces, after=after)
+            delta_commit(
+                model=Interface,
+                before_keys=before_interfaces,
+                before=before,
+                after_keys=after_interfaces,
+                after=after,
+            )
 
 
 def import_arp_entry(node):
@@ -578,10 +655,11 @@ def import_arp_entry(node):
     after = dict()
     interfaces = {interface.name: interface.id for interface in node.interfaces}
 
-
     for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
         before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
-        arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interfaces.values())).all()
+        arp_entries = ArpEntry.query.filter(
+            ArpEntry.interface_id.in_(interfaces.values())
+        ).all()
         before_arp_entries = set()
         before = dict()
         if arp_entries:
@@ -594,27 +672,52 @@ def import_arp_entry(node):
                     "interface_id": arp_entry.interface_id,
                     "protocol": arp_entry.protocol,
                     "arp_type": arp_entry.arp_type,
-                    "vendor": arp_entry.vendor}
+                    "vendor": arp_entry.vendor,
+                }
 
-        result = node.command_with_history(import_command["command"], current_user.email)
+        result = node.command_with_history(
+            import_command["command"], current_user.email
+        )
         if isinstance(result, list):
-            after_arp_entries = {arp_entry_info[import_command["field"]["ip_address"]] for arp_entry_info in result}
+            after_arp_entries = {
+                arp_entry_info[import_command["field"]["ip_address"]]
+                for arp_entry_info in result
+            }
             after_field = set(import_command["field"])
             delta_field = before_field - after_field
             for arp_entry_info in result:
                 if arp_entry_info["interface"] != "":
-                    after_entry = {"interface_id": interfaces[intf_conv.normalization(arp_entry_info["interface"])]}
+                    after_entry = {
+                        "interface_id": interfaces[
+                            intf_conv.normalization(arp_entry_info["interface"])
+                        ]
+                    }
                     for field_name in import_command["field"]:
-                        after_entry[field_name] = arp_entry_info[import_command["field"][field_name]]
+                        after_entry[field_name] = arp_entry_info[
+                            import_command["field"][field_name]
+                        ]
                     for field_name in delta_field:
-                        if arp_entry_info[import_command["field"]["ip_address"]] in before:
-                            after_entry[field_name] = before[arp_entry_info[import_command["field"]["ip_address"]]][field_name]
+                        if (
+                            arp_entry_info[import_command["field"]["ip_address"]]
+                            in before
+                        ):
+                            after_entry[field_name] = before[
+                                arp_entry_info[import_command["field"]["ip_address"]]
+                            ][field_name]
                         else:
                             after_entry[field_name] = None
 
-                after[arp_entry_info[import_command["field"]["ip_address"]]] = after_entry
+                after[arp_entry_info[import_command["field"]["ip_address"]]] = (
+                    after_entry
+                )
 
-            delta_commit(model=ArpEntry, before_keys=before_arp_entries, before=before, after_keys=after_arp_entries, after=after)
+            delta_commit(
+                model=ArpEntry,
+                before_keys=before_arp_entries,
+                before=before,
+                after_keys=after_arp_entries,
+                after=after,
+            )
 
 
 def import_target_node(node):
