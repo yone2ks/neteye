@@ -1,14 +1,12 @@
-from logging import getLogger, debug, info, error
+from logging import debug, error, getLogger, info
 
 import netmiko
 import pandas as pd
 import sqlalchemy
+from datatables import ColumnDT, DataTables
 from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from netaddr import *
-from sqlalchemy.sql import exists
-
-from datatables import ColumnDT, DataTables
 from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
@@ -18,6 +16,7 @@ from neteye.lib.import_command_mapper.import_command_mapper import ImportCommand
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.serial.models import Serial
+from sqlalchemy.sql import exists
 
 from .forms import NodeForm
 from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node
