@@ -468,6 +468,7 @@ def explore_network(node):
 def try_connect_node(ip_address):
     for cred in settings["default"]["credentials"].values():
         try:
+            logger.debug(f"Trying to connect to {ip_address}")
             node = Node(
                 hostname="hostname",
                 ip_address=ip_address,
@@ -477,22 +478,18 @@ def try_connect_node(ip_address):
                 password=cred["PASSWORD"],
                 enable=cred["ENABLE"],
             )
+            logger.info(f"Successfully connected to {ip_address}")
             return node
         except (
             netmiko.exceptions.NetMikoTimeoutException,
             netmiko.exceptions.SSHException,
             ValueError,
         ) as err:
-            print(err)
+            logger.error(f"Error connecting to {ip_address}: {str(err)}")
             continue
         except Exception as err:
-            print(
-                "Err: {err}, ip_address: {ip_address}".format(
-                    err=err, ip_address=ip_address
-                )
-            )
+            logger.error(f"Error connecting to {ip_address}: {str(err)}")
             break
-    raise Exception
 
 
 def import_serial(node):
