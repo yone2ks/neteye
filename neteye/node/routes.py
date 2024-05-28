@@ -425,10 +425,11 @@ def import_node_from_id(id):
     try:
         node = Node.query.get(id)
         import_target_node(node)
+        logger.info(f"Node {id} imported successfully")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        error("Error: Import Node {id}, {err}".format(id=id, err=err))
-        return redirect(url_for("node.index"))
+        logger.error(f"Error importing node {id}: {str(err)}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
@@ -437,14 +438,11 @@ def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
         import_target_node(node)
+        logger.info(f"Node {ip_address} imported successfully")
         return redirect(url_for("node.index"))
     except Exception as err:
-        error(
-            "Error: Import Node {ip_address}, {err}".format(
-                ip_address=ip_address, err=err
-            )
-        )
-        return redirect(url_for("node.index"))
+        logger.error(f"Error importing node {ip_address}: {str(err)}")
+        return redirect(url_for("node.show", id=node.id))
 
 
 @node_bp.route("/explore_node/<id>")
