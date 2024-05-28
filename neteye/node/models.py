@@ -69,7 +69,8 @@ class Node(Base):
             id=self.id, hostname=self.hostname, ip_address=self.ip_address
         )
 
-    def exists(hostname):
+    @classmethod
+    def exists(cls, hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
     def gen_netmiko_params(self, global_delay_factor=1, timeout=10, keepalive=10):
