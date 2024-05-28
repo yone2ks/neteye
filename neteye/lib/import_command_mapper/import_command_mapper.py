@@ -28,10 +28,9 @@ class ImportCommandMapper:
         mapping_file_path = os.path.join(
             self.MAPPING_DIR, f"{self.device_type}{self.SUFFIX}"
         )
-        if not os.path.isfile(mapping_file_path):
+        try:
+            with open(mapping_file_path, "r") as mapping_json:
+                self.mapping_dict = json.load(mapping_json)
+        except FileNotFoundError:
             logger.error(f"Import command mapping file '{mapping_file_path}' not found")
-            raise FileNotFoundError(
-                f"Import command mapping file '{mapping_file_path}' not found"
-            )
-        with open(mapping_file_path, "r") as mapping_json:
-            self.mapping_dict = json.load(mapping_json)
+            raise
