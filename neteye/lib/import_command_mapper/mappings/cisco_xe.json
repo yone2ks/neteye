@@ -1,0 +1,61 @@
+{
+    "import_serial":[
+            {
+                "command": "show inventory",
+                "field" : {
+                    "serial_number": "sn",
+                    "product_id": "pid"
+                },
+                "index": null
+            }
+    ],
+    "import_node": [
+        {
+            "command": "show inventory",
+            "field": {
+                "model": "pid"
+            },
+            "index": 0
+        },
+        {
+            "command": "show version",
+            "field": {
+                "hostname": "hostname",
+                "os_version": "version"
+            },
+            "index": 0
+        }
+    ],
+    "import_interface": [
+        {
+            "command": "show ip int brief",
+            "field": {
+                "name": "interface",
+                "ip_address": "ip_address",
+                "status": "status"
+            },
+            "index": null
+        },
+        {
+            "command": "show int desc",
+            "field": {
+                "name": "port",
+                "status": "status",
+                "description": "description"
+            },
+            "index": null
+        }
+    ],
+    "import_arp_entry": [
+        {
+            "command": "show ip arp",
+            "field": {
+                "ip_address": "ip_address",
+                "mac_address": "mac_address",
+                "protocol": "protocol",
+                "arp_type": "type"
+            },
+            "index": null
+        }
+    ]
+}
