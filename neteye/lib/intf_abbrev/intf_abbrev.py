@@ -5,6 +5,7 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 class IntfAbbrevConverter:
     TEMPLATE_DIR = os.path.dirname(__file__) + "/templates/"
     SUFFIX = ".json"
@@ -32,7 +33,9 @@ class IntfAbbrevConverter:
                 self.abbrev_dict = json.load(abbrev_json)
                 self.long_dict = {value: key for key, value in self.abbrev_dict.items()}
         except FileNotFoundError:
-            logger.error(f"Interface abbrev template file '{template_file_path}' not found")
+            logger.error(
+                f"Interface abbrev template file '{template_file_path}' not found"
+            )
             raise
 
     def to_long(self, abbrev_intf: str) -> str:
@@ -86,7 +89,7 @@ class IntfAbbrevConverter:
         Returns:
             bool: True if the interface name is abbreviated, False otherwise.
         """
-        base_intf = re.search(r'(?i)[a-z]+', intf_name).group()
+        base_intf = re.search(r"(?i)[a-z]+", intf_name).group()
         for key in self.abbrev_dict.keys():
             if base_intf == key:
                 return True
