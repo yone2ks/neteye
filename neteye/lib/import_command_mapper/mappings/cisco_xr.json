@@ -39,11 +39,15 @@
         {
             "command": "show arp",
             "field": {
-                "ip_address": "address",
-                "mac_address": "mac",
-                "protocol": "protocol",
+                "ip_address": "ip_address",
+                "mac_address": "mac_address",
                 "arp_type": "type"
             },
+            "ignore": [
+                {
+                    "age": "-"
+                }
+            ],
             "index": null
         }
     ]
