@@ -673,6 +673,11 @@ def import_arp_entry(node):
             import_command["command"], current_user.email
         )
         if isinstance(result, list):
+            result = [
+                record
+                for record in result
+                if is_not_ignore_record(record, import_command)
+            ]
             after_arp_entries = {
                 arp_entry_info[import_command["field"]["ip_address"]]
                 for arp_entry_info in result
@@ -719,3 +724,12 @@ def import_target_node(node):
     import_serial(node)
     import_interface(node)
     import_arp_entry(node)
+
+
+def is_not_ignore_record(record, import_command):
+    if "ignore" in import_command:
+        for ignore in import_command["ignore"]:
+            if all(record[key] == value for key, value in ignore.items()):
+                logger.debug(f"record is ignored: {record}")
+                return False
+    return True
