@@ -55,6 +55,11 @@
                 "protocol": "protocol",
                 "arp_type": "type"
             },
+            "ignore": [
+                {
+                    "age": "-"
+                }
+            ],
             "index": null
         }
     ]

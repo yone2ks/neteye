@@ -1,13 +1,13 @@
 {
-    "import_serial":[
-            {
-                "command": "show inventory",
-                "field" : {
-                    "serial_number": "sn",
-                    "product_id": "pid"
-                },
-                "index": null
-            }
+    "import_serial": [
+        {
+            "command": "show inventory",
+            "field": {
+                "serial_number": "sn",
+                "product_id": "pid"
+            },
+            "index": null
+        }
     ],
     "import_node": [
         {
@@ -55,6 +55,11 @@
                 "protocol": "protocol",
                 "arp_type": "type"
             },
+            "ignore": [
+                {
+                    "age": "-"
+                }
+            ],
             "index": null
         }
     ]
