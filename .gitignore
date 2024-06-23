@@ -1,5 +1,5 @@
 settings.toml
-neteye/ntc-templates
+ntc-templates/
 .python-version
 .DS_Store
 *~
