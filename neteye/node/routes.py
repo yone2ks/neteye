@@ -7,6 +7,7 @@ from datatables import ColumnDT, DataTables
 from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from netaddr import *
+from neteye.base.models import gen_uuid_str
 from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
@@ -437,9 +438,10 @@ def import_node_from_id(id):
 def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
-        import_target_node(node)
-        logger.info(f"Node {ip_address} imported successfully")
-        return redirect(url_for("node.index"))
+        if node:
+            import_target_node(node)
+            logger.info(f"Node {ip_address} imported successfully")
+            return redirect(url_for("node.index"))
     except Exception as err:
         logger.error(f"Error importing node {ip_address}: {type(err).__name__}, {str(err)}")
         return redirect(url_for("node.show", id=node.id))
@@ -458,19 +460,23 @@ def explore_network(node):
     arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
     ng_node = []
     for entry in arp_entries:
-        try:
-            target_node = try_connect_node(entry.ip_address)
-            import_target_node(target_node)
-        except Exception as err:
-            break
+        if Interface.query.filter_by(ip_address=entry.ip_address).first() is None:
+            try:
+                target_node = try_connect_node(entry.ip_address)
+                if target_node:
+                    import_target_node(target_node)
+            except Exception as err:
+                break
 
 
 def try_connect_node(ip_address):
     for cred in settings["default"]["credentials"].values():
         try:
             logger.debug(f"Trying to connect to {ip_address}")
+            id = gen_uuid_str()
             node = Node(
-                hostname="hostname",
+                id=id,
+                hostname=id,
                 ip_address=ip_address,
                 port=22,
                 device_type="autodetect",
@@ -478,6 +484,8 @@ def try_connect_node(ip_address):
                 password=cred["PASSWORD"],
                 enable=cred["ENABLE"],
             )
+            node.raw_command('\n')
+            node.add()
             logger.info(f"Successfully connected to {ip_address}")
             return node
         except (
@@ -490,6 +498,7 @@ def try_connect_node(ip_address):
         except Exception as err:
             logger.error(f"Error connecting to {ip_address}: {type(err).__name__}, {str(err)}")
             break
+    return False
 
 
 def import_serial(node):
