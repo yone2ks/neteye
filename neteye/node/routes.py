@@ -428,7 +428,7 @@ def import_node_from_id(id):
         logger.info(f"Node {id} imported successfully")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        logger.error(f"Error importing node {id}: {str(err)}")
+        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
         return redirect(url_for("node.show", id=id))
 
 
@@ -441,7 +441,7 @@ def import_node_from_ip(ip_address):
         logger.info(f"Node {ip_address} imported successfully")
         return redirect(url_for("node.index"))
     except Exception as err:
-        logger.error(f"Error importing node {ip_address}: {str(err)}")
+        logger.error(f"Error importing node {ip_address}: {type(err).__name__}, {str(err)}")
         return redirect(url_for("node.show", id=node.id))
 
 
@@ -485,10 +485,10 @@ def try_connect_node(ip_address):
             netmiko.exceptions.SSHException,
             ValueError,
         ) as err:
-            logger.error(f"Error connecting to {ip_address}: {str(err)}")
+            logger.error(f"Error connecting to {ip_address}: {type(err).__name__}, {str(err)}")
             continue
         except Exception as err:
-            logger.error(f"Error connecting to {ip_address}: {str(err)}")
+            logger.error(f"Error connecting to {ip_address}: {type(err).__name__}, {str(err)}")
             break
 
 
