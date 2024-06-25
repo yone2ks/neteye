@@ -12,7 +12,7 @@ class ArpEntry(Base):
 
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
-    interface_id = Column(String, ForeignKey("interfaces.id"), nullable=False)
+    interface_id = Column(String, ForeignKey("interfaces.id", ondelete="CASCADE"), nullable=False)
     interface = relationship("Interface")
     protocol = Column(String)
     arp_type = Column(String)

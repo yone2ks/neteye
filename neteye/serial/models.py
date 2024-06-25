@@ -11,7 +11,7 @@ class Serial(Base):
     serial_number = Column(String, nullable=False)
     product_id = Column(String)
     description = Column(String, default="")
-    node_id = Column(String, ForeignKey("nodes.id"))
+    node_id = Column(String, ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
     node = relationship("Node")
 
     def __repr__(self):

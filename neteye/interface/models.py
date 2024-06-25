@@ -10,7 +10,7 @@ class Interface(Base):
     __tablename__ = "interfaces"
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
-    node_id = Column(String, ForeignKey("nodes.id"))
+    node_id = Column(String, ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
     node = relationship("Node")
     name = Column(String, nullable=False)
     description = Column(String, default="")
