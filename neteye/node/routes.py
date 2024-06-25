@@ -57,7 +57,7 @@ def data():
 @auth_required()
 def show(id):
     node = Node.query.get(id)
-    command_list = ntc_template_utils.get_command_list(node.device_type)
+    command_list = ntc_template_utils.get_command_list(node.ntc_template_platform)
     return render_template("node/show.html", node=node, command_list=command_list)
 
 
