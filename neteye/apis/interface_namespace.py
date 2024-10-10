@@ -47,7 +47,7 @@ class InterfacesResource(Resource):
         return "create interface"
 
 
-@interfaces_api.route("/<int:id>")
+@interfaces_api.route("/<string:id>")
 class InterfaceResource(Resource):
     def get(self, id):
         return interface_schema.jsonify(Interface.query.get(id))

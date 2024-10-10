@@ -34,7 +34,7 @@ class NodesResource(Resource):
         return node_schema.jsonify(data)
 
 
-@nodes_api.route("/<int:id>")
+@nodes_api.route("/<string:id>")
 class NodeResource(Resource):
     def get(self, id):
         return node_schema.jsonify(Node.query.get(id))

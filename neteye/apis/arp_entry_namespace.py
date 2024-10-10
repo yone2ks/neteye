@@ -28,7 +28,7 @@ class ArpEntrysResource(Resource):
         return arp_entries_schema.jsonify(ArpEntry.query.all())
 
 
-@arp_entries_api.route("/<int:id>")
+@arp_entries_api.route("/<string:id>")
 class ArpEntryResource(Resource):
     def get(self, id):
         return arp_entry_schema.jsonify(ArpEntry.query.get(id))

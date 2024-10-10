@@ -27,7 +27,7 @@ class SerialsResource(Resource):
         return serials_schema.jsonify(Serial.query.all())
 
 
-@serials_api.route("/<int:id>")
+@serials_api.route("/<string:id>")
 class SerialResource(Resource):
     def get(self, id):
         return serial_schema.jsonify(Serial.query.get(id))

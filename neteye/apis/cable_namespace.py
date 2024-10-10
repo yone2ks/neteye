@@ -29,7 +29,7 @@ class CablesResource(Resource):
         return cables_schema.jsonify(Cable.query.all())
 
 
-@cables_api.route("/<int:id>")
+@cables_api.route("/<string:id>")
 class CableResource(Resource):
     def get(self, id):
         return cable_schema.jsonify(Cable.query.get(id))
