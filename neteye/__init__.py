@@ -5,7 +5,7 @@ import sqlite3
 from dynaconf import FlaskDynaconf
 from flask import Flask
 from flask_security import (Security, SQLAlchemySessionUserDatastore,
-                            login_required, generate_password_hash)
+                            login_required)
 
 import neteye as app_root
 from neteye.apis.interface_namespace import interfaces_api
@@ -78,7 +78,7 @@ def create_admin():
         admin_user = User(
             email=settings['default']['ADMIN_EMAIL'],
             username=settings['default']['ADMIN_USERNAME'],
-            password=generate_password_hash(settings['default']['ADMIN_PASSWORD']),
+            password=settings['default']['ADMIN_PASSWORD'],
             active=True
         )
         admin_user.roles.append(admin_role)
