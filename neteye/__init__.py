@@ -24,7 +24,7 @@ from neteye.node.models import Node
 from neteye.node.routes import node_bp, root_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
-from neteye.user.models import Role, User
+from neteye.user.models import Role, User, user_datastore
 from neteye.visualization.routes import visualization_bp
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
