@@ -16,7 +16,7 @@ from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
-                               continuum, db, ma, security, settings)
+                               continuum, db, ma, security, settings, user_datastore)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -75,12 +75,11 @@ def create_admin():
     # If the admin user does not exist, create it
     admin_user = User.query.filter_by(email=settings['default']['ADMIN_EMAIL']).first()
     if not admin_user:
-        admin_user = User(
+        admin_user = user_datastore.create_user(
             email=settings['default']['ADMIN_EMAIL'],
             username=settings['default']['ADMIN_USERNAME'],
             password=settings['default']['ADMIN_PASSWORD'],
-            active=True
+            active=True,
+            roles=[admin_role]
         )
-        admin_user.roles.append(admin_role)
-        db.session.add(admin_user)
         db.session.commit()
