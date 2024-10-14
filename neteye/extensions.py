@@ -9,7 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
 from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
-from neteye.user.models import User, Role
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()

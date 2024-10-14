@@ -6,6 +6,7 @@ from dynaconf import FlaskDynaconf
 from flask import Flask
 from flask_security import (Security, SQLAlchemySessionUserDatastore,
                             login_required)
+from werkzeug.security import generate_password_hash
 
 import neteye as app_root
 from neteye.apis.interface_namespace import interfaces_api
@@ -16,7 +17,7 @@ from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
-                               continuum, db, ma, security, settings, user_datastore)
+                               continuum, db, ma, security, settings)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -78,7 +79,7 @@ def create_admin():
         admin_user = user_datastore.create_user(
             email=settings['default']['ADMIN_EMAIL'],
             username=settings['default']['ADMIN_USERNAME'],
-            password=settings['default']['ADMIN_PASSWORD'],
+            password=generate_password_hash(settings['default']['ADMIN_PASSWORD']),
             active=True,
             roles=[admin_role]
         )
