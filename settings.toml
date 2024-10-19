@@ -1,7 +1,7 @@
 [default]
 DEBUG = true
 DATABASE = '/var/tmp/neteye.db'
-ADMIN_EMAIL = 'neteye_admin@example.com'
+ADMIN_EMAIL = 'neteye_admin@yourcompany.com'
 ADMIN_USERNAME = 'neteye_admin'
 ADMIN_PASSWORD = 'neteye_admin'
 SECRET_KEY = 'secret key'
