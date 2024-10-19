@@ -3,7 +3,7 @@ Werkzeug==0.16.1
 SQLAlchemy==1.2.16
 Flask-SQLAlchemy==2.4.4
 Flask-Babel==0.12.2
-Flask-Security-Too==4.0.1
+Flask-Security-Too==4.1.6
 wtforms==2.3.3
 Flask-WTF==0.14.3
 flask-nav==0.6
@@ -22,7 +22,7 @@ ntc_templates==4.3.0
 scrapli==2024.1.30
 scrapli_community==2024.1.30
 napalm==4.1.0
-pandas==1.2.2
+pandas==2.2.3
 dynaconf==3.1.2
 toml==0.10.2
 dictdiffer==0.8.1
