@@ -4,8 +4,7 @@ from flask_bootstrap import Bootstrap
 from flask_continuum import Continuum
 from flask_marshmallow import Marshmallow
 from flask_restx import Api
-from flask_security import (Security, SQLAlchemySessionUserDatastore,
-                            login_required)
+from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 
 from neteye.lib.connection_pool.connection_pool import ConnectionPool

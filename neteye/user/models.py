@@ -1,4 +1,4 @@
-from flask_security import RoleMixin, UserMixin
+from flask_security import RoleMixin, UserMixin, SQLAlchemySessionUserDatastore
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
 from sqlalchemy.orm import backref, relationship
@@ -34,3 +34,5 @@ class User(db.Model, UserMixin):
     roles = relationship(
         "Role", secondary="roles_users", backref=backref("users", lazy="dynamic")
     )
+
+user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
