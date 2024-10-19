@@ -5,8 +5,7 @@ import sqlite3
 from dynaconf import FlaskDynaconf
 from flask import Flask
 from flask_security import (Security, SQLAlchemySessionUserDatastore,
-                            login_required)
-from werkzeug.security import generate_password_hash
+                            login_required, hash_password)
 
 import neteye as app_root
 from neteye.apis.interface_namespace import interfaces_api
@@ -59,17 +58,13 @@ api.add_namespace(nodes_api)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
-# Create DB
-with app.app_context():
-    db.create_all()
-
-# Create admin role and user when the app starts
-@app.before_first_request
+# Create admin role and user 
 def create_admin():
+    ADMIN_ROLE='admin'
     # If the admin role does not exist, create it
-    admin_role = Role.query.filter_by(name='admin').first()
+    admin_role = Role.query.filter_by(name=ADMIN_ROLE).first()
     if not admin_role:
-        admin_role = Role(name='admin', description='Administrator role')
+        admin_role = Role(name=ADMIN_ROLE, description='Administrator role')
         db.session.add(admin_role)
         db.session.commit()
 
@@ -79,8 +74,14 @@ def create_admin():
         admin_user = user_datastore.create_user(
             email=settings['default']['ADMIN_EMAIL'],
             username=settings['default']['ADMIN_USERNAME'],
-            password=generate_password_hash(settings['default']['ADMIN_PASSWORD']),
+            password=hash_password(settings['default']['ADMIN_PASSWORD']),
             active=True,
             roles=[admin_role]
         )
         db.session.commit()
+
+# Create the database tables and admin user when the application starts.
+with app.app_context():
+    db.create_all()
+    create_admin()
+
