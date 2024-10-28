@@ -10,7 +10,7 @@ from netaddr import *
 from neteye.base.models import gen_uuid_str
 from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
-from neteye.blueprints import bp_factory
+from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper
@@ -24,7 +24,6 @@ from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node
 
 logger = getLogger(__name__)
 
-root_bp = bp_factory("")
 node_bp = bp_factory("node")
 
 

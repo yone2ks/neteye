@@ -16,3 +16,6 @@ def bp_factory(
         static_folder=static_folder,
     )
     return blueprint
+
+
+root_bp = bp_factory("")
