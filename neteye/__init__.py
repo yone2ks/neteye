@@ -4,8 +4,7 @@ import sqlite3
 
 from dynaconf import FlaskDynaconf
 from flask import Flask
-from flask_security import (Security, SQLAlchemySessionUserDatastore,
-                            login_required, hash_password)
+from flask_security import hash_password
 
 import neteye as app_root
 from neteye.apis.interface_namespace import interfaces_api
