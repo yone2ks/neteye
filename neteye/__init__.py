@@ -24,7 +24,7 @@ from neteye.node.models import Node
 from neteye.node.routes import node_bp, root_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
-from neteye.user.models import Role, User, user_datastore
+from neteye.user.models import Role, User, user_datastore, create_roles, admin_role
 from neteye.visualization.routes import visualization_bp
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
@@ -37,7 +37,7 @@ db.init_app(app)
 continuum.init_app(app)
 bootstrap.init_app(app)
 babel.init_app(app)
-security.init_app(app, SQLAlchemySessionUserDatastore(db.session, User, Role))
+security.init_app(app, user_datastore)
 ma.init_app(app)
 api.init_app(api_bp)
 
@@ -60,14 +60,6 @@ api.add_namespace(serials_api)
 
 # Create admin role and user 
 def create_admin():
-    ADMIN_ROLE='admin'
-    # If the admin role does not exist, create it
-    admin_role = Role.query.filter_by(name=ADMIN_ROLE).first()
-    if not admin_role:
-        admin_role = Role(name=ADMIN_ROLE, description='Administrator role')
-        db.session.add(admin_role)
-        db.session.commit()
-
     # If the admin user does not exist, create it
     admin_user = User.query.filter_by(email=settings['default']['ADMIN_EMAIL']).first()
     if not admin_user:
@@ -78,10 +70,11 @@ def create_admin():
             active=True,
             roles=[admin_role]
         )
-        db.session.commit()
+        admin_user.add()
 
 # Create the database tables and admin user when the application starts.
 with app.app_context():
     db.create_all()
+    create_roles()
     create_admin()
 
