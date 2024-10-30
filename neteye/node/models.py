@@ -73,7 +73,11 @@ class Node(Base):
     def exists(cls, hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
-    def gen_netmiko_params(self, global_delay_factor=1, timeout=10, keepalive=10):
+    def gen_netmiko_params(
+        self,
+        read_timeout=settings["default"].get("NETMIKO_READ_TIMEOUT", 10),
+        keepalive=10
+        ):
         return {
             "device_type": self.device_type,
             "ip": self.ip_address,
@@ -81,8 +85,7 @@ class Node(Base):
             "username": self.username,
             "password": self.password,
             "secret": self.enable,
-            "global_delay_factor": global_delay_factor,
-            "timeout": timeout,
+            "read_timeout_override": read_timeout,
             "keepalive": keepalive,
         }
 
@@ -251,9 +254,7 @@ class Node(Base):
             return self.gen_netmiko_connection()
 
     def gen_netmiko_connection(self):
-        return netmiko.ConnectHandler(**self.gen_netmiko_params(
-            settings["default"]["NETMIKO_GLOBAL_DELAY_FACTOR"],
-            settings["default"]["NETMIKO_TIMEOUT"]))
+        return netmiko.ConnectHandler(**self.gen_netmiko_params())
 
     def gen_scrapli_connection(self):
         conn = scrapli.Scrapli(**self.gen_scrapli_params(
