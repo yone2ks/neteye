@@ -89,7 +89,12 @@ class Node(Base):
             "keepalive": keepalive,
         }
 
-    def gen_scrapli_params(self, timeout_socket=10, timeout_transport=10, timeout_ops=10):
+    def gen_scrapli_params(
+        self,
+        timeout_socket=settings["default"].get("SCRAPLI_TIMEOUT_SOCKET", 10),
+        timeout_transport=settings["default"].get("SCRAPLI_TIMEOUT_TRANSPORT", 10),
+        timeout_ops=settings["default"].get("SCRAPLI_TIMEOUT_OPS", 10)
+        ):
         params = {
                 "host": self.ip_address,
                 "port": self.port,
@@ -109,7 +114,10 @@ class Node(Base):
             params["auth_secondary"] = self.enable
             return params
 
-    def gen_napalm_params(self, timeout=10):
+    def gen_napalm_params(
+        self,
+        timeout=settings["default"].get("NAPALM_TIMEOUT", 10)
+        ):
         enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
         optional_args = {enable_param: self.enable, "port": self.port}
         return {
@@ -257,16 +265,12 @@ class Node(Base):
         return netmiko.ConnectHandler(**self.gen_netmiko_params())
 
     def gen_scrapli_connection(self):
-        conn = scrapli.Scrapli(**self.gen_scrapli_params(
-            settings["default"]["SCRAPLI_TIMEOUT_SOCKET"],
-            settings["default"]["SCRAPLI_TIMEOUT_TRANSPORT"],
-            settings["default"]["SCRAPLI_TIMEOUT_OPS"]))
+        conn = scrapli.Scrapli(**self.gen_scrapli_params())
         conn.open()
         return conn
 
     def gen_napalm_connection(self):
         driver = napalm.get_network_driver(self.napalm_driver)
-        conn = driver(**self.gen_napalm_params(
-            settings["default"]["NAPALM_TIMEOUT"]))
+        conn = driver(**self.gen_napalm_params())
         conn.open()
         return conn
