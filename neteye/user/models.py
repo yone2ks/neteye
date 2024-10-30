@@ -1,9 +1,9 @@
-from flask_security import RoleMixin, UserMixin, SQLAlchemySessionUserDatastore
+from flask_security import RoleMixin, UserMixin, SQLAlchemySessionUserDatastore, hash_password
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
 from sqlalchemy.orm import backref, relationship
 
-from neteye.extensions import db
+from neteye.extensions import db, settings
 
 ADMIN_ROLE = 'admin'
 USER_ROLE = 'user'
@@ -69,3 +69,17 @@ def initialize_roles():
         admin_role.add() 
     if not user_datastore.find_role(USER_ROLE):
         user_role.add()
+
+
+def initialize_admin():
+    # If the admin user does not exist, create it
+    admin_user = User.query.filter_by(email=settings['default']['ADMIN_EMAIL']).first()
+    if not admin_user:
+        admin_user = user_datastore.create_user(
+            email=settings['default']['ADMIN_EMAIL'],
+            username=settings['default']['ADMIN_USERNAME'],
+            password=hash_password(settings['default']['ADMIN_PASSWORD']),
+            active=True,
+            roles=[admin_role]
+        )
+        admin_user.add()
