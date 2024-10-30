@@ -14,13 +14,14 @@ from neteye.apis.serial_namespace import serials_api
 from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
+from neteye.blueprints import root_bp
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
                                continuum, db, ma, security, settings)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
 from neteye.node.models import Node
-from neteye.node.routes import node_bp, root_bp
+from neteye.node.routes import node_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
 from neteye.user.models import Role, User, user_datastore, initialize_roles, admin_role
