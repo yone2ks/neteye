@@ -23,7 +23,7 @@ from neteye.node.models import Node
 from neteye.node.routes import node_bp, root_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
-from neteye.user.models import Role, User, user_datastore, create_roles, admin_role
+from neteye.user.models import Role, User, user_datastore, initialize_roles, admin_role
 from neteye.visualization.routes import visualization_bp
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
@@ -58,7 +58,7 @@ api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
 # Create admin role and user 
-def create_admin():
+def initialize_admin():
     # If the admin user does not exist, create it
     admin_user = User.query.filter_by(email=settings['default']['ADMIN_EMAIL']).first()
     if not admin_user:
@@ -74,6 +74,6 @@ def create_admin():
 # Create the database tables and admin user when the application starts.
 with app.app_context():
     db.create_all()
-    create_roles()
-    create_admin()
+    initialize_roles()
+    initialize_admin()
 

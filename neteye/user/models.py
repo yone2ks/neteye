@@ -64,7 +64,7 @@ user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
 admin_role = Role(name=ADMIN_ROLE, description='Administrator role')
 user_role = Role(name=USER_ROLE, description='User role')
 
-def create_roles():
+def initialize_roles():
     if not user_datastore.find_role(ADMIN_ROLE):
         admin_role.add() 
     if not user_datastore.find_role(USER_ROLE):
