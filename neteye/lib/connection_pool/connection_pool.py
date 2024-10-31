@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from ssh2.exceptions import SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError
+from netmiko.exceptions import ReadTimeout
 from scrapli.exceptions import ScrapliConnectionNotOpened
 
 class ConnectionKey(NamedTuple):
@@ -24,9 +25,9 @@ class ConnectionAdaptor():
                 self.connection.send_command('\n', timeout_ops=2)
                 return True
             else:
-                self.connection.send_command('\n', delay_factor=4)
+                self.connection.send_command('\n', read_timeout=2)
                 return True
-        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError, ScrapliConnectionNotOpened, BrokenPipeError, OSError):
+        except (SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError, ScrapliConnectionNotOpened, BrokenPipeError, OSError, ReadTimeout):
             return False
 
     def close(self):
