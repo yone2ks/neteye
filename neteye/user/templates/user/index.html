@@ -1,0 +1,44 @@
+{% extends "base_datatables_template_for_ajax.html" %}
+
+{% block card_header %}Users{% endblock card_header %}
+
+{% block ajax_source %}
+"/user/data"
+{% endblock ajax_source %}
+
+{% block datatables_cloumns %}
+columnDefs: [
+{
+"render": function(data, type, row) {
+return '<div class="btn-toolbar" style="flex-wrap: nowrap;">'
+    + '<div class="btn-group mr-2">'
+    + '<form action="/user/' + row[0] + '/delete"' + ' method="post">'
+    + '<button class="btn btn-sm btn-danger" type="submit" onclick="return confirm(\'Are you sure?\');">Delete</button>'
+    + '</form>'
+    + '</div>'
+    ;
+    },
+    "targets": 5
+    }
+    ],
+{% endblock datatables_cloumns %}
+
+{% block datatables_order %}
+[0, "asc"]
+{% endblock datatables_order %}
+
+{% block thead %}
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Is Active</th>
+        <th>Action</th>
+    </tr>
+{% endblock thead %}
+
+{% block card_footer %}
+            <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('user.register') }}'">New User</button>
+{% endblock card_footer %}
+

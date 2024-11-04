@@ -1,0 +1,35 @@
+{% extends "base_table_template.html" %}
+
+{% block card_header %}Show User{% endblock card_header %}
+
+{% block tbody %}
+<tbody>
+    <tr>
+        <th>ID</th>
+        <td>{{ user.id }}</td>
+    </tr>
+    <tr>
+        <th>Username</th>
+        <td>{{ user.username }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ user.email }}</td>
+    </tr>
+    <tr>
+        <th>Last Login</th>
+        <td>{{ user.last_login_at }}</td>
+    </tr>
+    <tr>
+        <th>Is Active</th>
+        <td>{{ user.is_active }}</td>
+    </tr>
+    <tr>
+        <th>Role</th>
+        <td>{{ user.roles }}</td>
+    </tr>
+</tbody>
+{% endblock tbody %}
+
+{% block card_footer %}
+{% endblock card_footer %}
