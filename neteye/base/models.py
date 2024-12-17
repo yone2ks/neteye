@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from flask_continuum import VersioningMixin
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 from neteye.extensions import db
 
@@ -24,12 +25,23 @@ class Base(db.Model, VersioningMixin):
         )
 
     def commit(self):
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError as sql_integrity_error:
+            db.session.rollback()
+            raise sql_integrity_error.orig
 
     def add(self):
-        db.session.add(self)
-        self.commit()
+        try:
+            db.session.add(self)
+            self.commit()
+        except IntegrityError as sql_integrity_error:
+            db.session.rollback()
+            raise sql_integrity_error.orig
 
     def delete(self):
         db.session.delete(self)
         self.commit()
+
+    def rollback(self):
+        db.session.rollback()
