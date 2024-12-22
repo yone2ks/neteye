@@ -1,5 +1,5 @@
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
-                        String, UniqueConstraint)
+                        String, UniqueConstraint, Index, case)
 from sqlalchemy.orm import backref, relationship
 
 from neteye.base.models import Base
@@ -15,3 +15,12 @@ class Cable(Base):
     description = Column(String, default="")
     cable_type = Column(String)
     link_speed = Column(String)
+
+    # Ensure unique pairs of a_interface_id and b_interface_id, regardless of order
+    __table_args__ = (
+        Index('unique_cable_index', 
+                case([(a_interface_id < b_interface_id, a_interface_id)], else_=b_interface_id),
+                case([(a_interface_id < b_interface_id, b_interface_id)], else_=a_interface_id),
+                unique=True
+            ),
+        )
