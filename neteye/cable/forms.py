@@ -12,20 +12,20 @@ def get_nodes():
 
 
 class CableForm(FlaskForm):
-    src_node = QuerySelectField(
-        "Src Node:",
+    a_node = QuerySelectField(
+        "Node-A:",
         validators=[InputRequired()],
         query_factory=get_nodes,
         get_label="hostname",
     )
-    dst_node = QuerySelectField(
-        "Dst Node:",
+    b_node = QuerySelectField(
+        "Node-B:",
         validators=[InputRequired()],
         query_factory=get_nodes,
         get_label="hostname",
     )
-    src_interface = SelectField(validators=[InputRequired()], choices=[])
-    dst_interface = SelectField(validators=[InputRequired()], choices=[])
+    a_interface = SelectField(validators=[InputRequired()], choices=[])
+    b_interface = SelectField(validators=[InputRequired()], choices=[])
     description = StringField("description:")
     cable_type = SelectField(
         choices=[("twisted_pair", "Twisted-Pair"), ("optical_fiber", "Optical-Fiber")]
@@ -34,6 +34,7 @@ class CableForm(FlaskForm):
         choices=[
             ("1g", "1Gbps"),
             ("10g", "10Gbps"),
+            ("25g", "25Gbps"),
             ("40g", "40Gbps"),
             ("100g", "100Gbps"),
         ]

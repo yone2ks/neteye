@@ -9,27 +9,27 @@
 
 <script>
  $(document).ready(function(){
-     var src_node_id = "{{src_node_id}}";
-     var dst_node_id = "{{dst_node_id}}";
-     $("#src_node").val(src_node_id);
-     $("#dst_node").val(dst_node_id);
+     var a_node_id = "{{a_node_id}}";
+     var b_node_id = "{{b_node_id}}";
+     $("#a_node").val(a_node_id);
+     $("#b_node").val(b_node_id);
 
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id;
+     var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + a_node_id;
      $.ajax({
-         url: src_interfaces_url,
+         url: a_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#src_interface").empty();
+             $("#a_interface").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 if (selectOptions[i].id == "{{src_interface_id}}"){
-                     $("#src_interface").append(
+                 if (selectOptions[i].id == "{{a_interface_id}}"){
+                     $("#a_interface").append(
                          $("<option selected></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
                      );
                  }
                  else {
-                     $("#src_interface").append(
+                     $("#a_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -39,22 +39,22 @@
          }
      });
 
-     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id;
+     var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + b_node_id;
      $.ajax({
-         url: dst_interfaces_url,
+         url: b_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#dst_interface").empty();
+             $("#b_interface").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 if (selectOptions[i].id == "{{dst_interface_id}}"){
-                     $("#dst_interface").append(
+                 if (selectOptions[i].id == "{{b_interface_id}}"){
+                     $("#b_interface").append(
                          $("<option selected></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
                      );
                  }
                  else {
-                     $("#dst_interface").append(
+                     $("#b_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -64,15 +64,15 @@
          }
      });
 
-     $("#src_node").change(function(){
-         var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val();
+     $("#a_node").change(function(){
+         var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#a_node option:selected').val();
          $.ajax({
-             url: src_interfaces_url,
+             url: a_interfaces_url,
              type: 'GET',
              success: function(selectOptions){
-                 $("#src_interface").empty();
+                 $("#a_interface").empty();
                  for (var i = 0; i < selectOptions.length; i++){
-                     $("#src_interface").append(
+                     $("#a_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -82,15 +82,15 @@
          });
      });
 
-     $("#dst_node").change(function(){
-         var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val();
+     $("#b_node").change(function(){
+         var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#b_node option:selected').val();
          $.ajax({
-             url: dst_interfaces_url,
+             url: b_interfaces_url,
              type: 'GET',
              success: function(selectOptions){
-                 $("#dst_interface").empty();
+                 $("#b_interface").empty();
                  for (var i = 0; i < selectOptions.length; i++){
-                     $("#dst_interface").append(
+                     $("#b_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -113,16 +113,16 @@
         <form action="{{ url_for('cable.update', id=id ) }}" method=post class="form-horizontal " id="cable_update">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ render_field(form.src_node, value=src_node_id) }}
+                {{ render_field(form.a_node, value=a_node_id) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.src_interface, value=src_interface_id) }}
+                {{ render_field(form.a_interface, value=a_interface_id) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.dst_node, value=dst_node_id) }}
+                {{ render_field(form.b_node, value=b_node_id) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.dst_interface, value=dst_interface_id) }}
+                {{ render_field(form.b_interface, value=b_interface_id) }}
             </div>
             <div class="form-group row">
                 {{ render_field(form.cable_type, value=cable_type) }}

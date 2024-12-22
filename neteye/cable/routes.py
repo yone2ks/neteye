@@ -1,9 +1,10 @@
 import pandas as pd
 from dynaconf import settings
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from sqlalchemy.orm import aliased
 
+from datatables import ColumnDT, DataTables
 from neteye.apis.cable_namespace import cable_schema, cables_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
@@ -14,38 +15,61 @@ from .forms import CableForm
 from .models import Cable
 
 cable_bp = bp_factory("cable")
-src_interface_table = aliased(Interface)
-dst_interface_table = aliased(Interface)
-src_node_table = aliased(Node)
-dst_node_table = aliased(Node)
+a_interface_table = aliased(Interface)
+b_interface_table = aliased(Interface)
+a_node_table = aliased(Node)
+b_node_table = aliased(Node)
 
 
 @cable_bp.route("")
 @auth_required()
 def index():
-    cables = Cable.query.all()
-    data = cables_schema.dump(cables)
-    return render_template("cable/index.html", cables=cables, data=data)
+    return render_template("cable/index.html")
+
+@cable_bp.route("/data")
+@auth_required()
+def data():
+    columns = [
+        ColumnDT(Cable.id),
+        ColumnDT(a_node_table.hostname),
+        ColumnDT(a_interface_table.name),
+        ColumnDT(b_node_table.hostname),
+        ColumnDT(b_interface_table.name),
+        ColumnDT(Cable.cable_type),
+        ColumnDT(Cable.link_speed),
+        ColumnDT(Cable.description),
+    ]
+    query = (
+        db.session.query()
+        .select_from(Cable)
+        .join(a_interface_table, Cable.a_interface_id == a_interface_table.id)
+        .join(a_node_table, a_interface_table.node_id == a_node_table.id)
+        .join(b_interface_table, Cable.b_interface_id == b_interface_table.id)
+        .join(b_node_table, b_interface_table.node_id == b_node_table.id)
+    )
+    params = request.args.to_dict()
+    row_table = DataTables(params, query, columns)
+    return jsonify(row_table.output_result())
 
 
 @cable_bp.route("/new")
 @auth_required()
 def new():
     form = CableForm()
-    src_node = None
-    dst_node = None
-    src_interface = None
-    dst_interface = None
+    a_node = None
+    b_node = None
+    a_interface = None
+    b_interface = None
     cable_type = None
     link_speed = None
     description = None
     return render_template(
         "cable/new.html",
         form=form,
-        src_node=src_node,
-        dst_node=dst_node,
-        src_interface=src_interface,
-        dst_interface=dst_interface,
+        a_node=a_node,
+        b_node=b_node,
+        a_interface=a_interface,
+        b_interface=b_interface,
         cable_type=cable_type,
         link_speed=link_speed,
         description=description,
@@ -56,8 +80,8 @@ def new():
 @auth_required()
 def create():
     cable = Cable(
-        src_interface_id=request.form["src_interface"],
-        dst_interface_id=request.form["dst_interface"],
+        a_interface_id=request.form["a_interface"],
+        b_interface_id=request.form["b_interface"],
         cable_type=request.form["cable_type"],
         link_speed=request.form["link_speed"],
         description=request.form["description"],
@@ -71,8 +95,8 @@ def create():
 def edit(id):
     cable = Cable.query.get(id)
     form = CableForm()
-    src_interface = cable.src_interface
-    dst_interface = cable.dst_interface
+    a_interface = cable.a_interface
+    b_interface = cable.b_interface
     cable_type = cable.cable_type
     link_speed = cable.link_speed
     return render_template(
@@ -80,10 +104,10 @@ def edit(id):
         id=id,
 
         form=form,
-        src_node_id=src_interface.node_id,
-        dst_node_id=dst_interface.node_id,
-        src_interface_id=src_interface.id,
-        dst_interface_id=dst_interface.id,
+        a_node_id=a_interface.node_id,
+        b_node_id=b_interface.node_id,
+        a_interface_id=a_interface.id,
+        b_interface_id=b_interface.id,
         cable_type=cable_type,
         link_speed=link_speed,
     )
@@ -93,8 +117,8 @@ def edit(id):
 @auth_required()
 def update(id):
     cable = Cable.query.get(id)
-    cable.src_interface_id = request.form["src_interface"]
-    cable.dst_interface_id = request.form["dst_interface"]
+    cable.a_interface_id = request.form["a_interface"]
+    cable.b_interface_id = request.form["b_interface"]
     cable.cable_type = request.form["cable_type"]
     cable.link_speed = request.form["link_speed"]
     cable.commit()

@@ -9,17 +9,17 @@
 
 <script>
  $(document).ready(function(){
-     var src_node_id = $("#src_node").val();
-     var dst_node_id = $("#dst_node").val();
+     var a_node_id = $("#a_node").val();
+     var b_node_id = $("#b_node").val();
 
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id;
+     var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + a_node_id;
      $.ajax({
-         url: src_interfaces_url,
+         url: a_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#src_interface").empty();
+             $("#a_interface").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 $("#src_interface").append(
+                 $("#a_interface").append(
                      $("<option></option>")
                          .attr("value", selectOptions[i].id)
                          .text(selectOptions[i].name)
@@ -28,14 +28,14 @@
          }
      });
 
-     var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + dst_node_id;
+     var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + b_node_id;
      $.ajax({
-         url: dst_interfaces_url,
+         url: b_interfaces_url,
          type: 'GET',
          success: function(selectOptions){
-             $("#dst_interface").empty();
+             $("#b_interface").empty();
              for (var i = 0; i < selectOptions.length; i++){
-                 $("#dst_interface").append(
+                 $("#b_interface").append(
                      $("<option></option>")
                          .attr("value", selectOptions[i].id)
                          .text(selectOptions[i].name)
@@ -44,15 +44,15 @@
          }
      });
 
-     $("#src_node").change(function(){
-         var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val();
+     $("#a_node").change(function(){
+         var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#a_node option:selected').val();
          $.ajax({
-             url: src_interfaces_url,
+             url: a_interfaces_url,
              type: 'GET',
              success: function(selectOptions){
-                 $("#src_interface").empty();
+                 $("#a_interface").empty();
                  for (var i = 0; i < selectOptions.length; i++){
-                     $("#src_interface").append(
+                     $("#a_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -62,15 +62,15 @@
          });
      });
 
-     $("#dst_node").change(function(){
-         var dst_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#dst_node option:selected').val();
+     $("#b_node").change(function(){
+         var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#b_node option:selected').val();
          $.ajax({
-             url: dst_interfaces_url,
+             url: b_interfaces_url,
              type: 'GET',
              success: function(selectOptions){
-                 $("#dst_interface").empty();
+                 $("#b_interface").empty();
                  for (var i = 0; i < selectOptions.length; i++){
-                     $("#dst_interface").append(
+                     $("#b_interface").append(
                          $("<option></option>")
                              .attr("value", selectOptions[i].id)
                              .text(selectOptions[i].name)
@@ -94,16 +94,16 @@
         <form action="{{ url_for('cable.create') }}" method=post class="form-horizontal " id="cable_create">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ render_field(form.src_node) }}
+                {{ render_field(form.a_node) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.src_interface) }}
+                {{ render_field(form.a_interface) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.dst_node) }}
+                {{ render_field(form.b_node) }}
             </div>
             <div class="form-group row">
-                {{ render_field(form.dst_interface) }}
+                {{ render_field(form.b_interface) }}
             </div>
             <div class="form-group row">
                 {{ render_field(form.cable_type) }}
