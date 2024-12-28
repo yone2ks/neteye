@@ -1,4 +1,4 @@
-{% extends "base_template.html" %}
+{% extends "base_card_template.html" %}
 
 {% block javascript %}
 {{ super() }}
@@ -103,38 +103,35 @@
 </script>
 {% endblock javascript %}
 
+{% block card_header %}
+Edit Cable
+{% endblock card_header %}
 
-{% block main %}
-<div class="card">
-    <div class="card-header">
-        Edit Cable
-    </div>
-    <div class="card-body">
-        <form action="{{ url_for('cable.update', id=id ) }}" method=post class="form-horizontal " id="cable_update">
-            {{ form.csrf_token }}
-            <div class="form-group row">
-                {{ render_field(form.a_node, value=a_node_id) }}
-            </div>
-            <div class="form-group row">
-                {{ render_field(form.a_interface, value=a_interface_id) }}
-            </div>
-            <div class="form-group row">
-                {{ render_field(form.b_node, value=b_node_id) }}
-            </div>
-            <div class="form-group row">
-                {{ render_field(form.b_interface, value=b_interface_id) }}
-            </div>
-            <div class="form-group row">
-                {{ render_field(form.cable_type, value=cable_type) }}
-            </div>
-            <div class="form-group row">
-                {{ render_field(form.link_speed, value=link_speed) }}
-            </div>
-        </form>
-    </div>
-    <div class="card-footer">
-        {{ form.submit(class_="btn btn-sm btn-primary", form="cable_update") }}
-        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="cable_update") }}
-    </div>
-</div>
-{% endblock main %}
+{% block card_body %}
+    <form action="{{ url_for('cable.update', id=id ) }}" method=post class="form-horizontal " id="cable_update">
+        {{ form.csrf_token }}
+        <div class="form-group row">
+            {{ render_field(form.a_node, value=a_node_id) }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.a_interface, value=a_interface_id) }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.b_node, value=b_node_id) }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.b_interface, value=b_interface_id) }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.cable_type, value=cable_type) }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.link_speed, value=link_speed) }}
+        </div>
+    </form>
+{% endblock card_body %}
+
+{% block card_footer %}
+    {{ form.submit(class_="btn btn-sm btn-primary", form="cable_update") }}
+    {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="cable_update") }}
+{% endblock card_footer %}
