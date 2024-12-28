@@ -1,0 +1,29 @@
+{% extends "base_template.html" %}
+
+{% block title %}neteye{% endblock title %}
+
+{% block main %}
+<div class="card">
+    <div class="card-header">
+        {% block card_header %}{% endblock card_header %}
+    </div>
+    <div class="card-body">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block card_body %}
+        {% endblock card_body %}
+    </div>
+    <div class="card-footer">
+        {% block card_footer %}{% endblock card_footer %}
+    </div>
+</div>
+{% endblock main %}
