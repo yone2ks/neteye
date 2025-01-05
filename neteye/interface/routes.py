@@ -1,5 +1,8 @@
+from logging import getLogger
+
 import pandas as pd
 from sqlalchemy.sql.expression import desc
+from sqlalchemy.exc import IntegrityError
 from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
@@ -10,9 +13,12 @@ from neteye.apis.interface_namespace import interface_schema, interfaces_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node
+from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
 
 from .forms import InterfaceForm
 from .models import Interface
+
+logger = getLogger(__name__)
 
 interface_bp = bp_factory("interface")
 
@@ -78,8 +84,19 @@ def create():
             mtu=mtu,
             status=status,
         )
-        interface.add()
-        return redirect(url_for("interface.index"))
+        try:
+            interface.add()
+            return redirect(url_for("interface.index"))
+        except IntegrityError as e:
+            interface.rollback()
+            logger.warning(f"IntegrityError: {e}")
+            flash(gen_integrity_error_message("Interface", e), "danger")
+            return redirect(url_for("interface.new"))
+        except Exception as e:
+            interface.rollback()
+            logger.error(f"Unexpected Error: {e}")
+            flash("An unexpected error occurred while creating the interface.", "danger")
+            return redirect(url_for("interface.new"))
     else:
         return render_template(
             "interface/new.html",
@@ -150,8 +167,19 @@ def update(id):
         interface.duplex = duplex
         interface.mtu = mtu
         interface.status = status
-        interface.commit()
-        return redirect(url_for("interface.show", id=id))
+        try:
+            interface.commit()
+            return redirect(url_for("interface.show", id=id))
+        except IntegrityError as e:
+            interface.rollback()
+            logger.warning(f"IntegrityError: {e}")
+            flash(gen_integrity_error_message("Interface", e), "danger")
+            return redirect(url_for("interface.edit", id=id))
+        except Exception as e:
+            interface.rollback()
+            logger.error(f"Unexpected Error: {e}")
+            flash("An unexpected error occurred while updating the interface.", "danger")
+            return redirect(url_for("interface.edit", id=id))
     else:
         return render_template(
             "interface/edit.html",
