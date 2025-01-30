@@ -35,6 +35,7 @@ def data():
         ColumnDT(Node.hostname),
         ColumnDT(Interface.name),
         ColumnDT(Interface.ip_address),
+        ColumnDT(Interface.mac_address),
         ColumnDT(Interface.description),
     ]
     query = db.session.query().select_from(Interface).join(Node)
@@ -67,6 +68,7 @@ def create():
     description=request.form["description"]
     ip_address=request.form["ip_address"]
     mask=request.form["mask"]
+    mac_address=request.form["mac_address"]
     speed=request.form["speed"]
     duplex=request.form["duplex"]
     mtu=request.form["mtu"]
@@ -78,6 +80,7 @@ def create():
             description=description,
             ip_address=ip_address,
             mask=mask,
+            mac_address=mac_address,
             speed=speed,
             duplex=duplex,
             mtu=mtu,
@@ -105,6 +108,7 @@ def create():
             description=description,
             ip_address=ip_address,
             mask=mask,
+            mac_address=mac_address,
             speed=speed,
             duplex=duplex,
             mtu=mtu,
@@ -122,6 +126,7 @@ def edit(id):
     description = interface.description
     ip_address = interface.ip_address
     mask = interface.mask
+    mac_address = interface.mac_address
     speed = interface.speed
     duplex = interface.duplex
     mtu = interface.mtu
@@ -135,6 +140,7 @@ def edit(id):
         description=description,
         ip_address=ip_address,
         mask=mask,
+        mac_address=mac_address,
         speed=speed,
         duplex=duplex,
         mtu=mtu,
@@ -151,6 +157,7 @@ def update(id):
     description = request.form["description"]
     ip_address = request.form["ip_address"]
     mask = request.form["mask"]
+    mac_address = request.form["mac_address"]
     speed = request.form["speed"]
     duplex = request.form["duplex"]
     mtu = request.form["mtu"]
@@ -162,6 +169,7 @@ def update(id):
         interface.description = description
         interface.ip_address = ip_address
         interface.mask = mask
+        interface.mac_address = mac_address
         interface.speed = speed
         interface.duplex = duplex
         interface.mtu = mtu
@@ -189,6 +197,7 @@ def update(id):
             description=description,
             ip_address=ip_address,
             mask=mask,
+            mac_address=mac_address,
             speed=speed,
             duplex=duplex,
             mtu=mtu,

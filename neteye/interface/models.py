@@ -16,6 +16,7 @@ class Interface(Base):
     description = Column(String, default="")
     ip_address = Column(String)
     mask = Column(String)
+    mac_address = Column(String)
     speed = Column(String)
     duplex = Column(String)
     mtu = Column(String)

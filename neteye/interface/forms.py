@@ -18,6 +18,7 @@ class InterfaceForm(FlaskForm):
     description = StringField("Description:")
     ip_address = StringField("IP Address:", validators=[IPAddress()])
     mask = StringField("Mask:", validators=[IPAddress()])
+    mac_address = StringField("MAC Address:")
     speed = StringField("Speed:")
     duplex = StringField("Duplex:")
     mtu = StringField("MTU:")
