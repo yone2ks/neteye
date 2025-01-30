@@ -73,12 +73,12 @@ def initialize_roles():
 
 def initialize_admin():
     # If the admin user does not exist, create it
-    admin_user = User.query.filter_by(email=settings['default']['ADMIN_EMAIL']).first()
+    admin_user = User.query.filter_by(email=settings.ADMIN_EMAIL).first()
     if not admin_user:
         admin_user = user_datastore.create_user(
-            email=settings['default']['ADMIN_EMAIL'],
-            username=settings['default']['ADMIN_USERNAME'],
-            password=hash_password(settings['default']['ADMIN_PASSWORD']),
+            email=settings.ADMIN_EMAIL,
+            username=settings.ADMIN_USERNAME,
+            password=hash_password(settings.ADMIN_PASSWORD),
             active=True,
             roles=[admin_role]
         )

@@ -6,6 +6,7 @@ from flask_marshmallow import Marshmallow
 from flask_restx import Api
 from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
+from dynaconf import Dynaconf
 
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
 from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
@@ -19,4 +20,4 @@ api = Api()
 ma = Marshmallow()
 connection_pool = ConnectionPool()
 ntc_template_utils = NtcTemplateUtils()
-settings = toml.load("settings.toml")
+settings = Dynaconf(environments=True, settings_files=['settings.toml'])

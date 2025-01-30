@@ -1,7 +1,6 @@
 from logging import getLogger
 
 import pandas as pd
-from dynaconf import settings
 from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from sqlalchemy.orm import aliased

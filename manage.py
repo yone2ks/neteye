@@ -1,4 +1,5 @@
 from neteye import app
+from neteye.extensions import settings
 
 print(app.url_map)
-app.run(host="0.0.0.0", port=5000, debug=True)
+app.run(host=settings.HOST, port=settings.PORT, debug=settings.DEBUG)

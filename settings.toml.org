@@ -1,16 +1,28 @@
 [default]
-DEBUG = true
+DEBUG = false
+
+# Server Setting
+HOST = '0.0.0.0'
+PORT = 5001
+
+# Database Setting
 DATABASE = '/var/tmp/neteye.db'
-ADMIN_EMAIL = 'neteye_admin@yourcompany.com'
-ADMIN_USERNAME = 'neteye_admin'
-ADMIN_PASSWORD = 'neteye_admin'
+SQLALCHEMY_DATABASE_URI = 'sqlite:////var/tmp/neteye.db'
+
+# Flask-Security Setting
 SECRET_KEY = 'secret key'
 SECURITY_REGISTERABLE = false
 SECURITY_PASSWORD_SALT = 'salt'
 SECURITY_SEND_REGISTER_EMAIL = false
 SECURITY_LOGIN_USER_TEMPLATE = 'login.html'
 SECURITY_REGISTER_USER_TEMPLATE = 'register.html'
-SQLALCHEMY_DATABASE_URI = 'sqlite://///var/tmp/neteye.db'
+
+# Administrator Setting
+ADMIN_EMAIL = 'neteye_admin@yourcompany.com'
+ADMIN_USERNAME = 'neteye_admin'
+ADMIN_PASSWORD = 'neteye_admin'
+
+# Device Connection Setting
 NETMIKO_READ_TIMEOUT = 10
 SCRAPLI_TIMEOUT_SOCKET = 10
 SCRAPLI_TIMEOUT_TRANSPORT = 10
@@ -31,6 +43,6 @@ NAPALM_TIMEOUT = 10
     ENABLE = 'cisco'
 
 [development]
-
+DEBUG = true
 
 [production]

@@ -469,7 +469,7 @@ def explore_network(node):
 
 
 def try_connect_node(ip_address):
-    for cred in settings["default"]["credentials"].values():
+    for cred in settings.credentials.values():
         try:
             logger.debug(f"Trying to connect to {ip_address}")
             id = gen_uuid_str()

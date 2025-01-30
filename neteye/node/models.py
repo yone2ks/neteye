@@ -75,7 +75,7 @@ class Node(Base):
 
     def gen_netmiko_params(
         self,
-        read_timeout=settings["default"].get("NETMIKO_READ_TIMEOUT", 10),
+        read_timeout=settings.NETMIKO_READ_TIMEOUT,
         keepalive=10
         ):
         return {
@@ -91,9 +91,9 @@ class Node(Base):
 
     def gen_scrapli_params(
         self,
-        timeout_socket=settings["default"].get("SCRAPLI_TIMEOUT_SOCKET", 10),
-        timeout_transport=settings["default"].get("SCRAPLI_TIMEOUT_TRANSPORT", 10),
-        timeout_ops=settings["default"].get("SCRAPLI_TIMEOUT_OPS", 10)
+        timeout_socket=settings.SCRAPLI_TIMEOUT_SOCKET,
+        timeout_transport=settings.SCRAPLI_TIMEOUT_TRANSPORT,
+        timeout_ops=settings.SCRAPLI_TIMEOUT_OPS
         ):
         params = {
                 "host": self.ip_address,
@@ -114,10 +114,7 @@ class Node(Base):
             params["auth_secondary"] = self.enable
             return params
 
-    def gen_napalm_params(
-        self,
-        timeout=settings["default"].get("NAPALM_TIMEOUT", 10)
-        ):
+    def gen_napalm_params(self, timeout=settings.NAPALM_TIMEOUT):
         enable_param = "enable_password" if self.napalm_driver == "eos" else "secret"
         optional_args = {enable_param: self.enable, "port": self.port}
         return {

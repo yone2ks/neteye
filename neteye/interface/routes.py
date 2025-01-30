@@ -3,7 +3,6 @@ from logging import getLogger
 import pandas as pd
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.exc import IntegrityError
-from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
@@ -214,11 +213,11 @@ def filter():
     if field == "ip_address":
         interfaces = Interface.query.filter(
             Interface.ip_address.contains(filter_str)
-        ).paginate(page, settings.PER_PAGE)
+        )
     elif field == "description":
         interfaces = Interface.query.filter(
             Interface.description.contains(filter_str)
-        ).paginate(page, settings.PER_PAGE)
+        )
     elif field == "node":
         interfaces = (
             Interface.query.join(Node, Interface.node_id == Node.id)
@@ -226,6 +225,5 @@ def filter():
                 Interface.id, Node.hostname, Interface.name, Interface.ip_address
             )
             .filter(Node.hostname.contains(filter_str))
-            .paginate(page, settings.PER_PAGE)
         )
     return render_template("interface/index.html", interfaces=interfaces)

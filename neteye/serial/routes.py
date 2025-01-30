@@ -1,5 +1,4 @@
 import pandas as pd
-from dynaconf import settings
 from flask import (flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
@@ -114,18 +113,13 @@ def filter():
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
     if field == "serial":
-        serials = Serial.query.filter(Serial.serial_number.contains(filter_str)).paginate(
-            page, settings.PER_PAGE
-        )
+        serials = Serial.query.filter(Serial.serial_number.contains(filter_str))
     elif field == "product_id":
-        serials = Serial.query.filter(Serial.product_id.contains(filter_str)).paginate(
-            page, settings.PER_PAGE
-        )
+        serials = Serial.query.filter(Serial.product_id.contains(filter_str))
     elif field == "node":
         serials = (
             Serial.query.join(Node, Serial.node_id == Node.id)
             .add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id)
             .filter(Node.hostname.contains(filter_str))
-            .paginate(page, settings.PER_PAGE)
         )
     return render_template("serial/index.html", serials=serials)
