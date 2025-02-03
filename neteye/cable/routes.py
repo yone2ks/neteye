@@ -84,26 +84,36 @@ def new():
 @cable_bp.route("/create", methods=["POST"])
 @auth_required()
 def create():
+    sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
     cable = Cable(
         a_interface_id=request.form["a_interface"],
         b_interface_id=request.form["b_interface"],
         cable_type=request.form["cable_type"],
         link_speed=request.form["link_speed"],
         description=request.form["description"],
+        sorted_interface_ids=sorted_interface_ids
     )
     try:
         cable.add()
+        return redirect(url_for("cable.index"))
     except IntegrityError as e:
         cable.rollback()
         logger.warning(f"IntegrityError: {e}")
+        form = CableForm(request.form)
         flash(gen_integrity_error_message("Cable", e), "danger")
-        return redirect(url_for("cable.new"))
+        return render_template(
+            "cable/new.html",
+            form=form
+        )
     except Exception as e:
         cable.rollback()
         logger.error(f"Unexpected Error: {e}")
+        form = CableForm(request.form)
         flash("An unexpected error occurred while creating the cable.", "danger")
-        return redirect(url_for("cable.new"))
-    return redirect(url_for("cable.index"))
+        return render_template(
+            "cable/new.html",
+            form=form
+        )
 
 
 @cable_bp.route("/<id>/edit")
@@ -115,6 +125,7 @@ def edit(id):
     b_interface = cable.b_interface
     cable_type = cable.cable_type
     link_speed = cable.link_speed
+    description = cable.description
     return render_template(
         "cable/edit.html",
         id=id,
@@ -125,19 +136,24 @@ def edit(id):
         b_interface_id=b_interface.id,
         cable_type=cable_type,
         link_speed=link_speed,
+        description=description
     )
 
 
 @cable_bp.route("/<id>/update", methods=["POST"])
 @auth_required()
 def update(id):
+    sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
     cable = Cable.query.get(id)
     cable.a_interface_id = request.form["a_interface"]
     cable.b_interface_id = request.form["b_interface"]
     cable.cable_type = request.form["cable_type"]
     cable.link_speed = request.form["link_speed"]
+    cable.description = request.form["description"]
+    cable.sorted_interface_ids = sorted_interface_ids
     try:
         cable.commit()
+        return redirect(url_for("cable.index"))
     except IntegrityError as e:
         cable.rollback()
         logger.warning(f"IntegrityError: {e}")
@@ -148,7 +164,6 @@ def update(id):
         logger.error(f"Unexpected Error: {e}")
         flash("An unexpected error occurred while updating the cable.", "danger")
         return redirect(url_for("cable.edit", id=id))
-    return redirect(url_for("cable.index"))
 
 
 @cable_bp.route("/<id>/delete", methods=["POST"])
