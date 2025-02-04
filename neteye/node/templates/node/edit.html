@@ -1,4 +1,4 @@
-{% extends "base_template.html" %}
+{% extends "base_card_template.html" %}
 
 {% block javascript %}
 {{ super() }}
@@ -39,85 +39,82 @@
 </script>
 {% endblock javascript %}
 
+{% block card_header %}
+Edit Node
+{% endblock card_header %}
 
-{% block main %}
-<div class="card">
-    <div class="card-header">
-         Edit Node
+{% block card_body %}
+<form action="{{ url_for('node.update', id=id ) }}" method=post class="form-horizontal" id="node_update">
+    <input name="_method" type="hidden" value="PUT"/>
+    {{ form.csrf_token }}
+    <div class="form-group row">
+        {{ render_field(form.hostname, value=hostname) }}
     </div>
-    <div class="card-body">
-    <form action="{{ url_for('node.update', id=id ) }}" method=post class="form-horizontal" id="node_update">
-        <input name="_method" type="hidden" value="PUT"/>
-        {{ form.csrf_token }}
-        <div class="form-group row">
-            {{ render_field(form.hostname, value=hostname) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.description, value=description) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.ip_address, value=ip_address) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.port, value=port) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.device_type, list="device_type_datalist", value=device_type) }}
-            <datalist id="device_type_datalist">
-                {% for device_type in device_type_datalist %}
+    <div class="form-group row">
+        {{ render_field(form.description, value=description) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.ip_address, value=ip_address) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.port, value=port) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.device_type, list="device_type_datalist", value=device_type) }}
+        <datalist id="device_type_datalist">
+            {% for device_type in device_type_datalist %}
                 <option value={{ device_type }}>
-                    {% endfor %}
-            </datalist>
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.napalm_driver, list="napalm_driver_datalist", value=napalm_driver) }}
-            <datalist id="napalm_driver_datalist">
-                {% for driver in napalm_driver_datalist %}
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.napalm_driver, list="napalm_driver_datalist", value=napalm_driver) }}
+        <datalist id="napalm_driver_datalist">
+            {% for driver in napalm_driver_datalist %}
                 <option value={{ driver }}>
-                    {% endfor %}
-            </datalist>
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.scrapli_driver, list="scrapli_driver_datalist", value=scrapli_driver) }}
-            <datalist id="scrapli_driver_datalist">
-                {% for driver in scrapli_driver_datalist %}
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.scrapli_driver, list="scrapli_driver_datalist", value=scrapli_driver) }}
+        <datalist id="scrapli_driver_datalist">
+            {% for driver in scrapli_driver_datalist %}
                 <option value={{ driver }}>
-                    {% endfor %}
-            </datalist>
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.ntc_template_platform, list="device_type_datalist", value=ntc_template_platform) }}
-            <datalist id="device_type_datalist">
-                {% for device_type in device_type_datalist %}
+            {% endfor %}
+        </datalist>
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.ntc_template_platform, list="device_type_datalist", value=ntc_template_platform) }}
+        <datalist id="device_type_datalist">
+            {% for device_type in device_type_datalist %}
                 <option value={{ device_type }}>
-                    {% endfor %}
-            </datalist>
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.model, value=model) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.os_type, value=os_type) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.os_version, value=os_version) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.username, value=username) }}
-        </div>
-        <div class="form-group row">
-            {{ render_field(form.password, value=password) }}
-            <button id="show_hide_password" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
-      </div>
-        <div class="form-group row">
-            {{ render_field(form.enable, value=enable) }}
-            <button id="show_hide_enable" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
-        </div>
-    </form>
+            {% endfor %}
+        </datalist>
     </div>
-    <div class="card-footer">
-        {{ form.submit(class_="btn btn-sm btn-primary", form="node_update") }}
-        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="node_update") }}
+    <div class="form-group row">
+        {{ render_field(form.model, value=model) }}
     </div>
-</div>
-{% endblock main %}
+    <div class="form-group row">
+        {{ render_field(form.os_type, value=os_type) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.os_version, value=os_version) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.username, value=username) }}
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.password, value=password) }}
+        <button id="show_hide_password" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
+    </div>
+    <div class="form-group row">
+        {{ render_field(form.enable, value=enable) }}
+        <button id="show_hide_enable" class="btn btn-light btn-sm" type="button"><i class="fa fa-eye-slash" aria-hidden="true"></i></buttlon>
+    </div>
+</form>
+{% endblock card_body %}
+
+{% block card_footer %}
+    {{ form.submit(class_="btn btn-sm btn-primary", form="node_update") }}
+    {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="node_update") }}
+{% endblock card_footer %}

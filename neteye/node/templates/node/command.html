@@ -1,4 +1,4 @@
-{% extends "base_template.html" %}
+{% extends "base_card_template.html" %}
 {% block javascript %}
 {{ super() }}
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
@@ -22,15 +22,16 @@
 </script>
 {% endblock javascript %}
 
-{% block main %}
-<div class="card">
+{% block card_header %}
     <div class="card-header">
         {{ command }}
 
         <button class="pull-right btn btn-sm btn-primary copy_to_clipboard" data-clipboard-target=".card-body">Copy to Clipboard</button>
     </div>
+{% endblock card_header %}
+
+{% block card_body %}
     <div class="card-body">
         {{ result|safe }}
     </div>
-</div>
-{% endblock main %}
+{% endblock card_body %}
