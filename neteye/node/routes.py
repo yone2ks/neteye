@@ -422,14 +422,14 @@ def napalm_get_interfaces(id):
 @node_bp.route("/import_node_from_id/<id>")
 @auth_required()
 def import_node_from_id(id):
-    try:
+#    try:
         node = Node.query.get(id)
         import_target_node(node)
         logger.info(f"Node {id} imported successfully")
         return redirect(url_for("node.show", id=id))
-    except Exception as err:
-        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
-        return redirect(url_for("node.show", id=id))
+#    except Exception as err:
+#        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
+#        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
@@ -581,17 +581,9 @@ def import_interface(node):
     after = dict()
     for import_command in import_command_mapper.mapping_dict["import_interface"]:
         before_interfaces = {interface.name for interface in node.interfaces}
-        before_field = {"name", "ip_address", "description", "status"}
+        before_field = Interface.ATTRIBUTES
         before = {
-            interface.name: {
-                "id": interface.id,
-                "node_id": interface.node_id,
-                "name": interface.name,
-                "ip_address": interface.ip_address,
-                "description": interface.description,
-                "status": interface.status,
-            }
-            for interface in node.interfaces
+            interface.name: interface.to_dict() for interface in node.interfaces
         }
 
         result = node.command_with_history(

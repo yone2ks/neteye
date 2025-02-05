@@ -10,6 +10,8 @@ class Interface(Base):
     __tablename__ = "interfaces"
     __table_args__ = (UniqueConstraint("node_id", "name", name="unique_interface"),)
 
+    ATTRIBUTES = {"name", "description", "ip_address", "mask", "mac_address", "speed", "duplex", "mtu", "status"}
+
     node_id = Column(String, ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
     node = relationship("Node")
     name = Column(String, nullable=False)
@@ -34,3 +36,18 @@ class Interface(Base):
             .scalar()
             != None
         )
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'ip_address': self.ip_address,
+            'mask': self.mask,
+            'mac_address': self.mac_address,
+            'speed': self.speed,
+            'duplex': self.duplex,
+            'mtu': self.mtu,
+            'status': self.status,
+            'node_id': self.node_id,
+        }
