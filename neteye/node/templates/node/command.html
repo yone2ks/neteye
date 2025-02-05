@@ -23,15 +23,13 @@
 {% endblock javascript %}
 
 {% block card_header %}
-    <div class="card-header">
+    <div class="d-flex align-items-center justify-content-between">
         {{ command }}
 
-        <button class="pull-right btn btn-sm btn-primary copy_to_clipboard" data-clipboard-target=".card-body">Copy to Clipboard</button>
+        <button class="btn btn-sm btn-primary copy_to_clipboard" data-clipboard-target=".card-body">Copy to Clipboard</button>
     </div>
 {% endblock card_header %}
 
 {% block card_body %}
-    <div class="card-body">
-        {{ result|safe }}
-    </div>
+    {{ result|safe }}
 {% endblock card_body %}
