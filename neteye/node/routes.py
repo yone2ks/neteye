@@ -422,14 +422,14 @@ def napalm_get_interfaces(id):
 @node_bp.route("/import_node_from_id/<id>")
 @auth_required()
 def import_node_from_id(id):
-#    try:
+    try:
         node = Node.query.get(id)
         import_target_node(node)
         logger.info(f"Node {id} imported successfully")
         return redirect(url_for("node.show", id=id))
-#    except Exception as err:
-#        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
-#        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
@@ -506,16 +506,8 @@ def import_serial(node):
     after = dict()
     for import_command in import_command_mapper.mapping_dict["import_serial"]:
         before_serials = {serial.serial_number for serial in node.serials}
-        before_field = {"serial_number", "product_id"}
-        before = {
-            serial.serial_number: {
-                "id": serial.id,
-                "node_id": serial.node_id,
-                "serial_number": serial.serial_number,
-                "product_id": serial.product_id,
-            }
-            for serial in node.serials
-        }
+        before_field = {"serial_number", "product_id", "description"}
+        before = { serial.serial_number: serial.to_dict() for serial in node.serials }
 
         result = node.command_with_history(
             import_command["command"], current_user.email
