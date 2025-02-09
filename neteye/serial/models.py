@@ -8,6 +8,8 @@ from neteye.base.models import Base
 class Serial(Base):
     __tablename__ = "serials"
 
+    ATTRIBUTES = {"serial_number", "product_id", "description", "node_id"}
+
     serial_number = Column(String, nullable=False)
     product_id = Column(String)
     description = Column(String, default="")
@@ -24,3 +26,12 @@ class Serial(Base):
 
     def exists(serial_number):
         return Serial.query.filter_by(serial_number=serial_number).scalar() != None
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "serial_number": self.serial_number,
+            "product_id": self.product_id,
+            "description": self.description,
+            "node_id": self.node_id,
+        }
