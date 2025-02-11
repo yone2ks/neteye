@@ -26,9 +26,13 @@ def normalize_mac_address(mac_address, format=netaddr.mac_cisco):
         str: The normalized MAC address.
     
     Note:
-        By default, the MAC address is represented in Cisco format (dot notation).
+        - By default, the MAC address is represented in Cisco format (dot notation).
+        - If the given MAC address is not valid, it is returned unchanged.
     """
-    return str(netaddr.EUI(mac_address).format(format))
+    if netaddr.valid_mac(mac_address):
+        return str(netaddr.EUI(mac_address).format(format))
+    else:
+        return mac_address
 
 def normalize_mask(mask):
     """
