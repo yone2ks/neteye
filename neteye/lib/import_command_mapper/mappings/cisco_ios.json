@@ -60,9 +60,6 @@
                     "source": "port",
                     "normalizer": "interface"
                 },
-                "status": {
-                    "source": "status"
-                },
                 "description": {
                     "source": "description"
                 }

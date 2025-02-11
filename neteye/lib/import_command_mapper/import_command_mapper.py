@@ -5,15 +5,20 @@ from typing import Callable
 
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
+from neteye.serial.models import Serial
+from neteye.interface.models import Interface
+from neteye.arp_entry.models import ArpEntry
+from neteye.node.models import Node
 
 logger = getLogger(__name__)
 
 # Import types
-IMPORT_SERIAL = "import_serial"
-IMPORT_NODE = "import_node"
-IMPORT_INTERFACE = "import_interface"
-IMPORT_ARP_ENTRY = "import_arp_entry"
-
+IMPORT_TYPES = {
+    Serial: "import_serial",
+    Node: "import_node",
+    Interface: "import_interface",
+    ArpEntry: "import_arp_entry"
+}
 
 class ImportCommandMapper:
     MAPPING_DIR = os.path.dirname(__file__) + "/mappings/"
@@ -51,7 +56,7 @@ class ImportCommandMapper:
         Get the mappings by type.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
 
         Returns:
             list: The mappings.
@@ -64,7 +69,7 @@ class ImportCommandMapper:
         Get the commands by type.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
 
         Returns:
             list: The commands.
@@ -77,7 +82,7 @@ class ImportCommandMapper:
         Get the command by type and command.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
             command (str): The command.
 
         Returns:
@@ -95,7 +100,7 @@ class ImportCommandMapper:
         Get the fields by type and command.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
             command (str): The command.
 
         Returns:
@@ -113,7 +118,7 @@ class ImportCommandMapper:
         Get the source by type, command, and field.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
             command (str): The command.
             field (str): The field.
 
@@ -128,7 +133,7 @@ class ImportCommandMapper:
         Get the normalizer by type, command, and field.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
             command (str): The command.
             field (str): The field.
 
@@ -147,15 +152,70 @@ class ImportCommandMapper:
         return normalizer_mapping.get(normalizer_type, normalize_noop)
 
 
+    def get_value_from_record(self, import_type: str, command: str, field: str, record: dict) -> str:
+        """
+        Get the record value by type, command, field, and record.
+
+        Args:
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
+            command (str): The command.
+            field (str): The field.
+            record (dict): The record.
+        
+        Returns:
+            str: The record value.
+        """
+        source = self.get_source(import_type, command, field)
+        normalizer = self.get_normalizer(import_type, command, field)
+        return normalizer(record.get(source, ""))
+
+
     def get_index(self, import_type: str, command: str) -> int:
         """
         Get the index by type and command.
 
         Args:
-            import_type (str): The import type. IMPORT_SERIAL, IMPORT_NODE, IMPORT_INTERFACE, or IMPORT_ARP_ENTRY.
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
             command (str): The command.
 
         Returns:
             int: The index, or None if not found.
         """
         return self.get_command(import_type, command).get("index", None)
+
+
+    def get_ignore(self, import_type: str, command: str) -> list:
+        """
+        Get the ignore by type and command.
+
+        Args:
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
+            command (str): The command.
+
+        Returns:
+            list: The ignore.
+        """
+        return self.get_command(import_type, command).get("ignore", [])
+
+
+    def filter_ignore_records(self, import_type: str, command: str, result: list) -> list:
+        """
+        Filter out ignore records from the result.
+
+        Args:
+            import_command (dict): The import command.
+            result (list): The result.
+
+        Returns:
+            list: The filtered result.
+        """
+        ignore_conditions = self.get_ignore(import_type, command)
+        filtered_result = []
+        for record in result:
+            is_ignored = any(
+                all(record.get(key) == value for key, value in condition.items())
+                for condition in ignore_conditions
+            )
+            if not is_ignored:
+                filtered_result.append(record)
+        return filtered_result

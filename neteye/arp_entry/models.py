@@ -10,6 +10,9 @@ from neteye.interface.models import Interface
 class ArpEntry(Base):
     __tablename__ = "arp_entries"
 
+    ATTRIBUTES = {"ip_address", "mac_address", "interface_id", "protocol", "arp_type", "vendor"}
+    KEY = "ip_address"
+
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
     interface_id = Column(String, ForeignKey("interfaces.id", ondelete="CASCADE"), nullable=False)
@@ -32,3 +35,15 @@ class ArpEntry(Base):
 
     def exists(ip_address, interface_id):
         return ArpEntry.query.filter_by(ip_address=ip_address, interface_id=interface_id).scalar() != None
+
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "ip_address": self.ip_address,
+            "mac_address": self.mac_address,
+            "interface_id": self.interface_id,
+            "protocol": self.protocol,
+            "arp_type": self.arp_type,
+            "vendor": self.vendor,
+        }

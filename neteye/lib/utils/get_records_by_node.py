@@ -3,8 +3,8 @@ from neteye.interface.models import Interface
 
 def get_records_by_node(model: Base, node_id: str) -> list:
     """
-    get related records by node id
-    
+    Get related records by node id.
+
     Args:
         model (Base): The SQLAlchemy model class.
         node_id (str): The ID of the node to filter by.
@@ -23,3 +23,18 @@ def get_records_by_node(model: Base, node_id: str) -> list:
         ).all()
     else:
         raise ValueError(f'{model.__name__} has no node_id or interface_id attribute')
+
+
+def get_records_dict_by_node(model: Base, node_id: str) -> list:
+    """
+    Get related records by node id and convert them to dict.
+
+    Args:
+        model (Base): The SQLAlchemy model class.
+        node_id (str): The ID of the node to filter by.
+
+    Returns:
+        list: List of records as dictionaries filtered by node_id.
+    """
+    records = get_records_by_node(model, node_id)
+    return [record.to_dict() for record in records]

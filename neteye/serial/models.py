@@ -9,6 +9,7 @@ class Serial(Base):
     __tablename__ = "serials"
 
     ATTRIBUTES = {"serial_number", "product_id", "description", "node_id"}
+    KEY = "serial_number"
 
     serial_number = Column(String, nullable=False)
     product_id = Column(String)

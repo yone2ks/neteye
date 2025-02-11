@@ -13,9 +13,11 @@ from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
-from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper
+from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper, IMPORT_TYPES
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
+from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
+from neteye.lib.utils.get_records_by_node import get_records_dict_by_node
 from neteye.serial.models import Serial
 from sqlalchemy.sql import exists
 
@@ -422,14 +424,14 @@ def napalm_get_interfaces(id):
 @node_bp.route("/import_node_from_id/<id>")
 @auth_required()
 def import_node_from_id(id):
-    try:
+#    try:
         node = Node.query.get(id)
         import_target_node(node)
         logger.info(f"Node {id} imported successfully")
         return redirect(url_for("node.show", id=id))
-    except Exception as err:
-        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
-        return redirect(url_for("node.show", id=id))
+#    except Exception as err:
+#        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
+#        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
@@ -500,216 +502,85 @@ def try_connect_node(ip_address):
     return False
 
 
-def import_serial(node):
+def import_common(node, model):
+    """
+    Generic import function to retrieve data from a device (node) 
+    and update the database model accordingly.
+
+    Args:
+        node: The target node from which data is retrieved.
+        model: The SQLAlchemy model where the data will be stored.
+    """
     import_command_mapper = ImportCommandMapper(node.device_type)
-    after_serials = set()
-    after = dict()
-    for import_command in import_command_mapper.mapping_dict["import_serial"]:
-        before_serials = {serial.serial_number for serial in node.serials}
-        before_field = {"serial_number", "product_id", "description"}
-        before = { serial.serial_number: serial.to_dict() for serial in node.serials }
-
-        result = node.command_with_history(
-            import_command["command"], current_user.email
-        )
+    import_type = IMPORT_TYPES[model]
+    key_field = model.KEY # Unique key field (e.g., serial number, IP address, etc.)
+    
+    # get data for each command and commit the changes to the database
+    for command in import_command_mapper.get_commands(import_type):
+        # get current records information
+        before_records = { record[key_field]: record for record in get_records_dict_by_node(model, node.id) }
+        before_keys = set(before_records.keys())
+        before_field = model.ATTRIBUTES
+        after_records = {}
+        
+        # execute import command and get result
+        result = node.command_with_history(command, current_user.email)
+        
         if isinstance(result, list):
-            if "serial_number" in import_command["field"]:
-                after_serials = {
-                    serial_info[import_command["field"]["serial_number"]]
-                    for serial_info in result
-                }
-            else:
-                after_serials = before_serials
-            after_field = set(import_command["field"])
-            delta_field = before_field - after_field
-            for serial_info in result:
-                after_entry = {"node_id": node.id}
-                for field_name in import_command["field"]:
-                    after_entry[field_name] = serial_info[
-                        import_command["field"][field_name]
-                    ]
+            index = import_command_mapper.get_index(import_type, command)
+            filtered_result = import_command_mapper.filter_ignore_records(import_type=import_type, command=command, result=result)
+            # get the fields in command result
+            after_field = set(import_command_mapper.get_fields(import_type, command).keys())
+            # get delta between before_field and after_field. delta_fields is not included in the result, so assign a before value in the fields.
+            delta_field = (before_field - after_field) - {"node_id"}
+            
+            # If an index is specified, only the record information of the corresponding index is processed. Otherwise, all records are processed.
+            for record in (filtered_result if index is None else [filtered_result[index]]):
+                record_key = import_command_mapper.get_value_from_record(import_type=import_type, command=command, field=key_field, record=record)
+                after_entry = {"node_id": node.id} if "node_id" in before_field else {}
+                # process for each field in the command result
+                for field_name in import_command_mapper.get_fields(import_type, command):
+                    after_entry[field_name] = import_command_mapper.get_value_from_record(import_type=import_type, command=command, field=field_name, record=record)
+                # process for non-existent fields in the command result
                 for field_name in delta_field:
-                    if serial_info[import_command["field"]["serial_number"]] in before:
-                        after_entry[field_name] = before[
-                            serial_info[import_command["field"]["serial_number"]]
-                        ][field_name]
-                    else:
-                        after_entry[field_name] = None
-                after[serial_info[import_command["field"]["serial_number"]]] = (
-                    after_entry
-                )
+                    after_entry[field_name] = before_records.get(record_key, {}).get(field_name)
 
-            delta_commit(
-                model=Serial,
-                before_keys=before_serials,
-                before=before,
-                after_keys=after_serials,
-                after=after,
-            )
+                after_records[record_key] = after_entry
+
+            # commit the changes to the database for the command
+            print(f"before_keys: {before_keys}")
+            print(f"before_records: {before_records}")
+            print(f"after_keys: {set(after_records.keys())}")
+            print(f"after_records: {after_records}")
+            
+            delta_commit(model=model, before_keys=before_keys, before=before_records, after_keys=set(after_records.keys()), after=after_records)
+
+
+def import_serial(node):
+    import_common(node, Serial)
 
 
 def import_node(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
-    for import_command in import_command_mapper.mapping_dict["import_node"]:
-        result = node.command_with_history(
-            import_command["command"], current_user.email
-        )
+    import_type = IMPORT_TYPES[Node]
+    
+    for command in import_command_mapper.get_commands(import_type):
+        result = node.command_with_history(command, current_user.email)
         if isinstance(result, list):
-            for field_name in import_command["field"]:
-                setattr(
-                    node,
-                    field_name,
-                    result[import_command["index"]][
-                        import_command["field"][field_name]
-                    ],
-                )
+            index = import_command_mapper.get_index(import_type, command)
+            fields = import_command_mapper.get_fields(import_type, command)
+            
+            for record in (result if index is None else [result[index]]):
+                for field_name in fields.keys():
+                    setattr(node, field_name, import_command_mapper.get_value_from_record(import_type, command, field_name, record))
     node.commit()
 
 
 def import_interface(node):
-    intf_conv = IntfAbbrevConverter(node.device_type)
-    import_command_mapper = ImportCommandMapper(node.device_type)
-    after_interfaces = set()
-    after = dict()
-    for import_command in import_command_mapper.mapping_dict["import_interface"]:
-        before_interfaces = {interface.name for interface in node.interfaces}
-        before_field = Interface.ATTRIBUTES
-        before = {
-            interface.name: interface.to_dict() for interface in node.interfaces
-        }
-
-        result = node.command_with_history(
-            import_command["command"], current_user.email
-        )
-        if isinstance(result, list):
-            if "name" in import_command["field"]:
-                after_interfaces = {
-                    intf_conv.normalization(
-                        interface_info[import_command["field"]["name"]]
-                    )
-                    for interface_info in result
-                }
-            else:
-                after_interfaces = before_interfaces
-            after_field = set(import_command["field"])
-            delta_field = before_field - after_field
-            for interface_info in result:
-                after_entry = {"node_id": node.id}
-                for field_name in import_command["field"]:
-                    if field_name == "name":
-                        after_entry[field_name] = intf_conv.normalization(
-                            interface_info[import_command["field"][field_name]]
-                        )
-                    else:
-                        after_entry[field_name] = interface_info[
-                            import_command["field"][field_name]
-                        ]
-                for field_name in delta_field:
-                    if (
-                        intf_conv.normalization(
-                            interface_info[import_command["field"]["name"]]
-                        )
-                        in before
-                    ):
-                        after_entry[field_name] = before[
-                            intf_conv.normalization(
-                                interface_info[import_command["field"]["name"]]
-                            )
-                        ][field_name]
-                    else:
-                        after_entry[field_name] = None
-
-                after[
-                    intf_conv.normalization(
-                        interface_info[import_command["field"]["name"]]
-                    )
-                ] = after_entry
-
-            delta_commit(
-                model=Interface,
-                before_keys=before_interfaces,
-                before=before,
-                after_keys=after_interfaces,
-                after=after,
-            )
-
+    import_common(node, Interface)
 
 def import_arp_entry(node):
-    intf_conv = IntfAbbrevConverter(node.device_type)
-    import_command_mapper = ImportCommandMapper(node.device_type)
-    after_arp_entries = set()
-    after = dict()
-    interfaces = {interface.name: interface.id for interface in node.interfaces}
-
-    for import_command in import_command_mapper.mapping_dict["import_arp_entry"]:
-        before_field = {"ip_address", "mac_address", "protocol", "arp_type", "vendor"}
-        arp_entries = ArpEntry.query.filter(
-            ArpEntry.interface_id.in_(interfaces.values())
-        ).all()
-        before_arp_entries = set()
-        before = dict()
-        if arp_entries:
-            for arp_entry in arp_entries:
-                before_arp_entries.add(arp_entry.ip_address)
-                before[arp_entry.ip_address] = {
-                    "id": arp_entry.id,
-                    "ip_address": arp_entry.ip_address,
-                    "mac_address": arp_entry.mac_address,
-                    "interface_id": arp_entry.interface_id,
-                    "protocol": arp_entry.protocol,
-                    "arp_type": arp_entry.arp_type,
-                    "vendor": arp_entry.vendor,
-                }
-
-        result = node.command_with_history(
-            import_command["command"], current_user.email
-        )
-        if isinstance(result, list):
-            result = [
-                record
-                for record in result
-                if is_not_ignore_record(record, import_command)
-            ]
-            after_arp_entries = {
-                arp_entry_info[import_command["field"]["ip_address"]]
-                for arp_entry_info in result
-            }
-            after_field = set(import_command["field"])
-            delta_field = before_field - after_field
-            for arp_entry_info in result:
-                if arp_entry_info["interface"] != "":
-                    after_entry = {
-                        "interface_id": interfaces[
-                            intf_conv.normalization(arp_entry_info["interface"])
-                        ]
-                    }
-                    for field_name in import_command["field"]:
-                        after_entry[field_name] = arp_entry_info[
-                            import_command["field"][field_name]
-                        ]
-                    for field_name in delta_field:
-                        if (
-                            arp_entry_info[import_command["field"]["ip_address"]]
-                            in before
-                        ):
-                            after_entry[field_name] = before[
-                                arp_entry_info[import_command["field"]["ip_address"]]
-                            ][field_name]
-                        else:
-                            after_entry[field_name] = None
-
-                after[arp_entry_info[import_command["field"]["ip_address"]]] = (
-                    after_entry
-                )
-
-            delta_commit(
-                model=ArpEntry,
-                before_keys=before_arp_entries,
-                before=before,
-                after_keys=after_arp_entries,
-                after=after,
-            )
-
+    import_common(node, ArpEntry)
 
 def import_target_node(node):
     import_node(node)
