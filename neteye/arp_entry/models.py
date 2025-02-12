@@ -24,9 +24,13 @@ class ArpEntry(Base):
     def __init__(self, **kwargs):
         super(ArpEntry, self).__init__(**kwargs)
         try:
-            self.vendor = EUI(self.mac_address, dialect=mac_unix_expanded).oui.registration().org
+            if valid_mac(self.mac_address):
+                self.vendor = EUI(self.mac_address, dialect=mac_unix_expanded).oui.registration().org
+            else:
+                self.vendor = ""
         except NotRegisteredError as err:
             self.vendor = ""
+
 
     def __repr__(self):
         return "<ARP Entry id={id} ip_address={ip_address} mac_address={mac_address}".format(
