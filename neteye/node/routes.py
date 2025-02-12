@@ -548,11 +548,6 @@ def import_common(node, model):
                 after_records[record_key] = after_entry
 
             # commit the changes to the database for the command
-            print(f"before_keys: {before_keys}")
-            print(f"before_records: {before_records}")
-            print(f"after_keys: {set(after_records.keys())}")
-            print(f"after_records: {after_records}")
-            
             delta_commit(model=model, before_keys=before_keys, before=before_records, after_keys=set(after_records.keys()), after=after_records)
 
 
