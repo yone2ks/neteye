@@ -5,10 +5,12 @@ from typing import Callable
 
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
+from neteye.base.models import Base
 from neteye.serial.models import Serial
 from neteye.interface.models import Interface
 from neteye.arp_entry.models import ArpEntry
 from neteye.node.models import Node
+from neteye.cable.models import Cable
 
 logger = getLogger(__name__)
 
@@ -152,6 +154,33 @@ class ImportCommandMapper:
         return normalizer_mapping.get(normalizer_type, normalize_noop)
 
 
+    def get_foreign_key(self, import_type: str, command: str, field: str) -> Base:
+        """
+        Get the foreign key by type, command, and field.
+
+        Args:
+            import_type (str): The import type. One of the values in IMPORT_TYPES.
+            command (str): The command.
+            field (str): The field.
+
+        Returns:
+            Base: The foreign key.
+
+        Notes:
+            - If the foreign key is not specified for the field, this method returns None.
+        """
+        foreign_key_mapping = {
+            "node": Node,
+            "interface": Interface,
+            "serial": Serial,
+            "arp_entry": ArpEntry,
+            "cable": Cable
+            "": None
+        }
+        foreign_key_type = self.get_fields(import_type, command).get(field, "").get("foreign_key", "")
+        return foreign_key_mapping.get(foreign_key_type)
+
+
     def get_value_from_record(self, import_type: str, command: str, field: str, record: dict) -> str:
         """
         Get the record value by type, command, field, and record.
@@ -167,7 +196,13 @@ class ImportCommandMapper:
         """
         source = self.get_source(import_type, command, field)
         normalizer = self.get_normalizer(import_type, command, field)
-        return normalizer(record.get(source, ""))
+        value = normalizer(record.get(source, ""))
+        foreign_model = self.get_foreign_key(import_type, command, field)
+
+        if foreign_model:
+            # Retrieve the foreign key ID by filtering the model's key with the value.
+            return foreign_model.query.filter_by(**{foreign_model.KEY: value}).first().id
+        return value
 
 
     def get_index(self, import_type: str, command: str) -> int:
