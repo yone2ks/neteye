@@ -174,7 +174,7 @@ class ImportCommandMapper:
             "interface": Interface,
             "serial": Serial,
             "arp_entry": ArpEntry,
-            "cable": Cable
+            "cable": Cable,
             "": None
         }
         foreign_key_type = self.get_fields(import_type, command).get(field, "").get("foreign_key", "")
