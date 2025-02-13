@@ -1,0 +1,53 @@
+import_serial:
+  - command: show inventory
+    field:
+      serial_number:
+        source: sn
+      product_id:
+        source: pid
+      description:
+        source: descr
+    index: null
+import_node:
+  - command: show version
+    field:
+      hostname:
+        source: hostname
+      model:
+        source: platform
+      os_version:
+        source: os
+    index: 0
+import_interface:
+  - command: show ip int brief vrf all
+    field:
+      name:
+        source: interface
+        normalizer: interface
+      ip_address:
+        source: ip_address
+      status:
+        source: status
+    index: null
+  - command: show int desc
+    field:
+      name:
+        source: port
+        normalizer: interface
+      speed:
+        source: speed
+      description:
+        source: description
+    index: null
+import_arp_entry:
+  - command: show ip arp vrf all
+    field:
+      ip_address:
+        source: ip_address
+      mac_address:
+        source: mac_address
+        normalizer: mac_address
+    ignore:
+      - age: '-'
+      - mac_address: Incomplete
+    index: null

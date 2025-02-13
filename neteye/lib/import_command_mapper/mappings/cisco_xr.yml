@@ -1,0 +1,51 @@
+import_serial:
+  - command: admin show inventory
+    field:
+      serial_number:
+        source: sn
+      product_id:
+        source: pid
+      description:
+        source: descr
+    index: null
+import_node:
+  - command: show version
+    field:
+      model:
+        source: hardware
+      os_version:
+        source: version
+    index: 0
+import_interface:
+  - command: show interfaces
+    field:
+      name:
+        source: interface
+        normalizer: interface
+      status:
+        source: link_status
+      ip_address:
+        source: ip_address
+      duplex:
+        source: duplex
+      speed:
+        source: speed
+      mtu:
+        source: mtu
+      description:
+        source: description
+    index: null
+import_arp_entry:
+  - command: show arp
+    field:
+      ip_address:
+        source: ip_address
+      mac_address:
+        source: mac_address
+        normalizer: mac_address
+      arp_type:
+        source: type
+    ignore:
+      - age: '-'
+      - mac_address: Incomplete
+    index: null

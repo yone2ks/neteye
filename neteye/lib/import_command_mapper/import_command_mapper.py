@@ -1,4 +1,4 @@
-import json
+import yaml
 import os
 from logging import getLogger
 from typing import Callable
@@ -24,7 +24,7 @@ IMPORT_TYPES = {
 
 class ImportCommandMapper:
     MAPPING_DIR = os.path.dirname(__file__) + "/mappings/"
-    SUFFIX = ".json"
+    SUFFIX = ".yml"
 
     def __init__(self, device_type: str) -> None:
         """
@@ -46,8 +46,8 @@ class ImportCommandMapper:
     def _load_mapping(self) -> dict:
         mapping_file_path = os.path.join(self.MAPPING_DIR, f"{self.device_type}{self.SUFFIX}")
         try:
-            with open(mapping_file_path, "r") as mapping_json:
-                return json.load(mapping_json)
+            with open(mapping_file_path, "r") as mapping_yaml:
+                return yaml.safe_load(mapping_yaml)
         except FileNotFoundError:
             logger.error(f"Import command mapping file '{mapping_file_path}' not found")
             raise
