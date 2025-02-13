@@ -1,27 +1,40 @@
 {
-    "import_serial":[
-            {
-                "command": "show inventory",
-                "field" : {
-                    "serial_number": "sn",
-                    "product_id": "pid"
+    "import_serial": [
+        {
+            "command": "show inventory",
+            "field": {
+                "serial_number": {
+                    "source": "sn"
                 },
-                "index": null
-            }
+                "product_id": {
+                    "source": "pid"
+                },
+                "description": {
+                    "source": "descr"
+                }
+            },
+            "index": null
+        }
     ],
     "import_node": [
         {
             "command": "show inventory",
             "field": {
-                "model": "pid"
+                "model": {
+                    "source": "pid"
+                }
             },
             "index": 0
         },
         {
             "command": "show version",
             "field": {
-                "hostname": "hostname",
-                "os_version": "version"
+                "hostname": {
+                    "source": "hostname"
+                },
+                "os_version": {
+                    "source": "version"
+                }
             },
             "index": 0
         }
@@ -30,18 +43,52 @@
         {
             "command": "show ip int brief",
             "field": {
-                "name": "interface",
-                "ip_address": "ip_address",
-                "status": "status"
+                "name": {
+                    "source": "interface",
+                    "normalizer": "interface"
+                },
+                "ip_address": {
+                    "source": "ip_address"
+                },
+                "status": {
+                    "source": "status"
+                }
             },
             "index": null
         },
         {
             "command": "show int desc",
             "field": {
-                "name": "port",
-                "status": "status",
-                "description": "description"
+                "name": {
+                    "source": "port",
+                    "normalizer": "interface"
+                },
+                "description": {
+                    "source": "description"
+                }
+            },
+            "index": null
+        },
+        {
+            "command": "show interfaces",
+            "field": {
+                "name": {
+                    "source": "interface",
+                    "normalizer": "interface"
+                },
+                "mac_address": {
+                    "source": "mac_address",
+                    "normalizer": "mac_address"
+                },
+                "speed": {
+                    "source": "speed"
+                },
+                "duplex": {
+                    "source": "duplex"
+                },
+                "mtu": {
+                    "source": "mtu"
+                }
             },
             "index": null
         }
@@ -50,14 +97,30 @@
         {
             "command": "show ip arp",
             "field": {
-                "ip_address": "ip_address",
-                "mac_address": "mac_address",
-                "protocol": "protocol",
-                "arp_type": "type"
+                "ip_address": {
+                    "source": "ip_address"
+                },
+                "mac_address": {
+                    "source": "mac_address",
+                    "normalizer": "mac_address"
+                },
+                "protocol": {
+                    "source": "protocol"
+                },
+                "arp_type": {
+                    "source": "type"
+                },
+                "interface_id": {
+                    "source": "interface",
+                    "foreign_key": "interface"
+                }
             },
             "ignore": [
                 {
                     "age": "-"
+                },
+                {
+                    "mac_address": "Incomplete"
                 }
             ],
             "index": null

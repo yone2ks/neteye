@@ -1,21 +1,31 @@
 {
-    "import_serial":[
-            {
-                "command": "admin show inventory",
-                "field" : {
-                    "serial_number": "sn",
-                    "product_id": "pid",
-                    "description": "descr"
+    "import_serial": [
+        {
+            "command": "admin show inventory",
+            "field": {
+                "serial_number": {
+                    "source": "sn"
                 },
-                "index": null
-            }
+                "product_id": {
+                    "source": "pid"
+                },
+                "description": {
+                    "source": "descr"
+                }
+            },
+            "index": null
+        }
     ],
     "import_node": [
         {
             "command": "show version",
             "field": {
-                "model": "hardware",
-                "os_version": "version"
+                "model": {
+                    "source": "hardware"
+                },
+                "os_version": {
+                    "source": "version"
+                }
             },
             "index": 0
         }
@@ -24,13 +34,28 @@
         {
             "command": "show interfaces",
             "field": {
-                "name": "interface",
-                "status": "link_status",
-                "ip_address": "ip_address",
-                "duplex": "duplex",
-                "speed": "speed",
-                "mtu": "mtu",
-                "description": "description"
+                "name": {
+                    "source": "interface",
+                    "normalizer": "interface"
+                },
+                "status": {
+                    "source": "link_status"
+                },
+                "ip_address": {
+                    "source": "ip_address"
+                },
+                "duplex": {
+                    "source": "duplex"
+                },
+                "speed": {
+                    "source": "speed"
+                },
+                "mtu": {
+                    "source": "mtu"
+                },
+                "description": {
+                    "source": "description"
+                }
             },
             "index": null
         }
@@ -39,13 +64,23 @@
         {
             "command": "show arp",
             "field": {
-                "ip_address": "ip_address",
-                "mac_address": "mac_address",
-                "arp_type": "type"
+                "ip_address": {
+                    "source": "ip_address"
+                },
+                "mac_address": {
+                    "source": "mac_address",
+                    "normalizer": "mac_address"
+                },
+                "arp_type": {
+                    "source": "type"
+                }
             },
             "ignore": [
                 {
                     "age": "-"
+                },
+                {
+                    "mac_address": "Incomplete"
                 }
             ],
             "index": null
