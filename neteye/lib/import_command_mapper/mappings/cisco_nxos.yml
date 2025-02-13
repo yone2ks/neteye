@@ -47,6 +47,9 @@ import_arp_entry:
       mac_address:
         source: mac_address
         normalizer: mac_address
+      interface_id:
+        source: interface
+        foreign_key: interface
     ignore:
       - age: '-'
       - mac_address: Incomplete
