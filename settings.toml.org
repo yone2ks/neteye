@@ -8,6 +8,7 @@ PORT = 5001
 # Database Setting
 DATABASE = '/var/tmp/neteye.db'
 SQLALCHEMY_DATABASE_URI = 'sqlite:////var/tmp/neteye.db'
+SQLALCHEMY_TRACK_MODIFICATIONS = false
 
 # Flask-Security Setting
 SECRET_KEY = 'secret key'
