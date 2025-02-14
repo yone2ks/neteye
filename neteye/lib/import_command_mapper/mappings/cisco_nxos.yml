@@ -8,6 +8,15 @@ import_serial:
       description:
         source: descr
     index: null
+  - command: show interface transceiver
+    field:
+      serial_number:
+        source: serial
+      product_id:
+        source: product_id
+      description:
+        source: type
+    index: null
 import_node:
   - command: show version
     field:
