@@ -17,7 +17,7 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
-from neteye.lib.scrapli_utils.scrapli_community_helper import ScrapliCommunityHelper
+from neteye.lib.scrapli_utils import ScrapliCommunityHelper, textfsm_get_template_with_env
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -221,7 +221,7 @@ class Node(Base):
             response.textfsm_platform = self.ntc_template_platform
         elif ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
             response.textfsm_platform = self.device_type
-        parsed_output = response.textfsm_parse_output()
+        parsed_output = response.textfsm_parse_output(textfsm_get_template_with_env(self.device_type, command))
         if parsed_output:
             return parsed_output
         return response.result

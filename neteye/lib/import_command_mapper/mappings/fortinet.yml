@@ -1,0 +1,14 @@
+import_serial:
+import_node:
+import_interface:
+  - command: get system interface physical
+    field:
+      name:
+        source: interface
+        normalizer: interface
+      ip_address:
+        source: ip_address
+      status:
+        source: status
+    index: null
+import_arp_entry:
