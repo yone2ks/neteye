@@ -17,7 +17,7 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
-from neteye.lib.scrapli_community_helper.scrapli_community_helper import ScrapliCommunityHelper
+from neteye.lib.scrapli_utils.scrapli_community_helper import ScrapliCommunityHelper
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
