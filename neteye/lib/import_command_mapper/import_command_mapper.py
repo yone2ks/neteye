@@ -142,9 +142,14 @@ class ImportCommandMapper:
         Returns:
             Callable: The normalizer.
         """
+        try:
+            interface_normalizer = IntfAbbrevConverter(self.device_type).normalization
+        except FileNotFoundError:
+            interface_normalizer = normalize_noop
+
         normalizer_mapping = {
             "noop": normalize_noop,
-            "interface": IntfAbbrevConverter(self.device_type).normalization,
+            "interface": interface_normalizer,
             "mac_address": normalize_mac_address,
             "mask": normalize_mask,
             "speed": normalize_speed,
