@@ -1,5 +1,8 @@
+from logging import getLogger
 from netmiko.utilities import get_template_dir
 from textfsm.clitable import CliTable
+
+logger = getLogger(__name__)
 
 def textfsm_get_template_with_env(platform: str, command: str) -> str:
     """
