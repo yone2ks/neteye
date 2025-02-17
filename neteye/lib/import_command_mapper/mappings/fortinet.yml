@@ -1,14 +1,39 @@
 import_serial:
+  - command: get system status
+    field:
+      serial_number:
+        source: serial_number
 import_node:
+  - command: get system status
+    field:
+      hostname:
+        source: hostname
+      os_version:
+        source: version
 import_interface:
   - command: get system interface physical
     field:
       name:
-        source: interface
-        normalizer: interface
+        source: name
       ip_address:
         source: ip_address
+      mask:
+        source: netmask
       status:
         source: status
-    index: null
+      speed:
+        source: speed
+        normalize: speed
+      duplex:
+        source: duplex
+        normalize: duplex
 import_arp_entry:
+  - command: get system arp
+    field:
+      ip_address:
+        source: ip_address
+      mac_address:
+        source: mac_address
+      interface_id:
+        source: interface
+        foreign_key: interface

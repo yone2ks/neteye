@@ -7,7 +7,6 @@ import_serial:
         source: pid
       description:
         source: descr
-    index: null
 import_node:
   - command: show version
     field:
@@ -34,7 +33,6 @@ import_interface:
         source: mtu
       description:
         source: description
-    index: null
 import_arp_entry:
   - command: show arp
     field:
@@ -45,7 +43,9 @@ import_arp_entry:
         normalizer: mac_address
       arp_type:
         source: type
+      interface_id:
+        source: interface
+        foreign_key: interface
     ignore:
       - age: '-'
       - mac_address: Incomplete
-    index: null
