@@ -10,7 +10,7 @@ flask-nav==0.6
 Flask-Bootstrap==3.3.7.1
 markupsafe==2.0.1
 marshmallow-sqlalchemy==0.24.2
-flask-restx==0.4.0
+flask-restx==0.5.1
 flask-marshmallow==0.11.0
 Flask-Continuum==0.1.7
 SQLAlchemy-Utils==0.36.8
