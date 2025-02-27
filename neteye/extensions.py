@@ -1,4 +1,3 @@
-import toml
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
 from flask_continuum import Continuum
