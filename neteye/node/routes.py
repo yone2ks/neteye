@@ -8,7 +8,6 @@ from flask import flash, jsonify, redirect, render_template, request, session, u
 from flask_security import auth_required, current_user
 from netaddr import *
 from neteye.base.models import gen_uuid_str
-from neteye.apis.node_namespace import node_schema, nodes_schema
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
