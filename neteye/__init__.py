@@ -40,7 +40,7 @@ bootstrap.init_app(app)
 babel.init_app(app)
 security.init_app(app, user_datastore)
 ma.init_app(app)
-api.init_app(api_bp)
+#api.init_app(api_bp)
 
 app.register_blueprint(root_bp)
 app.register_blueprint(base_bp)
@@ -56,7 +56,6 @@ app.register_blueprint(visualization_bp)
 app.register_blueprint(troubleshoot_bp)
 app.register_blueprint(api_bp)
 
-api.add_namespace(nodes_api)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 

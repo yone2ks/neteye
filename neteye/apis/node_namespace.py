@@ -1,8 +1,7 @@
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, ValidationError, fields, abort
 
-from neteye.apis.routes import api_bp
-from neteye.extensions import api, db, ma
+from neteye.extensions import api, ma
 from neteye.node.models import Node
 
 
@@ -15,7 +14,9 @@ nodes_schema = NodeSchema(many=True)
 node_schema = NodeSchema()
 
 
-nodes_api = api.namespace("nodes", description="Nodes API")
+nodes_api = Namespace("nodes", description="Nodes API")
+api.add_namespace(nodes_api)
+
 node_model = nodes_api.model('Node', {
     'id': fields.String(description='The UUID of the node'),
     'hostname': fields.String(description='The hostname of the node'),
@@ -34,8 +35,7 @@ node_model = nodes_api.model('Node', {
     'enable': fields.String(description='The enable password of the node')
 })
 
-@api_bp.route("nodes")
-@nodes_api.route("/")
+@nodes_api.route("","/")
 class NodesResource(Resource):
     @nodes_api.marshal_list_with(node_model)
     def get(self):

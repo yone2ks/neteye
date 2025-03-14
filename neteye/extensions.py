@@ -7,6 +7,7 @@ from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 from dynaconf import Dynaconf
 
+from neteye.apis.routes import api_bp
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
 from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
 
@@ -15,7 +16,7 @@ bootstrap = Bootstrap()
 babel = Babel()
 security = Security()
 continuum = Continuum(db=db)
-api = Api()
+api = Api(api_bp, version="1.0", title="Neteye API", description="API for managing network devices")
 ma = Marshmallow()
 connection_pool = ConnectionPool()
 ntc_template_utils = NtcTemplateUtils()
