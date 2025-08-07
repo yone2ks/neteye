@@ -37,6 +37,7 @@ def data():
         ColumnDT(Interface.ip_address),
         ColumnDT(Interface.mac_address),
         ColumnDT(Interface.description),
+        ColumnDT(Interface.status),
     ]
     query = db.session.query().select_from(Interface).join(Node)
     params = request.args.to_dict()
