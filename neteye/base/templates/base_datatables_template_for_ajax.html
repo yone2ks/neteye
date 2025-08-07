@@ -82,6 +82,53 @@
              }
          });
      });
+
+     // Function to rebuild filter row to match visible columns
+     function rebuildFilterRow() {
+         var filterRow = $('#index thead tr:eq(1)');
+         filterRow.empty(); // Clear existing filter fields
+         
+         table.columns().every(function(index) {
+             var column = this;
+             
+             if (column.visible()) {
+                 var header = table.column(index).header();
+                 var title = $(header).text();
+                 var state = table.state.loaded();
+                 var searchValue = '';
+                 
+                 if (state && state.columns && state.columns[index] && state.columns[index].search) {
+                     searchValue = state.columns[index].search.search;
+                 }
+                 
+                 var filterCell = $('<th class="sorting" tabindex="0" aria-controls="index" rowspan="1" colspan="1">' +
+                     '<input type="text" placeholder="Search ' + title + '" value="' + searchValue + '" />' +
+                     '</th>');
+                 
+                 filterRow.append(filterCell);
+                 
+                 // Bind search functionality to the new input
+                 filterCell.find('input').on('keyup change', function() {
+                     if (table.column(index).search() !== this.value) {
+                         table.column(index).search(this.value).draw();
+                     }
+                 });
+             }
+         });
+     }
+     
+     // Handle column visibility changes
+     table.on('column-visibility.dt', function (e, settings, column, state) {
+         // Rebuild the filter row to match current column visibility
+         setTimeout(function() {
+             rebuildFilterRow();
+         }, 10);
+     });
+     
+     // Initial rebuild on page load
+     setTimeout(function() {
+         rebuildFilterRow();
+     }, 200);
  } );
 </script>
 {% block additional_javascript %}{% endblock additional_javascript %}
