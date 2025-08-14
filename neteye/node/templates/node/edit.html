@@ -63,7 +63,7 @@ Edit Node
         {{ render_field(form.device_type, list="device_type_datalist", value=device_type) }}
         <datalist id="device_type_datalist">
             {% for device_type in device_type_datalist %}
-                <option value={{ device_type }}>
+                <option value="{{ device_type }}">
             {% endfor %}
         </datalist>
     </div>
@@ -71,7 +71,7 @@ Edit Node
         {{ render_field(form.napalm_driver, list="napalm_driver_datalist", value=napalm_driver) }}
         <datalist id="napalm_driver_datalist">
             {% for driver in napalm_driver_datalist %}
-                <option value={{ driver }}>
+                <option value="{{ driver }}">
             {% endfor %}
         </datalist>
     </div>
@@ -79,7 +79,7 @@ Edit Node
         {{ render_field(form.scrapli_driver, list="scrapli_driver_datalist", value=scrapli_driver) }}
         <datalist id="scrapli_driver_datalist">
             {% for driver in scrapli_driver_datalist %}
-                <option value={{ driver }}>
+                <option value="{{ driver }}">
             {% endfor %}
         </datalist>
     </div>
@@ -87,7 +87,7 @@ Edit Node
         {{ render_field(form.ntc_template_platform, list="device_type_datalist", value=ntc_template_platform) }}
         <datalist id="device_type_datalist">
             {% for device_type in device_type_datalist %}
-                <option value={{ device_type }}>
+                <option value="{{ device_type }}">
             {% endfor %}
         </datalist>
     </div>

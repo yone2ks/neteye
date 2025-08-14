@@ -60,7 +60,7 @@ New Node
             {{ render_field(form.device_type, list="device_type_datalist") }}
             <datalist id="device_type_datalist">
                 {% for device_type in device_type_datalist %}
-                <option value={{ device_type }}>
+                <option value="{{ device_type }}">
                 {% endfor %}
             </datalist>
         </div>
