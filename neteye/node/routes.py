@@ -447,6 +447,86 @@ def import_node_from_ip(ip_address):
         return redirect(url_for("node.show", id=node.id))
 
 
+@node_bp.route("/import_interface/<id>")
+@auth_required()
+def import_interface_only(id):
+    """Import interface data for a specific node"""
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "error")
+            return redirect(url_for("node.index"))
+        
+        import_interface(node)
+        flash(f"Interface data imported successfully for node {node.hostname}", "success")
+        logger.info(f"Interface data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        logger.error(f"Error importing interface data for node {id}: {type(err).__name__}, {str(err)}")
+        flash(f"Error importing interface data: {str(err)}", "error")
+        return redirect(url_for("node.show", id=id))
+
+
+@node_bp.route("/import_serial/<id>")
+@auth_required()
+def import_serial_only(id):
+    """Import serial data for a specific node"""
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "error")
+            return redirect(url_for("node.index"))
+        
+        import_serial(node)
+        flash(f"Serial data imported successfully for node {node.hostname}", "success")
+        logger.info(f"Serial data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        logger.error(f"Error importing serial data for node {id}: {type(err).__name__}, {str(err)}")
+        flash(f"Error importing serial data: {str(err)}", "error")
+        return redirect(url_for("node.show", id=id))
+
+
+@node_bp.route("/import_arp/<id>")
+@auth_required()
+def import_arp_only(id):
+    """Import ARP entry data for a specific node"""
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "error")
+            return redirect(url_for("node.index"))
+        
+        import_arp_entry(node)
+        flash(f"ARP entry data imported successfully for node {node.hostname}", "success")
+        logger.info(f"ARP entry data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        logger.error(f"Error importing ARP entry data for node {id}: {type(err).__name__}, {str(err)}")
+        flash(f"Error importing ARP entry data: {str(err)}", "error")
+        return redirect(url_for("node.show", id=id))
+
+
+@node_bp.route("/import_node/<id>")
+@auth_required()
+def import_node_only(id):
+    """Import node data for a specific node"""
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "error")
+            return redirect(url_for("node.index"))
+        
+        import_node(node)
+        flash(f"Node data imported successfully for node {node.hostname}", "success")
+        logger.info(f"Node data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        logger.error(f"Error importing node data for node {id}: {type(err).__name__}, {str(err)}")
+        flash(f"Error importing node data: {str(err)}", "error")
+        return redirect(url_for("node.show", id=id))
+
+
 @node_bp.route("/explore_node/<id>")
 @auth_required()
 def explore_node(id):

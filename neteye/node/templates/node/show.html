@@ -119,8 +119,21 @@
                 <div class="btn-group mr-2 mt-2">
                     <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{node.id}}/show+ip+route'">Show IP Route</button>
                 </div>
+            </div>
+            <div class="row ml-1">
                 <div class="btn-group mr-2 mt-2">
-                    <button class="btn btn-sm btn-primary" type="button" onclick="location.href='import_node_from_id/{{node.id}}'">Import Node</button>
+                    <button class="btn btn-sm btn-success" type="button" onclick="location.href='import_node_from_id/{{node.id}}'">Import All Data</button>
+                </div>
+                <div class="btn-group mr-2 mt-2" role="group">
+                    <button id="importDropdown" type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Import Individual
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="importDropdown">
+                        <a class="dropdown-item" href="import_node/{{node.id}}">Node Info Only</a>
+                        <a class="dropdown-item" href="import_interface/{{node.id}}">Interface Only</a>
+                        <a class="dropdown-item" href="import_serial/{{node.id}}">Serial Only</a>
+                        <a class="dropdown-item" href="import_arp/{{node.id}}">ARP Only</a>
+                    </div>
                 </div>
             </div>
         </td>
