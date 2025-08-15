@@ -113,8 +113,10 @@ def create():
             enable=enable,
         )
         node.add()
+        flash(f"Node '{hostname}' was created successfully", "success")
         return redirect(url_for("node.show", id=node.id))
     else:
+        flash("Validation failed. Please check your input.", "danger")
         device_type_datalist = NETMIKO_PLATFORMS
         return render_template(
             "node/new.html",
@@ -212,8 +214,10 @@ def update(id):
         node.password = password
         node.enable = enable
         node.commit()
+        flash(f"Node '{hostname}' was updated successfully", "success")
         return redirect(url_for("node.show", id=id))
     else:
+        flash("Validation failed. Please check your input.", "danger")
         device_type_datalist = NETMIKO_PLATFORMS
         napalm_driver_datalist = NAPALM_DRIVERS
         scrapli_driver_datalist = SCRAPLI_DRIVERS
@@ -246,6 +250,7 @@ def update(id):
 def delete(id):
     node = Node.query.get(id)
     node.delete()
+    flash(f"Node '{node.hostname}' was deleted", "success")
     return redirect(url_for("node.index"))
 
 
@@ -441,10 +446,12 @@ def import_node_from_ip(ip_address):
         if node:
             import_target_node(node)
             logger.info(f"Node {ip_address} imported successfully")
+            flash(f"Node {ip_address} imported successfully", "success")
             return redirect(url_for("node.index"))
     except Exception as err:
         logger.error(f"Error importing node {ip_address}: {type(err).__name__}, {str(err)}")
-        return redirect(url_for("node.show", id=node.id))
+        flash(f"Error importing node {ip_address}: {str(err)}", "danger")
+        return redirect(url_for("node.index"))
 
 
 @node_bp.route("/import_interface/<id>")
@@ -454,7 +461,7 @@ def import_interface_only(id):
     try:
         node = Node.query.get(id)
         if not node:
-            flash(f"Node with ID {id} not found", "error")
+            flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
         import_interface(node)
@@ -463,7 +470,7 @@ def import_interface_only(id):
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         logger.error(f"Error importing interface data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing interface data: {str(err)}", "error")
+        flash(f"Error importing interface data: {str(err)}", "danger")
         return redirect(url_for("node.show", id=id))
 
 
@@ -474,7 +481,7 @@ def import_serial_only(id):
     try:
         node = Node.query.get(id)
         if not node:
-            flash(f"Node with ID {id} not found", "error")
+            flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
         import_serial(node)
@@ -483,7 +490,7 @@ def import_serial_only(id):
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         logger.error(f"Error importing serial data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing serial data: {str(err)}", "error")
+        flash(f"Error importing serial data: {str(err)}", "danger")
         return redirect(url_for("node.show", id=id))
 
 
@@ -494,7 +501,7 @@ def import_arp_only(id):
     try:
         node = Node.query.get(id)
         if not node:
-            flash(f"Node with ID {id} not found", "error")
+            flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
         import_arp_entry(node)
@@ -503,7 +510,7 @@ def import_arp_only(id):
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         logger.error(f"Error importing ARP entry data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing ARP entry data: {str(err)}", "error")
+        flash(f"Error importing ARP entry data: {str(err)}", "danger")
         return redirect(url_for("node.show", id=id))
 
 
@@ -514,7 +521,7 @@ def import_node_only(id):
     try:
         node = Node.query.get(id)
         if not node:
-            flash(f"Node with ID {id} not found", "error")
+            flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
         import_node(node)
@@ -523,7 +530,7 @@ def import_node_only(id):
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         logger.error(f"Error importing node data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing node data: {str(err)}", "error")
+        flash(f"Error importing node data: {str(err)}", "danger")
         return redirect(url_for("node.show", id=id))
 
 
