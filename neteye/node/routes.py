@@ -18,6 +18,7 @@ from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
 from neteye.lib.utils.get_records_by_node import get_records_dict_by_node
 from neteye.serial.models import Serial
+from neteye.lib.utils.report_exception import report_exception
 from sqlalchemy.sql import exists
 
 from .forms import NodeForm
@@ -270,172 +271,281 @@ def filter():
 @auth_required()
 def show_run(id):
     command = "show run"
-    node = Node.query.get(id)
-    result = node.raw_command_with_history(command, current_user.email)
-    result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-    return render_template("node/command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.raw_command_with_history(command, current_user.email)
+        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        return render_template("node/command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+inventory")
 @auth_required()
 def show_inventory(id):
     command = "show inventory"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+version")
 @auth_required()
 def show_version(id):
     command = "show version"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+ip+int+brief")
 @auth_required()
 def show_ip_int_breif(id):
     command = "show ip int brief"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+interfaces+description")
 @auth_required()
 def show_interfaces_description(id):
     command = "show int desc"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+ip+arp")
 @auth_required()
 def show_ip_arp(id):
     command = "show ip arp"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/show_ip_arp.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/show_ip_arp.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/show+ip+route")
 @auth_required()
 def show_ip_route(id):
     command = "show ip route"
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    return render_template("node/show_ip_route.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        return render_template("node/show_ip_route.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/command/<command>")
 @auth_required()
 def command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = node.command_with_history(command, current_user.email)
-    if isinstance(result, str):
-        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-        return render_template("node/command.html", result=result, command=command)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.command_with_history(command, current_user.email)
+        if isinstance(result, str):
+            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+            return render_template("node/command.html", result=result, command=command)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/raw_command/<command>")
 @auth_required()
 def raw_command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = (
-        node.raw_command_with_history(command, current_user.email)
-        .replace("\r\n", "<br />")
-        .replace("\n", "<br />")
-    )
-    return render_template("node/command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = (
+            node.raw_command_with_history(command, current_user.email)
+            .replace("\r\n", "<br />")
+            .replace("\n", "<br />")
+        )
+        return render_template("node/command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing raw '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/netmiko/<command>")
 @auth_required()
 def netmiko_command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = node.netmiko_command_with_history(command, current_user.email)
-    if isinstance(result, str):
-        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-        return render_template("node/command.html", result=result, command=command)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.netmiko_command_with_history(command, current_user.email)
+        if isinstance(result, str):
+            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+            return render_template("node/command.html", result=result, command=command)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing netmiko '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/raw_netmiko/<command>")
 @auth_required()
 def netmiko_raw_command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = (
-        node.netmiko_raw_command_with_history(command, current_user.email)
-        .replace("\r\n", "<br />")
-        .replace("\n", "<br />")
-    )
-    return render_template("node/command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = (
+            node.netmiko_raw_command_with_history(command, current_user.email)
+            .replace("\r\n", "<br />")
+            .replace("\n", "<br />")
+        )
+        return render_template("node/command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing netmiko raw '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/scrapli/<command>")
 @auth_required()
 def scrapli_command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = node.scrapli_command_with_history(command, current_user.email)
-    if isinstance(result, str):
-        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-        return render_template("node/command.html", result=result, command=command)
-    return render_template("node/parsed_command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.scrapli_command_with_history(command, current_user.email)
+        if isinstance(result, str):
+            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+            return render_template("node/command.html", result=result, command=command)
+        return render_template("node/parsed_command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing scrapli '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/raw_scrapli/<command>")
 @auth_required()
 def scrapli_raw_command(id, command):
     command = command.replace("+", " ")
-    node = Node.query.get(id)
-    result = (
-        node.scrapli_raw_command_with_history(command, current_user.email)
-        .replace("\r\n", "<br />")
-        .replace("\n", "<br />")
-    )
-    return render_template("node/command.html", result=result, command=command)
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = (
+            node.scrapli_raw_command_with_history(command, current_user.email)
+            .replace("\r\n", "<br />")
+            .replace("\n", "<br />")
+        )
+        return render_template("node/command.html", result=result, command=command)
+    except Exception as err:
+        report_exception(err, f"Error executing scrapli raw '{command}' for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/napalm/get_facts")
 @auth_required()
 def napalm_get_facts(id):
-    node = Node.query.get(id)
-    result = node.napalm_get_facts()
-    return render_template(
-        "node/napalm.html", result=result, command="napalm_get_facts"
-    )
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.napalm_get_facts()
+        return render_template(
+            "node/napalm.html", result=result, command="napalm_get_facts"
+        )
+    except Exception as err:
+        report_exception(err, f"Error executing napalm get_facts for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/<id>/napalm/get_interfaces")
 @auth_required()
 def napalm_get_interfaces(id):
-    node = Node.query.get(id)
-    result = node.napalm_get_interfaces()
-    return render_template(
-        "node/parsed_command.html", result=result, command="napalm_get_interfaces"
-    )
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        result = node.napalm_get_interfaces()
+        return render_template(
+            "node/parsed_command.html", result=result, command="napalm_get_interfaces"
+        )
+    except Exception as err:
+        report_exception(err, f"Error executing napalm get_interfaces for node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_id/<id>")
 @auth_required()
 def import_node_from_id(id):
-#    try:
+    try:
         node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
         import_target_node(node)
         logger.info(f"Node {id} imported successfully")
+        flash(f"Node {node.hostname} imported successfully", "success")
         return redirect(url_for("node.show", id=id))
-#    except Exception as err:
-#        logger.error(f"Error importing node {id}: {type(err).__name__}, {str(err)}")
-#        return redirect(url_for("node.show", id=id))
+    except Exception as err:
+        report_exception(err, f"Error importing node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/import_node_from_ip/<ip_address>")
@@ -449,8 +559,7 @@ def import_node_from_ip(ip_address):
             flash(f"Node {ip_address} imported successfully", "success")
             return redirect(url_for("node.index"))
     except Exception as err:
-        logger.error(f"Error importing node {ip_address}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing node {ip_address}: {str(err)}", "danger")
+        report_exception(err, f"Error importing node {ip_address}")
         return redirect(url_for("node.index"))
 
 
@@ -469,8 +578,7 @@ def import_interface_only(id):
         logger.info(f"Interface data imported for node {id}")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        logger.error(f"Error importing interface data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing interface data: {str(err)}", "danger")
+        report_exception(err, f"Error importing interface data for node {id}")
         return redirect(url_for("node.show", id=id))
 
 
@@ -489,8 +597,7 @@ def import_serial_only(id):
         logger.info(f"Serial data imported for node {id}")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        logger.error(f"Error importing serial data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing serial data: {str(err)}", "danger")
+        report_exception(err, f"Error importing serial data for node {id}")
         return redirect(url_for("node.show", id=id))
 
 
@@ -509,8 +616,7 @@ def import_arp_only(id):
         logger.info(f"ARP entry data imported for node {id}")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        logger.error(f"Error importing ARP entry data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing ARP entry data: {str(err)}", "danger")
+        report_exception(err, f"Error importing ARP entry data for node {id}")
         return redirect(url_for("node.show", id=id))
 
 
@@ -529,17 +635,24 @@ def import_node_only(id):
         logger.info(f"Node data imported for node {id}")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
-        logger.error(f"Error importing node data for node {id}: {type(err).__name__}, {str(err)}")
-        flash(f"Error importing node data: {str(err)}", "danger")
+        report_exception(err, f"Error importing node data for node {id}")
         return redirect(url_for("node.show", id=id))
 
 
 @node_bp.route("/explore_node/<id>")
 @auth_required()
 def explore_node(id):
-    node = Node.query.get(id)
-    explore_network(node)
-    return redirect(url_for("node.index"))
+    try:
+        node = Node.query.get(id)
+        if not node:
+            flash(f"Node with ID {id} not found", "danger")
+            return redirect(url_for("node.index"))
+        explore_network(node)
+        flash(f"Started exploring network from node {node.hostname}", "success")
+        return redirect(url_for("node.index"))
+    except Exception as err:
+        report_exception(err, f"Error exploring from node {id}")
+        return redirect(url_for("node.show", id=id))
 
 
 def explore_network(node):
@@ -553,7 +666,8 @@ def explore_network(node):
                 if target_node:
                     import_target_node(target_node)
             except Exception as err:
-                break
+                logger.error(f"Error exploring ip {entry.ip_address}: {type(err).__name__}, {str(err)}")
+                continue
 
 
 def try_connect_node(ip_address):
