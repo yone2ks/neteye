@@ -1,6 +1,7 @@
 import logging
 import traceback
 from flask import flash
+from markupsafe import Markup, escape
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +25,16 @@ def report_exception(err: Exception, context: str, *, include_trace: bool = Fals
         tb = traceback.format_exc()
         detail = f"{detail}\n{tb}"
 
-    msg = f"{context}: {detail}"
+    # Build raw message text
+    raw_msg = f"{context}: {detail}"
 
     # Trim very long messages to keep the UI stable
-    if len(msg) > max_len:
-        msg = msg[: max_len - 3] + "..."
+    if len(raw_msg) > max_len:
+        raw_msg = raw_msg[: max_len - 3] + "..."
 
-    # Preserve line breaks in HTML via <br />
-    msg = msg.replace("\r\n", "\n").replace("\n", "<br />")
+    # Normalize newlines and escape to prevent XSS, then convert to <br /> and mark safe.
+    normalized = raw_msg.replace("\r\n", "\n")
+    escaped = escape(normalized)
+    html_msg = Markup(str(escaped).replace("\n", "<br />"))
 
-    flash(msg, level)
+    flash(html_msg, level)
