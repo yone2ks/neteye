@@ -714,41 +714,66 @@ def import_common(node, model):
     import_command_mapper = ImportCommandMapper(node.device_type)
     import_type = IMPORT_TYPES[model]
     key_field = model.KEY # Unique key field (e.g., serial number, IP address, etc.)
-    
-    # get data for each command and commit the changes to the database
+
+    # Take a single snapshot of current DB state (before) for this model/node
+    before_records = {record[key_field]: record for record in get_records_dict_by_node(model, node.id)}
+    before_keys = set(before_records.keys())
+    before_field = model.ATTRIBUTES
+
+    # Accumulate all records observed across this set of commands
+    after_records = {}
+
+    # get data for each command and merge into after_records
     for command in import_command_mapper.get_commands(import_type):
-        # get current records information
-        before_records = { record[key_field]: record for record in get_records_dict_by_node(model, node.id) }
-        before_keys = set(before_records.keys())
-        before_field = model.ATTRIBUTES
-        after_records = {}
-        
         # execute import command and get result
         result = node.command_with_history(command, current_user.email)
-        
+
         if isinstance(result, list):
             index = import_command_mapper.get_index(import_type, command)
-            filtered_result = import_command_mapper.filter_ignore_records(import_type=import_type, command=command, result=result)
-            # get the fields in command result
-            after_field = set(import_command_mapper.get_fields(import_type, command).keys())
-            # get delta between before_field and after_field. delta_fields is not included in the result, so assign a before value in the fields.
-            delta_field = (before_field - after_field) - {"node_id"}
-            
+            filtered_result = import_command_mapper.filter_ignore_records(
+                import_type=import_type, command=command, result=result
+            )
+            # fields present in this command's mapping
+            present_fields = set(import_command_mapper.get_fields(import_type, command).keys())
+            # fields missing from this command (fill from previous after_records or before_records)
+            delta_field = (before_field - present_fields) - {"node_id"}
+
             # If an index is specified, only the record information of the corresponding index is processed. Otherwise, all records are processed.
             for record in (filtered_result if index is None else [filtered_result[index]]):
-                record_key = import_command_mapper.get_value_from_record(import_type=import_type, command=command, field=key_field, record=record)
-                after_entry = {"node_id": node.id} if "node_id" in before_field else {}
-                # process for each field in the command result
+                record_key = import_command_mapper.get_value_from_record(
+                    import_type=import_type, command=command, field=key_field, record=record
+                )
+
+                # Start from what we already collected in this set for the key,
+                # otherwise empty (missing fields will be filled from previous DB state below)
+                base_entry = dict(after_records.get(record_key, {}))
+
+                # Ensure node linkage if applicable
+                if "node_id" in before_field:
+                    base_entry["node_id"] = node.id
+
+                # Overwrite/update fields present in this command
                 for field_name in import_command_mapper.get_fields(import_type, command):
-                    after_entry[field_name] = import_command_mapper.get_value_from_record(import_type=import_type, command=command, field=field_name, record=record)
-                # process for non-existent fields in the command result
+                    base_entry[field_name] = import_command_mapper.get_value_from_record(
+                        import_type=import_type, command=command, field=field_name, record=record
+                    )
+
+                # For fields not produced by this command, keep what we already have in base_entry,
+                # otherwise fallback to the previous DB value
                 for field_name in delta_field:
-                    after_entry[field_name] = before_records.get(record_key, {}).get(field_name)
+                    if field_name not in base_entry:
+                        base_entry[field_name] = before_records.get(record_key, {}).get(field_name)
 
-                after_records[record_key] = after_entry
+                after_records[record_key] = base_entry
 
-            # commit the changes to the database for the command
-            delta_commit(model=model, before_keys=before_keys, before=before_records, after_keys=set(after_records.keys()), after=after_records)
+    # After processing all commands, commit the consolidated delta once
+    delta_commit(
+        model=model,
+        before_keys=before_keys,
+        before=before_records,
+        after_keys=set(after_records.keys()),
+        after=after_records,
+    )
 
 
 def import_serial(node):
