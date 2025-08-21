@@ -2,7 +2,6 @@ import json
 
 import napalm
 import netmiko
-import netmiko.utilities
 import scrapli
 from netmiko.ssh_autodetect import SSHDetect
 from scrapli import Scrapli
@@ -17,7 +16,7 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
     DeviceTypeToDriverMapping
 from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
-from neteye.lib.scrapli_utils import ScrapliCommunityHelper, textfsm_get_template_with_env
+from neteye.lib.scrapli_utils import ScrapliCommunityHelper
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -183,16 +182,10 @@ class Node(Base):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
-        if self.ntc_template_platform != self.device_type:
-            response = conn.send_command(command)
-            return netmiko.utilities.structured_data_converter(
-                raw_data=response,
-                command=command,
-                platform=self.ntc_template_platform,
-                use_textfsm=True
-            )
-        else:
-            return conn.send_command(command, use_textfsm=True)
+        raw_output = conn.send_command(command, use_textfsm=False)
+        platform = self.ntc_template_platform or self.device_type
+        parsed = ntc_template_utils.parse(platform=platform, command=command, data=raw_output)
+        return parsed if parsed else raw_output
 
     def netmiko_raw_command_with_history(self, command, session_user):
         result = self.netmiko_raw_command(command)
@@ -217,14 +210,10 @@ class Node(Base):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
         response = conn.send_command(command)
-        if self.ntc_template_platform != self.device_type:
-            response.textfsm_platform = self.ntc_template_platform
-        elif ScrapliCommunityHelper.has_textfsm_platform_variable(self.scrapli_driver):
-            response.textfsm_platform = self.device_type
-        parsed_output = response.textfsm_parse_output(textfsm_get_template_with_env(self.device_type, command))
-        if parsed_output:
-            return parsed_output
-        return response.result
+        raw_output = response.result
+        platform = self.ntc_template_platform or self.device_type
+        parsed = ntc_template_utils.parse(platform=platform, command=command, data=raw_output)
+        return parsed if parsed else raw_output
 
     def scrapli_raw_command_with_history(self, command, session_user):
         result = self.scrapli_raw_command(command)

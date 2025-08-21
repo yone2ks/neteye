@@ -23,6 +23,10 @@ ADMIN_EMAIL = 'neteye_admin@yourcompany.com'
 ADMIN_USERNAME = 'neteye_admin'
 ADMIN_PASSWORD = 'neteye_admin'
 
+# Ntc-templates Setting
+# NOTE: Use an absolute path to avoid dependency on the current working directory
+CUSTOM_TEMPLATES_DIR = './custom_templates'
+
 # Device Connection Setting
 NETMIKO_READ_TIMEOUT = 10
 SCRAPLI_TIMEOUT_SOCKET = 10
