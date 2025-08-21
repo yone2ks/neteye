@@ -137,4 +137,7 @@ cython_debug/
 # Project-specific
 settings.toml
 ntc-templates/
-custom-templates/
+
+# custom templates: keep dir and original index, ignore user edits
+custom-templates/**
+!custom-templates/index.org
