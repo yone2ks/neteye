@@ -539,7 +539,7 @@ def import_node_from_id(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        import_target_node(node)
+        import_all_data(node)
         logger.info(f"Node {id} imported successfully")
         flash(f"Node {node.hostname} imported successfully", "success")
         return redirect(url_for("node.show", id=id))
@@ -554,7 +554,7 @@ def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
         if node:
-            import_target_node(node)
+            import_all_data(node)
             logger.info(f"Node {ip_address} imported successfully")
             flash(f"Node {ip_address} imported successfully", "success")
             return redirect(url_for("node.index"))
@@ -573,7 +573,7 @@ def import_interface_only(id):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
-        import_interface(node)
+        import_interfaces(node)
         flash(f"Interface data imported successfully for node {node.hostname}", "success")
         logger.info(f"Interface data imported for node {id}")
         return redirect(url_for("node.show", id=id))
@@ -592,7 +592,7 @@ def import_serial_only(id):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
-        import_serial(node)
+        import_serials(node)
         flash(f"Serial data imported successfully for node {node.hostname}", "success")
         logger.info(f"Serial data imported for node {id}")
         return redirect(url_for("node.show", id=id))
@@ -601,7 +601,7 @@ def import_serial_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_arp/<id>")
+@node_bp.route("/import_arp_entry/<id>")
 @auth_required()
 def import_arp_only(id):
     """Import ARP entry data for a specific node"""
@@ -611,7 +611,7 @@ def import_arp_only(id):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
-        import_arp_entry(node)
+        import_arp_entries(node)
         flash(f"ARP entry data imported successfully for node {node.hostname}", "success")
         logger.info(f"ARP entry data imported for node {id}")
         return redirect(url_for("node.show", id=id))
@@ -630,7 +630,7 @@ def import_node_only(id):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
-        import_node(node)
+        import_node_data(node)
         flash(f"Node data imported successfully for node {node.hostname}", "success")
         logger.info(f"Node data imported for node {id}")
         return redirect(url_for("node.show", id=id))
@@ -776,11 +776,11 @@ def import_common(node, model):
     )
 
 
-def import_serial(node):
+def import_serials(node):
     import_common(node, Serial)
 
 
-def import_node(node):
+def import_node_data(node):
     import_command_mapper = ImportCommandMapper(node.device_type)
     import_type = IMPORT_TYPES[Node]
     
@@ -796,17 +796,17 @@ def import_node(node):
     node.commit()
 
 
-def import_interface(node):
+def import_interfaces(node):
     import_common(node, Interface)
 
-def import_arp_entry(node):
+def import_arp_entries(node):
     import_common(node, ArpEntry)
 
-def import_target_node(node):
-    import_node(node)
-    import_serial(node)
-    import_interface(node)
-    import_arp_entry(node)
+def import_all_data(node):
+    import_node_data(node)
+    import_serials(node)
+    import_interfaces(node)
+    import_arp_entries(node)
 
 
 def is_not_ignore_record(record, import_command):
