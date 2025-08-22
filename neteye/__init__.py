@@ -7,6 +7,7 @@ from flask import Flask
 from flask_security import hash_password
 
 import neteye as app_root
+from neteye.apis.auth_namespace import auth_ns
 from neteye.apis.interface_namespace import interfaces_api
 from neteye.apis.node_namespace import nodes_api
 from neteye.apis.routes import api_bp
@@ -56,6 +57,7 @@ app.register_blueprint(visualization_bp)
 app.register_blueprint(troubleshoot_bp)
 app.register_blueprint(api_bp)
 
+api.add_namespace(auth_ns)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
