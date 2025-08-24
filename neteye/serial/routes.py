@@ -4,7 +4,7 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
-from neteye.apis.serial_namespace import serial_schema, serials_schema
+from neteye.api.serial_namespace import serial_schema, serials_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node

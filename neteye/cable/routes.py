@@ -7,7 +7,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError
 
 from datatables import ColumnDT, DataTables
-from neteye.apis.cable_namespace import cable_schema, cables_schema
+from neteye.api.cable_namespace import cable_schema, cables_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.interface.models import Interface

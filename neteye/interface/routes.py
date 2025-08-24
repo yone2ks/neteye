@@ -8,7 +8,7 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
-from neteye.apis.interface_namespace import interface_schema, interfaces_schema
+from neteye.api.interface_namespace import interface_schema, interfaces_schema
 from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node

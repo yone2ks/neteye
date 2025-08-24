@@ -2,8 +2,8 @@ from flask import jsonify, request
 from flask_restx import Namespace, Resource
 from marshmallow import fields
 
-from neteye.apis.interface_namespace import InterfaceSchema
-from neteye.apis.routes import api_bp
+from neteye.api.interface_namespace import InterfaceSchema
+from neteye.api.routes import api_bp
 from neteye.arp_entry.models import ArpEntry
 from neteye.extensions import api, db, ma
 

@@ -7,7 +7,7 @@ from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 from dynaconf import Dynaconf
 
-from neteye.apis.routes import api_bp
+from neteye.api.routes import api_bp
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
 from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
 

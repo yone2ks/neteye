@@ -7,11 +7,11 @@ from flask import Flask
 from flask_security import hash_password
 
 import neteye as app_root
-from neteye.apis.auth_namespace import auth_ns
-from neteye.apis.interface_namespace import interfaces_api
-from neteye.apis.node_namespace import nodes_api
-from neteye.apis.routes import api_bp
-from neteye.apis.serial_namespace import serials_api
+from neteye.api.auth_namespace import auth_ns
+from neteye.api.interface_namespace import interfaces_api
+from neteye.api.node_namespace import nodes_api
+from neteye.api.routes import api_bp
+from neteye.api.serial_namespace import serials_api
 from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp

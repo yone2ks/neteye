@@ -4,7 +4,7 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from flask_security import auth_required, current_user
 
 from datatables import ColumnDT, DataTables
-from neteye.apis.arp_entry_namespace import (arp_entries_schema,
+from neteye.api.arp_entry_namespace import (arp_entries_schema,
                                              arp_entry_schema)
 from neteye.blueprints import bp_factory
 from neteye.extensions import db

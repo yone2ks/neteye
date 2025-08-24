@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restx import Namespace, Resource
 
-from neteye.apis.routes import api_bp
+from neteye.api.routes import api_bp
 from neteye.extensions import api, db, ma
 from neteye.history.models import (OPERATION_TYPE, arp_entry_transaction,
                                    arp_entry_version, cable_transaction,

@@ -9,7 +9,7 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from sqlalchemy.sql import exists
 
 from datatables import ColumnDT, DataTables
-from neteye.apis.history_namespace import (arp_entry_transaction_schema,
+from neteye.api.history_namespace import (arp_entry_transaction_schema,
                                            arp_entry_transactions_schema,
                                            arp_entry_version_schema,
                                            arp_entry_versions_schema,
