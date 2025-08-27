@@ -6,6 +6,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ntc_templates.parse import parse_output as ntc_parse_output
+from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping import DeviceTypeToDriverMapping
+
+
+ntc_template_platform_mapping = DeviceTypeToDriverMapping("ntc-template")
 
 
 class NtcTemplateUtils:
@@ -46,13 +50,15 @@ class NtcTemplateUtils:
     def _rreplace(self, pattern, sub):
         return sub('%s$' % pattern, sub, self)
 
-    def parse(self, platform: str, command: str, data: str) -> List[Dict[str, Any]]:
+    def parse(self, device_type: str, command: str, data: str) -> List[Dict[str, Any]]:
         """Parse Command output using ntc-templates with custom-overrides-first logic.
 
         Order:
         1) Try custom_dir (if set and exists)
         2) Fallback to default ntc-templates resolution (NET_TEXTFSM / package)
         """
+        platform = ntc_template_platform_mapping.mapping_dict.get(device_type, device_type)
+
         # 1) Try custom directory first
         if self.custom_dir and Path(self.custom_dir).exists():
             try:
