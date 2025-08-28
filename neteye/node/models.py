@@ -72,11 +72,13 @@ class Node(Base):
     def exists(cls, hostname):
         return Node.query.filter_by(hostname=hostname).scalar() != None
 
-    def gen_netmiko_params(
-        self,
-        read_timeout=settings.NETMIKO_READ_TIMEOUT,
-        keepalive=10
-        ):
+    def gen_netmiko_params(self):
+        read_timeout = settings.NETMIKO_READ_TIMEOUT
+        conn_timeout = settings.NETMIKO_CONN_TIMEOUT
+        auth_timeout = settings.NETMIKO_AUTH_TIMEOUT
+        banner_timeout = settings.NETMIKO_BANNER_TIMEOUT
+        keepalive = settings.NETMIKO_KEEPALIVE
+
         return {
             "device_type": self.device_type,
             "ip": self.ip_address,
@@ -85,6 +87,9 @@ class Node(Base):
             "password": self.password,
             "secret": self.enable,
             "read_timeout_override": read_timeout,
+            "conn_timeout": conn_timeout,
+            "auth_timeout": auth_timeout,
+            "banner_timeout": banner_timeout,
             "keepalive": keepalive,
         }
 

@@ -6,6 +6,7 @@ from flask_restx import Api
 from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 from dynaconf import Dynaconf
+from neteye.lib.utils.dynaconf_validators import validators
 
 from neteye.api.routes import api_bp
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
@@ -19,5 +20,9 @@ continuum = Continuum(db=db)
 api = Api(api_bp, version="1.0", title="Neteye API", description="API for managing network devices")
 ma = Marshmallow()
 connection_pool = ConnectionPool()
-settings = Dynaconf(environments=True, settings_files=['settings.toml'])
+settings = Dynaconf(
+    environments=True,
+    settings_files=['settings.toml'],
+    validators=validators,
+)
 ntc_template_utils = NtcTemplateUtils(custom_dir=settings.CUSTOM_TEMPLATES_DIR)
