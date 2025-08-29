@@ -50,7 +50,7 @@ class NtcTemplateUtils:
     def _rreplace(self, pattern, sub):
         return sub('%s$' % pattern, sub, self)
 
-    def parse(self, device_type: str, command: str, data: str) -> List[Dict[str, Any]]:
+    def parse(self, platform: str, command: str, data: str) -> List[Dict[str, Any]]:
         """Parse Command output using ntc-templates with custom-overrides-first logic.
 
         Order:
