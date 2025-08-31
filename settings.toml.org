@@ -37,6 +37,21 @@ SCRAPLI_TIMEOUT_SOCKET = 5
 SCRAPLI_TIMEOUT_TRANSPORT = 5
 SCRAPLI_TIMEOUT_OPS = 5
 NAPALM_TIMEOUT = 5
+
+# Specify device types for netmiko autodetect
+# NOTE: If empty or parameter does not exist, all device types will be targeted.
+AUTO_DETECT_DEVICE_TYPES = [
+    "cisco_ios",
+    "cisco_xe", 
+    "cisco_nxos",
+    "cisco_xr",
+    "cisco_asa",
+    "arista_eos",
+    "juniper_junos",
+    "fortinet",
+    "paloalto_panos"
+]
+
   [default.credentials]
     [default.credentials.1]
     USERNAME = 'admin'

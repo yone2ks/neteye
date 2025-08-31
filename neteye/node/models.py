@@ -17,6 +17,7 @@ from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping impo
 from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
 from neteye.lib.scrapli_utils import ScrapliCommunityHelper
+from neteye.lib.netmiko_utils.netmiko_autodetect_helper import detect_device_type
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -130,15 +131,9 @@ class Node(Base):
         }
 
     def detect_device_type(self):
-        try:
-            self.device_type = SSHDetect(
-                **self.gen_netmiko_params()
-            ).autodetect()
-        except (
-            netmiko.exceptions.NetMikoTimeoutException,
-            netmiko.exceptions.SSHException,
-        ) as err:
-            self.device_type = "cisco_ios_telnet"
+        autodetect_device_types = settings.AUTO_DETECT_DEVICE_TYPES
+        self.device_type = detect_device_type(self, autodetect_device_types)
+        if self.device_type == "cisco_ios_telnet":
             self.port = 23
 
     def detect_scrapli_driver(self):

@@ -29,4 +29,6 @@ validators = [
     Validator("SCRAPLI_TIMEOUT_OPS", is_type_of=int, gt=0, default=DEFAULTS["SCRAPLI_TIMEOUT_OPS"]),
     # Napalm
     Validator("NAPALM_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NAPALM_TIMEOUT"]),
+    # Autodetect
+    Validator("AUTO_DETECT_DEVICE_TYPES", is_type_of=list, default=[]),
 ]
