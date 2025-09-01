@@ -57,7 +57,7 @@ class NtcTemplateUtils:
         1) Try custom_dir (if set and exists)
         2) Fallback to default ntc-templates resolution (NET_TEXTFSM / package)
         """
-        platform = ntc_template_platform_mapping.mapping_dict.get(device_type, device_type)
+        platform = ntc_template_platform_mapping.mapping_dict.get(platform, platform)
 
         # 1) Try custom directory first
         if self.custom_dir and Path(self.custom_dir).exists():
