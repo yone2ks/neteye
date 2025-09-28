@@ -16,6 +16,15 @@ DEFAULTS = {
     "NAPALM_TIMEOUT": 10,
 }
 
+HISTORY_VALIDATORS = [
+    "COMMAND_HISTORY_MAX_RECORDS",
+    "NODE_HISTORY_MAX_RECORDS",
+    "INTERFACE_HISTORY_MAX_RECORDS",
+    "SERIAL_HISTORY_MAX_RECORDS",
+    "CABLE_HISTORY_MAX_RECORDS",
+    "ARP_ENTRY_HISTORY_MAX_RECORDS",
+]
+
 validators = [
     # Netmiko
     Validator("NETMIKO_READ_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NETMIKO_READ_TIMEOUT"]),
@@ -31,4 +40,6 @@ validators = [
     Validator("NAPALM_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NAPALM_TIMEOUT"]),
     # Autodetect
     Validator("AUTO_DETECT_DEVICE_TYPES", is_type_of=list, default=[]),
+    # History: If specific limits are provided, validate them as non-negative integers.
+    *[Validator(history_validator, is_type_of=int, gte=0, required=False) for history_validator in HISTORY_VALIDATORS],
 ]

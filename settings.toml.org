@@ -38,6 +38,16 @@ SCRAPLI_TIMEOUT_TRANSPORT = 5
 SCRAPLI_TIMEOUT_OPS = 5
 NAPALM_TIMEOUT = 5
 
+# History Settings
+# Maximum number of history records to keep in database for each type
+# NOTE: Set to 0 for unlimited records
+COMMAND_HISTORY_MAX_RECORDS = 10000
+NODE_HISTORY_MAX_RECORDS = 0
+INTERFACE_HISTORY_MAX_RECORDS = 0
+SERIAL_HISTORY_MAX_RECORDS = 0
+CABLE_HISTORY_MAX_RECORDS = 0
+ARP_ENTRY_HISTORY_MAX_RECORDS = 50000
+
 # Specify device types for netmiko autodetect
 # NOTE: If empty or parameter does not exist, all device types will be targeted.
 AUTO_DETECT_DEVICE_TYPES = [

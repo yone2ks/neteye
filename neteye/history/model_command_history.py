@@ -3,8 +3,9 @@ from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import backref, relationship
 
 from neteye.base.models import Base
+from neteye.history.history_utils import HistoryUtils
 
-class CommandHistory(Base):
+class CommandHistory(Base, HistoryUtils):
     __tablename__ = "command_histories"
 
     username = Column(String, nullable=False)
@@ -20,3 +21,7 @@ class CommandHistory(Base):
         return "<CommandHistory id={id} date={date} username={username} node_id={node_id} hostname={hostname} command={command}".format(
             id=self.id, date=self.created_at, username=self.username, node_id=self.node_id, hostname=self.hostname, command=self.command
         )
+
+    def add(self):
+        """Add record with limit enforcement"""
+        self.add_with_limit()
