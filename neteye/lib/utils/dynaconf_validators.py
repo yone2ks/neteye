@@ -41,5 +41,6 @@ validators = [
     # Autodetect
     Validator("AUTO_DETECT_DEVICE_TYPES", is_type_of=list, default=[]),
     # History: If specific limits are provided, validate them as non-negative integers.
-    *[Validator(history_validator, is_type_of=int, gte=0, required=False) for history_validator in HISTORY_VALIDATORS],
+    # Note: Do not set 'required' or 'must_exist' here; we only validate when keys exist.
+    *[Validator(history_validator, is_type_of=int, gte=0) for history_validator in HISTORY_VALIDATORS],
 ]
