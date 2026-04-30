@@ -16,8 +16,9 @@ from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
+from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
-                               continuum, db, ma, security, settings)
+                               csrf, db, ma, security, settings)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -36,10 +37,9 @@ STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
 FlaskDynaconf(app)
 db.init_app(app)
-continuum.init_app(app)
 bootstrap.init_app(app)
 babel.init_app(app)
-security.init_app(app, user_datastore)
+csrf.init_app(app)
 ma.init_app(app)
 #api.init_app(api_bp)
 
@@ -61,8 +61,12 @@ api.add_namespace(auth_ns)
 api.add_namespace(interfaces_api)
 api.add_namespace(serials_api)
 
-# Create the database tables and admin user when the application starts.
+# configure_mappers finalizes sqlalchemy_continuum versioning table setup;
+# must run after all models are imported (via blueprint registration above).
+configure_mappers()
+
 with app.app_context():
+    security.init_app(app, user_datastore)
     db.create_all()
     initialize_roles()
     initialize_admin()

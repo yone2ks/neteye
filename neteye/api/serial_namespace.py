@@ -46,12 +46,12 @@ class SerialsResource(Resource):
 class SerialResource(Resource):
     @serials_api.marshal_with(serial_model)
     def get(self, id):
-        return Serial.query.get_or_404(id)
+        return db.get_or_404(Serial, id)
 
     @serials_api.expect(serial_model)
     @serials_api.marshal_with(serial_model)
     def put(self, id):
-        serial = Serial.query.get_or_404(id)
+        serial = db.get_or_404(Serial, id)
         try:
             serial = serial_schema.load(api.payload, instance=serial)
             serial.commit()
@@ -61,7 +61,7 @@ class SerialResource(Resource):
 
     @serials_api.response(204, "Serial deleted")
     def delete(self, id):
-        serial = Serial.query.get_or_404(id)
+        serial = db.get_or_404(Serial, id)
         serial.delete()
         return '', 204
 

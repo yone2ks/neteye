@@ -49,12 +49,12 @@ class CablesResource(Resource):
 class CableResource(Resource):
     @cables_api.marshal_with(cable_model)
     def get(self, id):
-        return Cable.query.get_or_404(id)
+        return db.get_or_404(Cable, id)
 
     @cables_api.expect(cable_model)
     @cables_api.marshal_with(cable_model)
     def put(self, id):
-        cable = Cable.query.get_or_404(id)
+        cable = db.get_or_404(Cable, id)
         try:
             cable = cable_schema.load(api.payload, instance=cable)
             cable.commit()
@@ -64,7 +64,7 @@ class CableResource(Resource):
 
     @cables_api.response(204, "Cable deleted")
     def delete(self, id):
-        cable = Cable.query.get_or_404(id)
+        cable = db.get_or_404(Cable, id)
         cable.delete()
         return '', 204
 

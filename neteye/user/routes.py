@@ -56,13 +56,13 @@ def data():
 @user_bp.route('/<id>')
 @auth_required()
 def show(id):
-    user = User.query.get(id)
+    user = User.get(id)
     return render_template('user/show.html', user=user)
 
 
 @user_bp.route('/<id>/delete', methods=['POST'])
 @auth_required()
 def delete(id):
-    user = User.query.get(id)
+    user = User.get(id)
     user.delete()
     return redirect(url_for("user.index"))

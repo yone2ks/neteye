@@ -54,12 +54,12 @@ class InterfacesResource(Resource):
 class InterfaceResource(Resource):
     @interfaces_api.marshal_with(interface_model)
     def get(self, id):
-        return Interface.query.get_or_404(id)
+        return db.get_or_404(Interface, id)
 
     @interfaces_api.expect(interface_model)
     @interfaces_api.marshal_with(interface_model)
     def put(self, id):
-        interface = Interface.query.get_or_404(id)
+        interface = db.get_or_404(Interface, id)
         try:
             interface = interface_schema.load(api.payload, instance=interface)
             interface.commit()
@@ -69,7 +69,7 @@ class InterfaceResource(Resource):
 
     @interfaces_api.response(204, "Interface deleted")
     def delete(self, id):
-        interface = Interface.query.get_or_404(id)
+        interface = db.get_or_404(Interface, id)
         interface.delete()
         return '', 204
 

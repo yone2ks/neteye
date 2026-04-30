@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, SubmitField
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import DataRequired, Required
+from wtforms_sqlalchemy.fields import QuerySelectField
+from wtforms.validators import DataRequired
 from neteye.node.models import Node
 
 
@@ -10,10 +10,10 @@ def get_nodes():
 
 
 class PingForm(FlaskForm):
-    dst_ip_address = StringField("Destination IP Address:", validators=[Required()])
+    dst_ip_address = StringField("Destination IP Address:", validators=[DataRequired()])
     src_node = QuerySelectField(
         "Source Node:",
-        validators=[Required()],
+        validators=[DataRequired()],
         query_factory=get_nodes,
         get_label="hostname",
     )

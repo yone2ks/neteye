@@ -119,7 +119,7 @@ def create():
 @cable_bp.route("/<id>/edit")
 @auth_required()
 def edit(id):
-    cable = Cable.query.get(id)
+    cable = Cable.get(id)
     form = CableForm()
     a_interface = cable.a_interface
     b_interface = cable.b_interface
@@ -144,7 +144,7 @@ def edit(id):
 @auth_required()
 def update(id):
     sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
-    cable = Cable.query.get(id)
+    cable = Cable.get(id)
     cable.a_interface_id = request.form["a_interface"]
     cable.b_interface_id = request.form["b_interface"]
     cable.cable_type = request.form["cable_type"]
@@ -169,6 +169,6 @@ def update(id):
 @cable_bp.route("/<id>/delete", methods=["POST"])
 @auth_required()
 def delete(id):
-    cable = Cable.query.get(id)
+    cable = Cable.get(id)
     cable.delete()
     return redirect(url_for("cable.index"))

@@ -48,8 +48,8 @@ def data():
 @interface_bp.route("/<id>")
 @auth_required()
 def show(id):
-    interface = Interface.query.get(id)
-    node = Node.query.get(interface.node_id)
+    interface = Interface.get(id)
+    node = Node.get(interface.node_id)
     return render_template("interface/show.html", interface=interface, node=node)
 
 
@@ -120,7 +120,7 @@ def create():
 @interface_bp.route("/<id>/edit")
 @auth_required()
 def edit(id):
-    interface = Interface.query.get(id)
+    interface = Interface.get(id)
     form = InterfaceForm()
     node_id = interface.node_id
     name = interface.name
@@ -164,7 +164,7 @@ def update(id):
     mtu = request.form["mtu"]
     status = request.form["status"]
     if form.validate_on_submit():
-        interface = Interface.query.get(id)
+        interface = Interface.get(id)
         interface.node_id = node_id
         interface.name = name
         interface.description = description
@@ -209,7 +209,7 @@ def update(id):
 @interface_bp.route("/<id>/delete", methods=["POST"])
 @auth_required()
 def delete(id):
-    interface = Interface.query.get(id)
+    interface = Interface.get(id)
     interface.delete()
     return redirect(url_for("interface.index"))
 

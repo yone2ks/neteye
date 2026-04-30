@@ -57,7 +57,7 @@ def data():
 @node_bp.route("/<id>")
 @auth_required()
 def show(id):
-    node = Node.query.get(id)
+    node = Node.get(id)
     command_list = ntc_template_utils.get_command_list(node.ntc_template_platform)
     return render_template("node/show.html", node=node, command_list=command_list)
 
@@ -137,7 +137,7 @@ def create():
 @node_bp.route("/<id>/edit")
 @auth_required()
 def edit(id):
-    node = Node.query.get(id)
+    node = Node.get(id)
     form = NodeForm()
     hostname = node.hostname
     description = node.description
@@ -199,7 +199,7 @@ def update(id):
     password = request.form["password"]
     enable = request.form["enable"]
     if form.validate_on_submit():
-        node = Node.query.get(id)
+        node = Node.get(id)
         node.hostname = hostname
         node.description = description
         node.ip_address = ip_address
@@ -249,7 +249,7 @@ def update(id):
 @node_bp.route("/<id>/delete", methods=["POST"])
 @auth_required()
 def delete(id):
-    node = Node.query.get(id)
+    node = Node.get(id)
     node.delete()
     flash(f"Node '{node.hostname}' was deleted", "success")
     return redirect(url_for("node.index"))
@@ -272,7 +272,7 @@ def filter():
 def show_run(id):
     command = "show run"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -289,7 +289,7 @@ def show_run(id):
 def show_inventory(id):
     command = "show inventory"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -305,7 +305,7 @@ def show_inventory(id):
 def show_version(id):
     command = "show version"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -321,7 +321,7 @@ def show_version(id):
 def show_ip_int_breif(id):
     command = "show ip int brief"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -337,7 +337,7 @@ def show_ip_int_breif(id):
 def show_interfaces_description(id):
     command = "show int desc"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -353,7 +353,7 @@ def show_interfaces_description(id):
 def show_ip_arp(id):
     command = "show ip arp"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -369,7 +369,7 @@ def show_ip_arp(id):
 def show_ip_route(id):
     command = "show ip route"
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -385,7 +385,7 @@ def show_ip_route(id):
 def command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -404,7 +404,7 @@ def command(id, command):
 def raw_command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -424,7 +424,7 @@ def raw_command(id, command):
 def netmiko_command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -443,7 +443,7 @@ def netmiko_command(id, command):
 def netmiko_raw_command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -463,7 +463,7 @@ def netmiko_raw_command(id, command):
 def scrapli_command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -482,7 +482,7 @@ def scrapli_command(id, command):
 def scrapli_raw_command(id, command):
     command = command.replace("+", " ")
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -501,7 +501,7 @@ def scrapli_raw_command(id, command):
 @auth_required()
 def napalm_get_facts(id):
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -518,7 +518,7 @@ def napalm_get_facts(id):
 @auth_required()
 def napalm_get_interfaces(id):
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -535,7 +535,7 @@ def napalm_get_interfaces(id):
 @auth_required()
 def import_node_from_id(id):
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -568,7 +568,7 @@ def import_node_from_ip(ip_address):
 def import_interface_only(id):
     """Import interface data for a specific node"""
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -587,7 +587,7 @@ def import_interface_only(id):
 def import_serial_only(id):
     """Import serial data for a specific node"""
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -606,7 +606,7 @@ def import_serial_only(id):
 def import_arp_only(id):
     """Import ARP entry data for a specific node"""
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -625,7 +625,7 @@ def import_arp_only(id):
 def import_node_only(id):
     """Import node data for a specific node"""
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
@@ -643,7 +643,7 @@ def import_node_only(id):
 @auth_required()
 def explore_node(id):
     try:
-        node = Node.query.get(id)
+        node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))

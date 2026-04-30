@@ -48,12 +48,12 @@ class ArpEntrysResource(Resource):
 class ArpEntryResource(Resource):
     @arp_entries_api.marshal_with(arp_entry_model)
     def get(self, id):
-        return ArpEntry.query.get_or_404(id)
+        return db.get_or_404(ArpEntry, id)
 
     @arp_entries_api.expect(arp_entry_model)
     @arp_entries_api.marshal_with(arp_entry_model)
     def put(self, id):
-        arp_entry = ArpEntry.query.get_or_404(id)
+        arp_entry = db.get_or_404(ArpEntry, id)
         try:
             arp_entry = arp_entry_schema.load(api.payload, instance=arp_entry)
             arp_entry.commit()
@@ -63,7 +63,7 @@ class ArpEntryResource(Resource):
 
     @arp_entries_api.response(204, "ARP entry deleted")
     def delete(self, id):
-        arp_entry = ArpEntry.query.get_or_404(id)
+        arp_entry = db.get_or_404(ArpEntry, id)
         arp_entry.delete()
         return '', 204
 
