@@ -1,3 +1,5 @@
+import threading
+from collections import OrderedDict
 from typing import NamedTuple
 from ssh2.exceptions import SocketRecvError, SocketSendError, Timeout, ChannelEOFSentError
 from netmiko.exceptions import ReadTimeout
@@ -45,39 +47,49 @@ class ConnectionAdaptor():
 
 class ConnectionPool:
     def __init__(self, pool_size=50):
-        self.pool = {}
+        self.pool = OrderedDict()
         self.pool_size = pool_size
+        self._lock = threading.RLock()
 
     def add_connection(self, node, driver_type):
-        try:
-            connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-            connection_adaptor = ConnectionAdaptor(connection=node.gen_connection(driver_type), driver_type=driver_type)
+        connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
+        connection_adaptor = ConnectionAdaptor(
+            connection=node.gen_connection(driver_type), driver_type=driver_type
+        )
+        with self._lock:
+            if len(self.pool) >= self.pool_size:
+                _, oldest = self.pool.popitem(last=False)
+                oldest.close()
             self.pool[connection_key] = connection_adaptor
-        except Exception as err:
-            raise err
 
     def delete_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        connection_adaptor = self.pool.pop(connection_key)
+        with self._lock:
+            connection_adaptor = self.pool.pop(connection_key)
         connection_adaptor.close()
 
     def recreate_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        if self.pool[connection_key].is_alive():
-            self.delete_connection(node, driver_type)
+        with self._lock:
+            if connection_key in self.pool and self.pool[connection_key].is_alive():
+                adaptor = self.pool.pop(connection_key)
+                adaptor.close()
         self.add_connection(node, driver_type)
 
     def get_connection(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        if self.pool[connection_key].is_alive():
-            return self.pool[connection_key].connection
-        else:
-            self.add_connection(node, driver_type)
+        with self._lock:
+            if self.pool[connection_key].is_alive():
+                return self.pool[connection_key].connection
+        self.add_connection(node, driver_type)
+        with self._lock:
             return self.pool[connection_key].connection
 
     def exists(self, node, driver_type):
         connection_key = ConnectionKey(ip_address=node.ip_address, driver_type=driver_type)
-        return connection_key in self.pool
+        with self._lock:
+            return connection_key in self.pool
 
     def size(self):
-        return len(self.pool)
+        with self._lock:
+            return len(self.pool)
