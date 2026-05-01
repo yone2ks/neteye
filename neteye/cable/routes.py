@@ -13,6 +13,7 @@ from neteye.extensions import db
 from neteye.interface.models import Interface
 from neteye.node.models import Node
 from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
+from neteye.lib.utils.report_exception import report_exception
 
 from .forms import CableForm
 from .models import Cable
@@ -107,9 +108,8 @@ def create():
         )
     except Exception as e:
         cable.rollback()
-        logger.error(f"Unexpected Error: {e}")
+        report_exception(e, "Error creating cable")
         form = CableForm(request.form)
-        flash("An unexpected error occurred while creating the cable.", "danger")
         return render_template(
             "cable/new.html",
             form=form
@@ -161,8 +161,7 @@ def update(id):
         return redirect(url_for("cable.edit", id=id))
     except Exception as e:
         cable.rollback()
-        logger.error(f"Unexpected Error: {e}")
-        flash("An unexpected error occurred while updating the cable.", "danger")
+        report_exception(e, "Error updating cable")
         return redirect(url_for("cable.edit", id=id))
 
 

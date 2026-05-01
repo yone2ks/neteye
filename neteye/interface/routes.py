@@ -13,6 +13,7 @@ from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node
 from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
+from neteye.lib.utils.report_exception import report_exception
 
 from .forms import InterfaceForm
 from .models import Interface
@@ -97,8 +98,7 @@ def create():
             return redirect(url_for("interface.new"))
         except Exception as e:
             interface.rollback()
-            logger.error(f"Unexpected Error: {e}")
-            flash("An unexpected error occurred while creating the interface.", "danger")
+            report_exception(e, "Error creating interface")
             return redirect(url_for("interface.new"))
     else:
         return render_template(
@@ -185,8 +185,7 @@ def update(id):
             return redirect(url_for("interface.edit", id=id))
         except Exception as e:
             interface.rollback()
-            logger.error(f"Unexpected Error: {e}")
-            flash("An unexpected error occurred while updating the interface.", "danger")
+            report_exception(e, "Error updating interface")
             return redirect(url_for("interface.edit", id=id))
     else:
         return render_template(
