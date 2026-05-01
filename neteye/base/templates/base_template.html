@@ -29,6 +29,7 @@
           <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
           <meta name="author" content="Łukasz Holeczek">
           <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' code.jquery.com cdn.datatables.net cdnjs.cloudflare.com cdn.jsdelivr.net unpkg.com marvl.infotech.monash.edu www.googletagmanager.com www.google-analytics.com; style-src 'self' 'unsafe-inline' cdn.datatables.net; font-src 'self'; img-src 'self' data: www.googletagmanager.com; connect-src 'self' www.google-analytics.com;">
           <title>{% block title %}neteye{% endblock title %}</title>
           {% block stylesheet %}
           <!-- Icons-->
@@ -52,7 +53,6 @@
           <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
           <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
           <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
-          <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
           {% endblock javascript %}
           <!-- Global site tag (gtag.js) - Google Analytics-->
           <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-118965717-3"></script>
