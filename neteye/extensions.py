@@ -13,20 +13,24 @@ from neteye.api.routes import api_bp
 from neteye.lib.connection_pool.connection_pool import ConnectionPool
 from neteye.lib.ntc_template_utils.ntc_template_utils import NtcTemplateUtils
 
-# must be called before any model with __versioned__ = {} is mapped
+# sqlalchemy_continuum has no init_app pattern: make_versioned() must run at
+# import time, before any model class with __versioned__ = {} is defined.
 make_versioned(user_cls=None)
 
-db = SQLAlchemy()
-bootstrap = Bootstrap()
-babel = Babel()
-csrf = CSRFProtect()
-security = Security()
+# Flask extensions (init_app pattern — initialized in neteye/__init__.py)
 api = Api(api_bp, version="1.0", title="Neteye API", description="API for managing network devices")
+babel = Babel()
+bootstrap = Bootstrap()
+csrf = CSRFProtect()
+db = SQLAlchemy()
 ma = Marshmallow()
-connection_pool = ConnectionPool()
+security = Security()
+
+# Application singletons
 settings = Dynaconf(
     environments=True,
     settings_files=['settings.toml'],
     validators=validators,
 )
+connection_pool = ConnectionPool()
 ntc_template_utils = NtcTemplateUtils(custom_dir=settings.CUSTOM_TEMPLATES_DIR)
