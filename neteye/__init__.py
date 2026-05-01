@@ -1,13 +1,10 @@
 import locale
-import logging
 import os
 import sqlite3
 
 from dynaconf import FlaskDynaconf
-from flask import Flask, jsonify, render_template, request
+from flask import Flask
 from flask_security import hash_password
-
-logger = logging.getLogger(__name__)
 
 import neteye as app_root
 from neteye.api.auth_namespace import auth_ns
@@ -19,6 +16,7 @@ from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
+from neteye.error_handlers import register_error_handlers
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
                                csrf, db, ma, security, settings)
@@ -67,21 +65,7 @@ api.add_namespace(serials_api)
 # configure_mappers finalizes sqlalchemy_continuum versioning table setup;
 # must run after all models are imported (via blueprint registration above).
 configure_mappers()
-
-@app.errorhandler(404)
-def not_found(e):
-    if request.path.startswith("/api/"):
-        return jsonify(error=str(e)), 404
-    return render_template("errors/404.html"), 404
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    logger.exception("Internal server error")
-    if request.path.startswith("/api/"):
-        return jsonify(error="Internal server error"), 500
-    return render_template("errors/500.html"), 500
-
+register_error_handlers(app)
 
 with app.app_context():
     security.init_app(app, user_datastore)
