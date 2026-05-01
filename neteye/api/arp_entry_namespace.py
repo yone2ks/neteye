@@ -68,13 +68,15 @@ class ArpEntryResource(Resource):
         return '', 204
 
 
+ARP_ENTRY_FILTER_FIELDS = {"ip_address", "mac_address", "vendor"}
+
 @arp_entries_api.route("/filter")
 class ArpEntryResourceFilter(Resource):
     @arp_entries_api.marshal_list_with(arp_entry_model)
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(ArpEntry, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in ARP_ENTRY_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(ARP_ENTRY_FILTER_FIELDS)}")
         results = ArpEntry.query.filter(getattr(ArpEntry, field) == filter_str).all()
         return results

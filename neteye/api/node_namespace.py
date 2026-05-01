@@ -76,14 +76,16 @@ class NodeResource(Resource):
         return '', 204
 
 
+NODE_FILTER_FIELDS = {"hostname", "ip_address", "device_type", "os_type"}
+
 @nodes_api.route("/filter")
 class NodeResourceFilter(Resource):
     @nodes_api.marshal_list_with(node_model)
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Node, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in NODE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(NODE_FILTER_FIELDS)}")
         nodes = Node.query.filter(getattr(Node, field) == filter_str).all()
         return nodes
 

@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import (flash, jsonify, redirect, render_template, request, session,
+from flask import (abort, flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
 
@@ -106,17 +106,21 @@ def delete(id):
     return redirect(url_for("serial.index"))
 
 
+FILTER_FIELDS = {"serial", "product_id", "node"}
+
 @serial_bp.route("/filter")
 @auth_required()
 def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
+    if field not in FILTER_FIELDS:
+        abort(400)
     if field == "serial":
         serials = Serial.query.filter(Serial.serial_number.contains(filter_str))
     elif field == "product_id":
         serials = Serial.query.filter(Serial.product_id.contains(filter_str))
-    elif field == "node":
+    else:
         serials = (
             Serial.query.join(Node, Serial.node_id == Node.id)
             .add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id)

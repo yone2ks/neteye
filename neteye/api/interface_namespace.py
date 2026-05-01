@@ -74,13 +74,15 @@ class InterfaceResource(Resource):
         return '', 204
 
 
+INTERFACE_FILTER_FIELDS = {"ip_address", "name", "description", "status"}
+
 @interfaces_api.route("/filter")
 class InterfaceResourceFilter(Resource):
     @interfaces_api.marshal_list_with(interface_model)
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Interface, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in INTERFACE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(INTERFACE_FILTER_FIELDS)}")
         results = Interface.query.filter(getattr(Interface, field) == filter_str).all()
         return results

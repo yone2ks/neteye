@@ -66,13 +66,15 @@ class SerialResource(Resource):
         return '', 204
 
 
+SERIAL_FILTER_FIELDS = {"serial_number", "product_id", "description"}
+
 @serials_api.route("/filter")
 class SerialResourceFilter(Resource):
     @serials_api.marshal_list_with(serial_model)
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Serial, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in SERIAL_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(SERIAL_FILTER_FIELDS)}")
         results = Serial.query.filter(getattr(Serial, field) == filter_str).all()
         return results

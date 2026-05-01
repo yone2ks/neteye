@@ -3,7 +3,7 @@ from logging import getLogger
 import pandas as pd
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.exc import IntegrityError
-from flask import (flash, jsonify, redirect, render_template, request, session,
+from flask import (abort, flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
 
@@ -213,12 +213,16 @@ def delete(id):
     return redirect(url_for("interface.index"))
 
 
+FILTER_FIELDS = {"ip_address", "description", "node"}
+
 @interface_bp.route("/filter")
 @auth_required()
 def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
+    if field not in FILTER_FIELDS:
+        abort(400)
     if field == "ip_address":
         interfaces = Interface.query.filter(
             Interface.ip_address.contains(filter_str)
@@ -227,7 +231,7 @@ def filter():
         interfaces = Interface.query.filter(
             Interface.description.contains(filter_str)
         )
-    elif field == "node":
+    else:
         interfaces = (
             Interface.query.join(Node, Interface.node_id == Node.id)
             .add_columns(

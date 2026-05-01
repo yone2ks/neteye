@@ -69,13 +69,15 @@ class CableResource(Resource):
         return '', 204
 
 
+CABLE_FILTER_FIELDS = {"cable_type", "description", "link_speed"}
+
 @cables_api.route("/filter")
 class CableResourceFilter(Resource):
     @cables_api.marshal_list_with(cable_model)
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Cable, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in CABLE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(CABLE_FILTER_FIELDS)}")
         results = Cable.query.filter(getattr(Cable, field) == filter_str).all()
         return results
