@@ -4,7 +4,7 @@ import netmiko
 import pandas as pd
 import sqlalchemy
 from datatables import ColumnDT, DataTables
-from flask import flash, jsonify, redirect, render_template, request, session, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from netaddr import *
 from neteye.base.models import gen_uuid_str
@@ -255,14 +255,18 @@ def delete(id):
     return redirect(url_for("node.index"))
 
 
+FILTER_FIELDS = {"hostname", "ip_address"}
+
 @node_bp.route("/filter")
 @auth_required()
 def filter():
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
+    if field not in FILTER_FIELDS:
+        abort(400)
     if field == "hostname":
         nodes = Node.query.filter(Node.hostname.contains(filter_str))
-    elif field == "ip_address":
+    else:
         nodes = Node.query.filter(Node.ip_address.contains(filter_str))
     return render_template("node/index.html", nodes=nodes)
 
