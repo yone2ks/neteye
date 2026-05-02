@@ -230,7 +230,7 @@ def command_history_data():
 
 @history_bp.route("/command_history/<id>/result")
 def command_history_result(id):
-    command_history = CommandHistory.query.get(id)
+    command_history = CommandHistory.get(id)
     result = json.loads(command_history.result)
     date = command_history.created_at.replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
     if isinstance(result, str):

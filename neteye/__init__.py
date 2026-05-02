@@ -16,8 +16,10 @@ from neteye.arp_entry.routes import arp_entry_bp
 from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
+from neteye.error_handlers import register_error_handlers
+from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
-                               continuum, db, ma, security, settings)
+                               csrf, db, ma, security, settings)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -33,37 +35,46 @@ APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
 TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, "templates")
 STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
-app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
-FlaskDynaconf(app)
-db.init_app(app)
-continuum.init_app(app)
-bootstrap.init_app(app)
-babel.init_app(app)
-security.init_app(app, user_datastore)
-ma.init_app(app)
-#api.init_app(api_bp)
 
-app.register_blueprint(root_bp)
-app.register_blueprint(base_bp)
-app.register_blueprint(node_bp)
-app.register_blueprint(interface_bp)
-app.register_blueprint(serial_bp)
-app.register_blueprint(cable_bp)
-app.register_blueprint(arp_entry_bp)
-app.register_blueprint(history_bp)
-app.register_blueprint(management_bp)
-app.register_blueprint(user_bp)
-app.register_blueprint(visualization_bp)
-app.register_blueprint(troubleshoot_bp)
-app.register_blueprint(api_bp)
+def create_app():
+    _app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
+    FlaskDynaconf(_app)
+    db.init_app(_app)
+    bootstrap.init_app(_app)
+    babel.init_app(_app)
+    csrf.init_app(_app)
+    ma.init_app(_app)
 
-api.add_namespace(auth_ns)
-api.add_namespace(interfaces_api)
-api.add_namespace(serials_api)
+    _app.register_blueprint(root_bp)
+    _app.register_blueprint(base_bp)
+    _app.register_blueprint(node_bp)
+    _app.register_blueprint(interface_bp)
+    _app.register_blueprint(serial_bp)
+    _app.register_blueprint(cable_bp)
+    _app.register_blueprint(arp_entry_bp)
+    _app.register_blueprint(history_bp)
+    _app.register_blueprint(management_bp)
+    _app.register_blueprint(user_bp)
+    _app.register_blueprint(visualization_bp)
+    _app.register_blueprint(troubleshoot_bp)
+    _app.register_blueprint(api_bp)
 
-# Create the database tables and admin user when the application starts.
-with app.app_context():
-    db.create_all()
-    initialize_roles()
-    initialize_admin()
+    api.add_namespace(auth_ns)
+    api.add_namespace(interfaces_api)
+    api.add_namespace(serials_api)
 
+    # configure_mappers finalizes sqlalchemy_continuum versioning table setup;
+    # must run after all models are imported (via blueprint registration above).
+    configure_mappers()
+    register_error_handlers(_app)
+
+    with _app.app_context():
+        security.init_app(_app, user_datastore)
+        db.create_all()
+        initialize_roles()
+        initialize_admin()
+
+    return _app
+
+
+app = create_app()

@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import (flash, jsonify, redirect, render_template, request, session,
+from flask import (abort, flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
 
@@ -40,8 +40,8 @@ def data():
 @serial_bp.route("/<id>")
 @auth_required()
 def show(id):
-    serial = Serial.query.get(id)
-    node = Node.query.get(serial.node_id)
+    serial = Serial.get(id)
+    node = Node.get(serial.node_id)
     return render_template("serial/show.html", serial=serial, node=node)
 
 
@@ -68,7 +68,7 @@ def create():
 @serial_bp.route("/<id>/edit")
 @auth_required()
 def edit(id):
-    serial = Serial.query.get(id)
+    serial = Serial.get(id)
     form = SerialForm()
     node_id = serial.node_id
     serial_number = serial.serial_number
@@ -88,7 +88,7 @@ def edit(id):
 @serial_bp.route("/<id>/update", methods=["POST"])
 @auth_required()
 def update(id):
-    serial = Serial.query.get(id)
+    serial = Serial.get(id)
     serial.node_id = request.form["node_id"]
     serial.serial_number = request.form["serial_number"]
     serial.product_id = request.form["product_id"]
@@ -101,10 +101,12 @@ def update(id):
 @serial_bp.route("/<id>/delete", methods=["POST"])
 @auth_required()
 def delete(id):
-    serial = Serial.query.get(id)
+    serial = Serial.get(id)
     serial.delete()
     return redirect(url_for("serial.index"))
 
+
+FILTER_FIELDS = {"serial", "product_id", "node"}
 
 @serial_bp.route("/filter")
 @auth_required()
@@ -112,11 +114,13 @@ def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
+    if field not in FILTER_FIELDS:
+        abort(400)
     if field == "serial":
         serials = Serial.query.filter(Serial.serial_number.contains(filter_str))
     elif field == "product_id":
         serials = Serial.query.filter(Serial.product_id.contains(filter_str))
-    elif field == "node":
+    else:
         serials = (
             Serial.query.join(Node, Serial.node_id == Node.id)
             .add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id)

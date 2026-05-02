@@ -35,7 +35,7 @@ def delta_commit(model: Base, before_keys: set, before: dict, after_keys: set, a
         if diff_type == REMOVE:
             for _, keys in diff_content:
                 for key in keys:
-                    instance = model.query.get(before[key]["id"])
+                    instance = model.get(before[key]["id"])
                     instance.delete()
         elif diff_type == ADD:
             for _, keys in diff_content:
@@ -47,6 +47,6 @@ def delta_commit(model: Base, before_keys: set, before: dict, after_keys: set, a
         attr_delta = tuple(diff(before[key], after[key], ignore=set(["id"])))
         for diff_type, diff_target, diff_content in attr_delta:
             if diff_type == CHANGE:
-                instance = model.query.get(before[key]["id"])
+                instance = model.get(before[key]["id"])
                 setattr(instance, diff_target, diff_content[1])
                 instance.commit()

@@ -25,7 +25,16 @@ HISTORY_VALIDATORS = [
     "ARP_ENTRY_HISTORY_MAX_RECORDS",
 ]
 
+INSECURE_SECRET_KEYS = {"secret key", "changeme", "dev", "development", "test", ""}
+
 validators = [
+    # Flask: only reject well-known insecure defaults in production
+    Validator(
+        "SECRET_KEY", must_exist=True,
+        condition=lambda v: v not in INSECURE_SECRET_KEYS,
+        messages={"condition": "SECRET_KEY must be set to a secure random value"},
+        when=Validator("ENV_FOR_DYNACONF", eq="production"),
+    ),
     # Netmiko
     Validator("NETMIKO_READ_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NETMIKO_READ_TIMEOUT"]),
     Validator("NETMIKO_CONN_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NETMIKO_CONN_TIMEOUT"]),

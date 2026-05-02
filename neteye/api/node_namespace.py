@@ -56,12 +56,12 @@ class NodesResource(Resource):
 class NodeResource(Resource):
     @nodes_api.marshal_with(node_model)
     def get(self, id):
-        return Node.query.get_or_404(id)
+        return db.get_or_404(Node, id)
 
     @nodes_api.expect(node_model)
     @nodes_api.marshal_with(node_model)
     def put(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         try:
             node = node_schema.load(api.payload, instance=node)
             node.commit()
@@ -71,10 +71,12 @@ class NodeResource(Resource):
 
     @nodes_api.response(204, "Node deleted")
     def delete(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node.delete()
         return '', 204
 
+
+NODE_FILTER_FIELDS = {"hostname", "ip_address", "device_type", "os_type"}
 
 @nodes_api.route("/filter")
 class NodeResourceFilter(Resource):
@@ -82,8 +84,8 @@ class NodeResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Node, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in NODE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(NODE_FILTER_FIELDS)}")
         nodes = Node.query.filter(getattr(Node, field) == filter_str).all()
         return nodes
 
@@ -92,7 +94,7 @@ class NodeResourceFilter(Resource):
 class NodeResourceCommand(Resource):
     def get(self, id, command):
         command = command.replace("+", " ")
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         result = node.command(command)
         return jsonify(result)
 
@@ -101,7 +103,7 @@ class NodeResourceCommand(Resource):
 class NodeResourceRawCommand(Resource):
     def get(self, id, command):
         command = command.replace("+", " ")
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         result = node.raw_command(command)
         return jsonify(result)
 
@@ -110,7 +112,7 @@ class NodeResourceRawCommand(Resource):
 class NodeImportNode(Resource):
     @nodes_api.marshal_with(node_model)
     def post(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node_imports.import_node_data(node)
         return node, 200
 
@@ -118,7 +120,7 @@ class NodeImportNode(Resource):
 @nodes_api.route("/<string:id>/import/serial")
 class NodeImportSerial(Resource):
     def post(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node_imports.import_serials(node)
         return {"message": f"Serials imported for node {node.hostname}"}, 200
 
@@ -126,7 +128,7 @@ class NodeImportSerial(Resource):
 @nodes_api.route("/<string:id>/import/interface")
 class NodeImportInterface(Resource):
     def post(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node_imports.import_interfaces(node)
         return {"message": f"Interfaces imported for node {node.hostname}"}, 200
 
@@ -134,7 +136,7 @@ class NodeImportInterface(Resource):
 @nodes_api.route("/<string:id>/import/arp_entry")
 class NodeImportArpEntry(Resource):
     def post(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node_imports.import_arp_entries(node)
         return {"message": f"ARP entries imported for node {node.hostname}"}, 200
 
@@ -142,6 +144,6 @@ class NodeImportArpEntry(Resource):
 @nodes_api.route("/<string:id>/import/all_data")
 class NodeImportAll(Resource):
     def post(self, id):
-        node = Node.query.get_or_404(id)
+        node = db.get_or_404(Node, id)
         node_imports.import_all_data(node)
         return {"message": f"All data imported for node {node.hostname}"}, 200

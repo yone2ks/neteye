@@ -49,12 +49,12 @@ class CablesResource(Resource):
 class CableResource(Resource):
     @cables_api.marshal_with(cable_model)
     def get(self, id):
-        return Cable.query.get_or_404(id)
+        return db.get_or_404(Cable, id)
 
     @cables_api.expect(cable_model)
     @cables_api.marshal_with(cable_model)
     def put(self, id):
-        cable = Cable.query.get_or_404(id)
+        cable = db.get_or_404(Cable, id)
         try:
             cable = cable_schema.load(api.payload, instance=cable)
             cable.commit()
@@ -64,10 +64,12 @@ class CableResource(Resource):
 
     @cables_api.response(204, "Cable deleted")
     def delete(self, id):
-        cable = Cable.query.get_or_404(id)
+        cable = db.get_or_404(Cable, id)
         cable.delete()
         return '', 204
 
+
+CABLE_FILTER_FIELDS = {"cable_type", "description", "link_speed"}
 
 @cables_api.route("/filter")
 class CableResourceFilter(Resource):
@@ -75,7 +77,7 @@ class CableResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Cable, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in CABLE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(CABLE_FILTER_FIELDS)}")
         results = Cable.query.filter(getattr(Cable, field) == filter_str).all()
         return results

@@ -18,4 +18,4 @@ def bp_factory(
     return blueprint
 
 
-root_bp = bp_factory("")
+root_bp = bp_factory("root", url_prefix="/")

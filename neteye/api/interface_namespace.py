@@ -54,12 +54,12 @@ class InterfacesResource(Resource):
 class InterfaceResource(Resource):
     @interfaces_api.marshal_with(interface_model)
     def get(self, id):
-        return Interface.query.get_or_404(id)
+        return db.get_or_404(Interface, id)
 
     @interfaces_api.expect(interface_model)
     @interfaces_api.marshal_with(interface_model)
     def put(self, id):
-        interface = Interface.query.get_or_404(id)
+        interface = db.get_or_404(Interface, id)
         try:
             interface = interface_schema.load(api.payload, instance=interface)
             interface.commit()
@@ -69,10 +69,12 @@ class InterfaceResource(Resource):
 
     @interfaces_api.response(204, "Interface deleted")
     def delete(self, id):
-        interface = Interface.query.get_or_404(id)
+        interface = db.get_or_404(Interface, id)
         interface.delete()
         return '', 204
 
+
+INTERFACE_FILTER_FIELDS = {"ip_address", "name", "description", "status"}
 
 @interfaces_api.route("/filter")
 class InterfaceResourceFilter(Resource):
@@ -80,7 +82,7 @@ class InterfaceResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(Interface, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in INTERFACE_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(INTERFACE_FILTER_FIELDS)}")
         results = Interface.query.filter(getattr(Interface, field) == filter_str).all()
         return results

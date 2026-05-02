@@ -48,12 +48,12 @@ class ArpEntrysResource(Resource):
 class ArpEntryResource(Resource):
     @arp_entries_api.marshal_with(arp_entry_model)
     def get(self, id):
-        return ArpEntry.query.get_or_404(id)
+        return db.get_or_404(ArpEntry, id)
 
     @arp_entries_api.expect(arp_entry_model)
     @arp_entries_api.marshal_with(arp_entry_model)
     def put(self, id):
-        arp_entry = ArpEntry.query.get_or_404(id)
+        arp_entry = db.get_or_404(ArpEntry, id)
         try:
             arp_entry = arp_entry_schema.load(api.payload, instance=arp_entry)
             arp_entry.commit()
@@ -63,10 +63,12 @@ class ArpEntryResource(Resource):
 
     @arp_entries_api.response(204, "ARP entry deleted")
     def delete(self, id):
-        arp_entry = ArpEntry.query.get_or_404(id)
+        arp_entry = db.get_or_404(ArpEntry, id)
         arp_entry.delete()
         return '', 204
 
+
+ARP_ENTRY_FILTER_FIELDS = {"ip_address", "mac_address", "vendor"}
 
 @arp_entries_api.route("/filter")
 class ArpEntryResourceFilter(Resource):
@@ -74,7 +76,7 @@ class ArpEntryResourceFilter(Resource):
     def get(self):
         field = request.args.get("field")
         filter_str = request.args.get("filter_str")
-        if not hasattr(ArpEntry, field):
-            abort(400, message=f"Invalid field: {field}")
+        if field not in ARP_ENTRY_FILTER_FIELDS:
+            abort(400, message=f"Invalid field: {field}. Allowed: {sorted(ARP_ENTRY_FILTER_FIELDS)}")
         results = ArpEntry.query.filter(getattr(ArpEntry, field) == filter_str).all()
         return results

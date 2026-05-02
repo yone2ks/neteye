@@ -3,7 +3,7 @@ from logging import getLogger
 import pandas as pd
 from sqlalchemy.sql.expression import desc
 from sqlalchemy.exc import IntegrityError
-from flask import (flash, jsonify, redirect, render_template, request, session,
+from flask import (abort, flash, jsonify, redirect, render_template, request, session,
                    url_for)
 from flask_security import auth_required, current_user
 
@@ -13,6 +13,7 @@ from neteye.blueprints import bp_factory
 from neteye.extensions import db
 from neteye.node.models import Node
 from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
+from neteye.lib.utils.report_exception import report_exception
 
 from .forms import InterfaceForm
 from .models import Interface
@@ -48,8 +49,8 @@ def data():
 @interface_bp.route("/<id>")
 @auth_required()
 def show(id):
-    interface = Interface.query.get(id)
-    node = Node.query.get(interface.node_id)
+    interface = Interface.get(id)
+    node = Node.get(interface.node_id)
     return render_template("interface/show.html", interface=interface, node=node)
 
 
@@ -97,8 +98,7 @@ def create():
             return redirect(url_for("interface.new"))
         except Exception as e:
             interface.rollback()
-            logger.error(f"Unexpected Error: {e}")
-            flash("An unexpected error occurred while creating the interface.", "danger")
+            report_exception(e, "Error creating interface")
             return redirect(url_for("interface.new"))
     else:
         return render_template(
@@ -120,7 +120,7 @@ def create():
 @interface_bp.route("/<id>/edit")
 @auth_required()
 def edit(id):
-    interface = Interface.query.get(id)
+    interface = Interface.get(id)
     form = InterfaceForm()
     node_id = interface.node_id
     name = interface.name
@@ -164,7 +164,7 @@ def update(id):
     mtu = request.form["mtu"]
     status = request.form["status"]
     if form.validate_on_submit():
-        interface = Interface.query.get(id)
+        interface = Interface.get(id)
         interface.node_id = node_id
         interface.name = name
         interface.description = description
@@ -185,8 +185,7 @@ def update(id):
             return redirect(url_for("interface.edit", id=id))
         except Exception as e:
             interface.rollback()
-            logger.error(f"Unexpected Error: {e}")
-            flash("An unexpected error occurred while updating the interface.", "danger")
+            report_exception(e, "Error updating interface")
             return redirect(url_for("interface.edit", id=id))
     else:
         return render_template(
@@ -209,10 +208,12 @@ def update(id):
 @interface_bp.route("/<id>/delete", methods=["POST"])
 @auth_required()
 def delete(id):
-    interface = Interface.query.get(id)
+    interface = Interface.get(id)
     interface.delete()
     return redirect(url_for("interface.index"))
 
+
+FILTER_FIELDS = {"ip_address", "description", "node"}
 
 @interface_bp.route("/filter")
 @auth_required()
@@ -220,6 +221,8 @@ def filter():
     page = request.args.get("page", 1, type=int)
     field = request.args.get("field")
     filter_str = request.args.get("filter_str")
+    if field not in FILTER_FIELDS:
+        abort(400)
     if field == "ip_address":
         interfaces = Interface.query.filter(
             Interface.ip_address.contains(filter_str)
@@ -228,7 +231,7 @@ def filter():
         interfaces = Interface.query.filter(
             Interface.description.contains(filter_str)
         )
-    elif field == "node":
+    else:
         interfaces = (
             Interface.query.join(Node, Interface.node_id == Node.id)
             .add_columns(
