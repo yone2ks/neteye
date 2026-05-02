@@ -1,15 +1,12 @@
 import os
 
-# DYNACONF_ 環境変数は settings.toml をオーバーライドする。
-# neteye import より前に設定することで、import 時の create_app() からテスト DB が使われる。
+# settings.toml の [testing] セクションを有効化する。
+# neteye import より前に設定することで、create_app() 時から正しい設定が使われる。
 _TEST_DB = "/tmp/neteye_test.db"
 if os.path.exists(_TEST_DB):
     os.remove(_TEST_DB)
 
-os.environ["DYNACONF_SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{_TEST_DB}"
-os.environ["DYNACONF_WTF_CSRF_ENABLED"] = "false"
-os.environ["DYNACONF_SECURITY_CSRF_PROTECT_MECHANISMS"] = "@json []"
-os.environ["DYNACONF_SECRET_KEY"] = "test-secret-key"
+os.environ["ENV_FOR_DYNACONF"] = "testing"
 
 import pytest
 from flask_security import hash_password

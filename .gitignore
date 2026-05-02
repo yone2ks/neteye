@@ -135,7 +135,6 @@ dmypy.json
 cython_debug/
 
 # Project-specific
-settings.toml
 ntc-templates/
 custom_templates/**
 !custom_templates/index.org
