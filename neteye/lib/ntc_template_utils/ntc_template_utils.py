@@ -41,6 +41,8 @@ class NtcTemplateUtils:
         return template_allreplace.replace("_", " ")
 
     def get_command_list(self, platform):
+        if self.ntc_template_index_df.empty:
+            return []
         template_list = self.ntc_template_index_df.query("Platform == @platform")["Template"].values.tolist()
         return [self.convert_template_to_command(template) for template in template_list]
 
