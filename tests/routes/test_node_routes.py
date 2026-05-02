@@ -1,13 +1,12 @@
 import pytest
-from neteye import app as flask_app
 from neteye.extensions import db as _db
 from neteye.node.models import Node
 
 
 @pytest.fixture
-def sample_node():
-    """ルートテスト用ノード。app context をテスト実行中に保持しない。"""
-    with flask_app.app_context():
+def sample_node(app):
+    """ルートテスト用ノード。セットアップ・クリーンアップの前後で app context を閉じる。"""
+    with app.app_context():
         node = Node(
             hostname="route-test",
             ip_address="192.168.99.1",
@@ -20,7 +19,7 @@ def sample_node():
         _db.session.commit()
         node_id = node.id
     yield node_id
-    with flask_app.app_context():
+    with app.app_context():
         node = _db.session.get(Node, node_id)
         if node:
             _db.session.delete(node)
@@ -47,12 +46,10 @@ class TestNodeFilterValidation:
 
 class TestNodeCrudRoutes:
     def test_index_returns_200(self, auth_client):
-        # node index route is registered at /node (no trailing slash)
         resp = auth_client.get("/node")
         assert resp.status_code == 200
 
     def test_show_returns_200(self, auth_client, sample_node):
-        # show route is /<id> (not /<id>/show)
         resp = auth_client.get(f"/node/{sample_node}")
         assert resp.status_code == 200
 
