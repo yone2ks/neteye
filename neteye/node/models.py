@@ -69,12 +69,12 @@ class Node(Base):
     enable = Column(String)
     interfaces = relationship(
         "Interface",
-        backref="nodes",
+        back_populates="node",
         lazy="joined",
         cascade="save-update, merge, delete",
     )
     serials = relationship(
-        "Serial", backref="nodes", lazy="joined", cascade="save-update, merge, delete"
+        "Serial", back_populates="node", lazy="joined", cascade="save-update, merge, delete"
     )
 
     def __init__(self, **kwargs):

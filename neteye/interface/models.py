@@ -1,6 +1,6 @@
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String, UniqueConstraint)
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import relationship
 
 from neteye.base.models import Base
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
@@ -14,7 +14,7 @@ class Interface(Base):
     KEY = "name"
 
     node_id = Column(String, ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
-    node = relationship("Node")
+    node = relationship("Node", back_populates="interfaces")
     name = Column(String, nullable=False)
     description = Column(String, default="")
     ip_address = Column(String)
