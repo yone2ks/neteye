@@ -1,6 +1,6 @@
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
                         String)
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import relationship
 
 from neteye.base.models import Base
 
@@ -15,7 +15,7 @@ class Serial(Base):
     product_id = Column(String)
     description = Column(String, default="")
     node_id = Column(String, ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
-    node = relationship("Node")
+    node = relationship("Node", back_populates="serials")
 
     def __repr__(self):
         return "serial_id={id} serial_number={serial_number} product_id={product_id} node_id={node_id}".format(
