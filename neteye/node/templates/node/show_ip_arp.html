@@ -22,11 +22,10 @@
     <td>{{ row['protocol'] }}</td>
     <td>{{ row['type'] }}</td>
     <td>
-        {% if row['age'] == '-' %}
-        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node_from_ip/{{row['address']}}'" disabled>Import Node</button>
-        {% else %}
-        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node_from_ip/{{row['address']}}'">Import Node</button>
-        {% endif %}
+        <form action="{{ url_for('node.import_node_from_ip', ip_address=row['address']) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-primary" type="submit" {% if row['age'] == '-' %}disabled{% endif %}>Import Node</button>
+        </form>
     </td>
 </tr>
 {% endfor %}

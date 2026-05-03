@@ -535,7 +535,7 @@ def napalm_get_interfaces(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_node_from_id/<id>")
+@node_bp.route("/import_node_from_id/<id>", methods=["POST"])
 @auth_required()
 def import_node_from_id(id):
     try:
@@ -552,7 +552,7 @@ def import_node_from_id(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_node_from_ip/<ip_address>")
+@node_bp.route("/import_node_from_ip/<ip_address>", methods=["POST"])
 @auth_required()
 def import_node_from_ip(ip_address):
     try:
@@ -567,7 +567,7 @@ def import_node_from_ip(ip_address):
         return redirect(url_for("node.index"))
 
 
-@node_bp.route("/import_interface/<id>")
+@node_bp.route("/import_interface/<id>", methods=["POST"])
 @auth_required()
 def import_interface_only(id):
     """Import interface data for a specific node"""
@@ -586,7 +586,7 @@ def import_interface_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_serial/<id>")
+@node_bp.route("/import_serial/<id>", methods=["POST"])
 @auth_required()
 def import_serial_only(id):
     """Import serial data for a specific node"""
@@ -605,7 +605,7 @@ def import_serial_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_arp_entry/<id>")
+@node_bp.route("/import_arp_entry/<id>", methods=["POST"])
 @auth_required()
 def import_arp_only(id):
     """Import ARP entry data for a specific node"""
@@ -624,7 +624,7 @@ def import_arp_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/import_node/<id>")
+@node_bp.route("/import_node/<id>", methods=["POST"])
 @auth_required()
 def import_node_only(id):
     """Import node data for a specific node"""
@@ -643,7 +643,7 @@ def import_node_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/explore_node/<id>")
+@node_bp.route("/explore_node/<id>", methods=["POST"])
 @auth_required()
 def explore_node(id):
     try:
