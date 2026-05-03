@@ -122,17 +122,32 @@
             </div>
             <div class="row ml-1">
                 <div class="btn-group mr-2 mt-2">
-                    <button class="btn btn-sm btn-success" type="button" onclick="location.href='import_node_from_id/{{node.id}}'">Import All Data</button>
+                    <form action="{{ url_for('node.import_node_from_id', id=node.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-success" type="submit">Import All Data</button>
+                    </form>
                 </div>
                 <div class="btn-group mr-2 mt-2" role="group">
                     <button id="importDropdown" type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background-color: #e8f5e8; color: #28a745; border-color: #28a745;">
                         Import Individual
                     </button>
                     <div class="dropdown-menu" aria-labelledby="importDropdown">
-                        <a class="dropdown-item" href="import_node/{{node.id}}" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Node Info Only</a>
-                        <a class="dropdown-item" href="import_interface/{{node.id}}" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Interface Only</a>
-                        <a class="dropdown-item" href="import_serial/{{node.id}}" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Serial Only</a>
-                        <a class="dropdown-item" href="import_arp_entry/{{node.id}}" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">ARP Entry Only</a>
+                        <form action="{{ url_for('node.import_node_only', id=node.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="dropdown-item" type="submit" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Node Info Only</button>
+                        </form>
+                        <form action="{{ url_for('node.import_interface_only', id=node.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="dropdown-item" type="submit" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Interface Only</button>
+                        </form>
+                        <form action="{{ url_for('node.import_serial_only', id=node.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="dropdown-item" type="submit" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">Serial Only</button>
+                        </form>
+                        <form action="{{ url_for('node.import_arp_only', id=node.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="dropdown-item" type="submit" style="color: #28a745;" onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';" onmouseout="this.style.backgroundColor=''; this.style.color='#28a745';">ARP Entry Only</button>
+                        </form>
                     </div>
                 </div>
             </div>

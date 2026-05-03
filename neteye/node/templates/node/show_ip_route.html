@@ -28,11 +28,10 @@
     <td>{{ row['type'] }}</td>
     <td>{{ row['uptime'] }}</td>
     <td>
-        {% if row['nexthop_ip'] == '' %}
-        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['nexthop_ip']}}'" disabled>Import Node</button>
-        {% else %}
-        <button class="btn btn-sm btn-primary" type="button" onclick="location.href='/node/import_node/{{row['nexthop_ip']}}'">Import Node</button>
-        {% endif %}
+        <form action="{{ url_for('node.import_node_from_ip', ip_address=row['nexthop_ip']) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-primary" type="submit" {% if row['nexthop_ip'] == '' %}disabled{% endif %}>Import Node</button>
+        </form>
     </td>
 </tr>
 {% endfor %}
