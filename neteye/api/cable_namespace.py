@@ -1,9 +1,10 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource, ValidationError, fields, abort
+from flask_restx import Namespace, ValidationError, fields, abort
 
 from neteye.api.interface_namespace import InterfaceSchema
 from neteye.api.routes import api_bp
 from neteye.cable.models import Cable
+from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
 
 
@@ -29,7 +30,7 @@ cable_model = cables_api.model('Cable', {
 })
 
 @cables_api.route("", "/")
-class CablesResource(Resource):
+class CablesResource(AuthenticatedResource):
     @cables_api.marshal_list_with(cable_model)
     def get(self):
         return Cable.query.all()
@@ -46,7 +47,7 @@ class CablesResource(Resource):
 
 
 @cables_api.route("/<string:id>")
-class CableResource(Resource):
+class CableResource(AuthenticatedResource):
     @cables_api.marshal_with(cable_model)
     def get(self, id):
         return db.get_or_404(Cable, id)
@@ -72,7 +73,7 @@ class CableResource(Resource):
 CABLE_FILTER_FIELDS = {"cable_type", "description", "link_speed"}
 
 @cables_api.route("/filter")
-class CableResourceFilter(Resource):
+class CableResourceFilter(AuthenticatedResource):
     @cables_api.marshal_list_with(cable_model)
     def get(self):
         field = request.args.get("field")

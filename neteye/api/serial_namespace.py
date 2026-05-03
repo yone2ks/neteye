@@ -1,8 +1,9 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource, ValidationError, fields, abort
+from flask_restx import Namespace, ValidationError, fields, abort
 
 from neteye.api.node_namespace import NodeSchema
 from neteye.api.routes import api_bp
+from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
 from neteye.serial.models import Serial
 
@@ -26,7 +27,7 @@ serial_model = serials_api.model('Serial', {
 })
 
 @serials_api.route("", "/")
-class SerialsResource(Resource):
+class SerialsResource(AuthenticatedResource):
     @serials_api.marshal_list_with(serial_model)
     def get(self):
         return Serial.query.all()
@@ -43,7 +44,7 @@ class SerialsResource(Resource):
 
 
 @serials_api.route("/<string:id>")
-class SerialResource(Resource):
+class SerialResource(AuthenticatedResource):
     @serials_api.marshal_with(serial_model)
     def get(self, id):
         return db.get_or_404(Serial, id)
@@ -69,7 +70,7 @@ class SerialResource(Resource):
 SERIAL_FILTER_FIELDS = {"serial_number", "product_id", "description"}
 
 @serials_api.route("/filter")
-class SerialResourceFilter(Resource):
+class SerialResourceFilter(AuthenticatedResource):
     @serials_api.marshal_list_with(serial_model)
     def get(self):
         field = request.args.get("field")

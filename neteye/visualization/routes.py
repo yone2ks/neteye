@@ -8,6 +8,7 @@ from sqlalchemy.sql import exists
 
 from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory
+from flask_security import auth_required
 from neteye.cable.models import Cable
 from neteye.extensions import connection_pool, db, settings
 from neteye.interface.models import Interface
@@ -25,6 +26,7 @@ intf_conv = IntfAbbrevConverter("cisco_ios")
 
 
 @visualization_bp.route("/layer1")
+@auth_required()
 def layer1():
     cables = (
         Cable.query.join(
