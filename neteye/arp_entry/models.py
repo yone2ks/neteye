@@ -37,6 +37,7 @@ class ArpEntry(Base):
             id=self.id, ip_address=self.ip_address, mac_address=self.mac_address
         )
 
+    @staticmethod
     def exists(ip_address, interface_id):
         return ArpEntry.query.filter_by(ip_address=ip_address, interface_id=interface_id).scalar() != None
 

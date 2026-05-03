@@ -41,6 +41,8 @@ def data():
 @auth_required()
 def show(id):
     serial = Serial.get(id)
+    if not serial:
+        abort(404)
     node = Node.get(serial.node_id)
     return render_template("serial/show.html", serial=serial, node=node)
 
@@ -69,6 +71,8 @@ def create():
 @auth_required()
 def edit(id):
     serial = Serial.get(id)
+    if not serial:
+        abort(404)
     form = SerialForm()
     node_id = serial.node_id
     serial_number = serial.serial_number
@@ -89,6 +93,8 @@ def edit(id):
 @auth_required()
 def update(id):
     serial = Serial.get(id)
+    if not serial:
+        abort(404)
     serial.node_id = request.form["node_id"]
     serial.serial_number = request.form["serial_number"]
     serial.product_id = request.form["product_id"]
@@ -102,6 +108,8 @@ def update(id):
 @auth_required()
 def delete(id):
     serial = Serial.get(id)
+    if not serial:
+        abort(404)
     serial.delete()
     return redirect(url_for("serial.index"))
 
@@ -123,7 +131,7 @@ def filter():
     else:
         serials = (
             Serial.query.join(Node, Serial.node_id == Node.id)
-            .add_columns(Serial.id, Node.hostname, Serial.serial, Serial.product_id)
+            .add_columns(Serial.id, Node.hostname, Serial.serial_number, Serial.product_id)
             .filter(Node.hostname.contains(filter_str))
         )
     return render_template("serial/index.html", serials=serials)

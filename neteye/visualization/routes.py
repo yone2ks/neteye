@@ -28,11 +28,11 @@ intf_conv = IntfAbbrevConverter("cisco_ios")
 def layer1():
     cables = (
         Cable.query.join(
-            src_interface_table, Cable.src_interface_id == src_interface_table.id
+            src_interface_table, Cable.a_interface_id == src_interface_table.id
         )
         .add_columns(src_interface_table.name)
         .join(src_node_table, src_interface_table.node_id == src_node_table.id)
-        .join(dst_interface_table, Cable.dst_interface_id == dst_interface_table.id)
+        .join(dst_interface_table, Cable.b_interface_id == dst_interface_table.id)
         .join(dst_node_table, dst_interface_table.node_id == dst_node_table.id)
         .add_columns(
             Cable.id,
