@@ -1,8 +1,9 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource, ValidationError, fields, abort
+from flask_restx import Namespace, ValidationError, fields, abort
 
 from neteye.api.node_namespace import NodeSchema
 from neteye.api.routes import api_bp
+from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
 from neteye.interface.models import Interface
 from neteye.node.models import Node
@@ -34,7 +35,7 @@ interface_model = interfaces_api.model('Interface', {
 })
 
 @interfaces_api.route("", "/")
-class InterfacesResource(Resource):
+class InterfacesResource(AuthenticatedResource):
     @interfaces_api.marshal_list_with(interface_model)
     def get(self):
         return Interface.query.all()
@@ -51,7 +52,7 @@ class InterfacesResource(Resource):
 
 
 @interfaces_api.route("/<string:id>")
-class InterfaceResource(Resource):
+class InterfaceResource(AuthenticatedResource):
     @interfaces_api.marshal_with(interface_model)
     def get(self, id):
         return db.get_or_404(Interface, id)
@@ -77,7 +78,7 @@ class InterfaceResource(Resource):
 INTERFACE_FILTER_FIELDS = {"ip_address", "name", "description", "status"}
 
 @interfaces_api.route("/filter")
-class InterfaceResourceFilter(Resource):
+class InterfaceResourceFilter(AuthenticatedResource):
     @interfaces_api.marshal_list_with(interface_model)
     def get(self):
         field = request.args.get("field")

@@ -19,6 +19,12 @@ SECURITY_LOGIN_USER_TEMPLATE = 'login.html'
 SECURITY_REGISTER_USER_TEMPLATE = 'register.html'
 # Flask-Security-Too 5.x manages CSRF internally; disable Flask-WTF's default check
 WTF_CSRF_CHECK_DEFAULT = false
+# Token authentication for REST API / automation clients
+# Header: Authentication-Token: <token>
+SECURITY_TOKEN_AUTHENTICATION_HEADER = 'Authentication-Token'
+# Token expiry: 7 days (604800 seconds)
+# On expiry, client should re-login to obtain a new token
+SECURITY_TOKEN_MAX_AGE = 604800
 
 # Administrator Setting
 ADMIN_EMAIL = 'neteye_admin@yourcompany.com'

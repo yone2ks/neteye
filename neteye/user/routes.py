@@ -54,14 +54,14 @@ def data():
 
 
 @user_bp.route('/<id>')
-@auth_required()
+@roles_required('admin')
 def show(id):
     user = User.get(id)
     return render_template('user/show.html', user=user)
 
 
 @user_bp.route('/<id>/delete', methods=['POST'])
-@auth_required()
+@roles_required('admin')
 def delete(id):
     user = User.get(id)
     user.delete()

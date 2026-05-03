@@ -9,6 +9,7 @@ from flask import (flash, jsonify, redirect, render_template, request, session,
 from sqlalchemy.sql import exists
 
 from datatables import ColumnDT, DataTables
+from flask_security import auth_required
 from neteye.api.history_namespace import (arp_entry_transaction_schema,
                                            arp_entry_transactions_schema,
                                            arp_entry_version_schema,
@@ -41,11 +42,13 @@ from .model_command_history import CommandHistory
 history_bp = bp_factory("history")
 
 @history_bp.route("/node_history")
+@auth_required()
 def node_history():
     return render_template("history/node_history.html")
 
 
 @history_bp.route("/node_history_data")
+@auth_required()
 def node_history_data():
     columns = [
         ColumnDT(node_transaction.issued_at),
@@ -81,11 +84,13 @@ def node_history_data():
 
 
 @history_bp.route("/interface_history")
+@auth_required()
 def interface_history():
     return render_template("history/interface_history.html")
 
 
 @history_bp.route("/interface_history_data")
+@auth_required()
 def interface_history_data():
     columns = [
         ColumnDT(interface_transaction.issued_at),
@@ -113,10 +118,12 @@ def interface_history_data():
 
 
 @history_bp.route("/serial_history")
+@auth_required()
 def serial_history():
     return render_template("history/serial_history.html")
 
 @history_bp.route("/serial_history_data")
+@auth_required()
 def serial_history_data():
     columns = [
         ColumnDT(serial_transaction.issued_at),
@@ -143,11 +150,13 @@ def serial_history_data():
 
 
 @history_bp.route("/cable_history")
+@auth_required()
 def cable_history():
     return render_template("history/cable_history.html")
 
 
 @history_bp.route("/cable_history_data")
+@auth_required()
 def cable_history_data():
     columns = [
         ColumnDT(cable_transaction.issued_at),
@@ -177,11 +186,13 @@ def cable_history_data():
 
 
 @history_bp.route("/arp_entry_history")
+@auth_required()
 def arp_entry_history():
     return render_template("history/arp_entry_history.html")
 
 
 @history_bp.route("/arp_entry_history_data")
+@auth_required()
 def arp_entry_history_data():
     columns = [
         ColumnDT(arp_entry_transaction.issued_at),
@@ -212,11 +223,13 @@ def arp_entry_history_data():
     return jsonify(result)
 
 @history_bp.route("/command_history")
+@auth_required()
 def command_history():
     return render_template("history/command_history.html")
 
 
 @history_bp.route("/command_history_data")
+@auth_required()
 def command_history_data():
     columns = [
         ColumnDT(CommandHistory.created_at),
@@ -235,6 +248,7 @@ def command_history_data():
     return jsonify(result)
 
 @history_bp.route("/command_history/<id>/result")
+@auth_required()
 def command_history_result(id):
     command_history = CommandHistory.get(id)
     result = json.loads(command_history.result)

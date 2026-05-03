@@ -1,9 +1,10 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource, ValidationError, fields, abort
+from flask_restx import Namespace, ValidationError, fields, abort
 
 from neteye.api.interface_namespace import InterfaceSchema
 from neteye.api.routes import api_bp
 from neteye.arp_entry.models import ArpEntry
+from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
 
 
@@ -28,7 +29,7 @@ arp_entry_model = arp_entries_api.model('ArpEntry', {
 })
 
 @arp_entries_api.route("", "/")
-class ArpEntrysResource(Resource):
+class ArpEntrysResource(AuthenticatedResource):
     @arp_entries_api.marshal_list_with(arp_entry_model)
     def get(self):
         return ArpEntry.query.all()
@@ -45,7 +46,7 @@ class ArpEntrysResource(Resource):
 
 
 @arp_entries_api.route("/<string:id>")
-class ArpEntryResource(Resource):
+class ArpEntryResource(AuthenticatedResource):
     @arp_entries_api.marshal_with(arp_entry_model)
     def get(self, id):
         return db.get_or_404(ArpEntry, id)
@@ -71,7 +72,7 @@ class ArpEntryResource(Resource):
 ARP_ENTRY_FILTER_FIELDS = {"ip_address", "mac_address", "vendor"}
 
 @arp_entries_api.route("/filter")
-class ArpEntryResourceFilter(Resource):
+class ArpEntryResourceFilter(AuthenticatedResource):
     @arp_entries_api.marshal_list_with(arp_entry_model)
     def get(self):
         field = request.args.get("field")

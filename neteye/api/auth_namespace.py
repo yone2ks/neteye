@@ -47,8 +47,9 @@ class Login(Resource):
             return {'message': 'Account is disabled'}, 403
             
         login_user(user)
-        
+
         return {
+            'authentication_token': user.get_auth_token(),
             'id': user.id,
             'email': user.email,
             'username': user.username,

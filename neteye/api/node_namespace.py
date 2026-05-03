@@ -1,7 +1,8 @@
 from flask import jsonify, request
-from flask_restx import Namespace, Resource, ValidationError, fields, abort
+from flask_restx import Namespace, ValidationError, fields, abort
 
-from neteye.extensions import api, ma
+from neteye.api.routes import AuthenticatedResource
+from neteye.extensions import api, db, ma
 from neteye.node.models import Node
 import neteye.node.routes as node_imports
 
@@ -37,7 +38,7 @@ node_model = nodes_api.model('Node', {
 })
 
 @nodes_api.route("","/")
-class NodesResource(Resource):
+class NodesResource(AuthenticatedResource):
     @nodes_api.marshal_list_with(node_model)
     def get(self):
         return Node.query.all()
@@ -53,7 +54,7 @@ class NodesResource(Resource):
             abort(400, message=err.messages)
 
 @nodes_api.route("/<string:id>")
-class NodeResource(Resource):
+class NodeResource(AuthenticatedResource):
     @nodes_api.marshal_with(node_model)
     def get(self, id):
         return db.get_or_404(Node, id)
@@ -79,7 +80,7 @@ class NodeResource(Resource):
 NODE_FILTER_FIELDS = {"hostname", "ip_address", "device_type", "os_type"}
 
 @nodes_api.route("/filter")
-class NodeResourceFilter(Resource):
+class NodeResourceFilter(AuthenticatedResource):
     @nodes_api.marshal_list_with(node_model)
     def get(self):
         field = request.args.get("field")
@@ -91,7 +92,7 @@ class NodeResourceFilter(Resource):
 
 
 @nodes_api.route("/<string:id>/command/<string:command>")
-class NodeResourceCommand(Resource):
+class NodeResourceCommand(AuthenticatedResource):
     def get(self, id, command):
         command = command.replace("+", " ")
         node = db.get_or_404(Node, id)
@@ -100,7 +101,7 @@ class NodeResourceCommand(Resource):
 
 
 @nodes_api.route("/<string:id>/raw_command/<string:command>")
-class NodeResourceRawCommand(Resource):
+class NodeResourceRawCommand(AuthenticatedResource):
     def get(self, id, command):
         command = command.replace("+", " ")
         node = db.get_or_404(Node, id)
@@ -109,7 +110,7 @@ class NodeResourceRawCommand(Resource):
 
 
 @nodes_api.route("/<string:id>/import/node")
-class NodeImportNode(Resource):
+class NodeImportNode(AuthenticatedResource):
     @nodes_api.marshal_with(node_model)
     def post(self, id):
         node = db.get_or_404(Node, id)
@@ -118,7 +119,7 @@ class NodeImportNode(Resource):
 
 
 @nodes_api.route("/<string:id>/import/serial")
-class NodeImportSerial(Resource):
+class NodeImportSerial(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
         node_imports.import_serials(node)
@@ -126,7 +127,7 @@ class NodeImportSerial(Resource):
 
 
 @nodes_api.route("/<string:id>/import/interface")
-class NodeImportInterface(Resource):
+class NodeImportInterface(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
         node_imports.import_interfaces(node)
@@ -134,7 +135,7 @@ class NodeImportInterface(Resource):
 
 
 @nodes_api.route("/<string:id>/import/arp_entry")
-class NodeImportArpEntry(Resource):
+class NodeImportArpEntry(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
         node_imports.import_arp_entries(node)
@@ -142,7 +143,7 @@ class NodeImportArpEntry(Resource):
 
 
 @nodes_api.route("/<string:id>/import/all_data")
-class NodeImportAll(Resource):
+class NodeImportAll(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
         node_imports.import_all_data(node)
