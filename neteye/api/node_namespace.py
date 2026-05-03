@@ -1,5 +1,6 @@
 from flask import jsonify, request
 from flask_restx import Namespace, ValidationError, fields, abort
+from flask_security import current_user
 
 from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
@@ -96,7 +97,7 @@ class NodeResourceCommand(AuthenticatedResource):
     def get(self, id, command):
         command = command.replace("+", " ")
         node = db.get_or_404(Node, id)
-        result = node.command(command)
+        result = node.command(command, current_user.email)
         return jsonify(result)
 
 
@@ -105,7 +106,7 @@ class NodeResourceRawCommand(AuthenticatedResource):
     def get(self, id, command):
         command = command.replace("+", " ")
         node = db.get_or_404(Node, id)
-        result = node.raw_command(command)
+        result = node.raw_command(command, current_user.email)
         return jsonify(result)
 
 

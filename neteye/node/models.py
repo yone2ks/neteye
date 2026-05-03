@@ -1,3 +1,4 @@
+import functools
 import json
 
 import napalm
@@ -18,6 +19,25 @@ from neteye.serial.models import Serial
 from neteye.history.model_command_history import CommandHistory
 from neteye.lib.scrapli_utils import ScrapliCommunityHelper
 from neteye.lib.netmiko_utils.netmiko_autodetect_helper import detect_device_type
+
+def record_history(func):
+    """コマンド実行結果を CommandHistory に記録するデコレータ。
+    session_user を渡した場合のみ保存、省略すれば保存しない（接続テスト等）。
+    """
+    @functools.wraps(func)
+    def wrapper(self, command, session_user=None):
+        result = func(self, command)
+        if session_user is not None:
+            CommandHistory(
+                username=session_user,
+                node_id=self.id,
+                hostname=self.hostname,
+                command=command,
+                result=json.dumps(result)
+            ).add()
+        return result
+    return wrapper
+
 
 DRIVER_TYPE_NETMIKO = "netmiko"
 DRIVER_TYPE_SCRAPLI = "scrapli"
@@ -148,36 +168,21 @@ class Node(Base):
         else:
             self.napalm_driver = NOT_SUPPORTED
 
-    def command_with_history(self, command, session_user):
-        result = self.command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def command(self, command):
         if not self.scrapli_driver == NOT_SUPPORTED:
             return self.scrapli_command(command)
         else:
             return self.netmiko_command(command)
 
-    def raw_command_with_history(self, command, session_user):
-        result = self.raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def raw_command(self, command):
         if not self.scrapli_driver == NOT_SUPPORTED:
             return self.scrapli_raw_command(command)
         else:
             return self.netmiko_raw_command(command)
 
-    def netmiko_command_with_history(self, command, session_user):
-        result = self.netmiko_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def netmiko_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
@@ -187,24 +192,14 @@ class Node(Base):
         parsed = ntc_template_utils.parse(platform=platform, command=command, data=raw_output)
         return parsed if parsed else raw_output
 
-    def netmiko_raw_command_with_history(self, command, session_user):
-        result = self.netmiko_raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def netmiko_raw_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
         return conn.send_command(command, use_textfsm=False)
 
-    def scrapli_command_with_history(self, command, session_user):
-        result = self.scrapli_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def scrapli_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
@@ -215,12 +210,7 @@ class Node(Base):
         parsed = ntc_template_utils.parse(platform=platform, command=command, data=raw_output)
         return parsed if parsed else raw_output
 
-    def scrapli_raw_command_with_history(self, command, session_user):
-        result = self.scrapli_raw_command(command)
-        command_history = CommandHistory(username=session_user, node_id=self.id, hostname=self.hostname, command=command, result=json.dumps(result))
-        command_history.add()
-        return result
-
+    @record_history
     def scrapli_raw_command(self, command):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
