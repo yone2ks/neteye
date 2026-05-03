@@ -25,6 +25,7 @@ class Serial(Base):
             node_id=self.node_id,
         )
 
+    @staticmethod
     def exists(serial_number):
         return Serial.query.filter_by(serial_number=serial_number).scalar() != None
 

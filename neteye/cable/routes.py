@@ -1,7 +1,7 @@
 from logging import getLogger
 
 import pandas as pd
-from flask import flash, jsonify, redirect, render_template, request, session, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_security import auth_required, current_user
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import IntegrityError
@@ -120,6 +120,8 @@ def create():
 @auth_required()
 def edit(id):
     cable = Cable.get(id)
+    if not cable:
+        abort(404)
     form = CableForm()
     a_interface = cable.a_interface
     b_interface = cable.b_interface
@@ -145,6 +147,8 @@ def edit(id):
 def update(id):
     sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
     cable = Cable.get(id)
+    if not cable:
+        abort(404)
     cable.a_interface_id = request.form["a_interface"]
     cable.b_interface_id = request.form["b_interface"]
     cable.cable_type = request.form["cable_type"]
@@ -169,5 +173,7 @@ def update(id):
 @auth_required()
 def delete(id):
     cable = Cable.get(id)
+    if not cable:
+        abort(404)
     cable.delete()
     return redirect(url_for("cable.index"))

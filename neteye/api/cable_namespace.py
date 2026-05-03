@@ -21,10 +21,10 @@ api.add_namespace(cables_api)
 
 cable_model = cables_api.model('Cable', {
     'id': fields.String(description='The UUID of the cable'),
-    'src_node_id': fields.String(description='The source node ID'),
-    'src_interface_id': fields.String(description='The source interface ID'),
-    'dst_node_id': fields.String(description='The destination node ID'),
-    'dst_interface_id': fields.String(description='The destination interface ID'),
+    'a_interface_id': fields.String(description='The A-side interface ID'),
+    'b_interface_id': fields.String(description='The B-side interface ID'),
+    'cable_type': fields.String(description='The type of the cable'),
+    'link_speed': fields.String(description='The link speed'),
     'description': fields.String(description='The description of the cable')
 })
 

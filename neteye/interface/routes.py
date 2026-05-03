@@ -50,6 +50,8 @@ def data():
 @auth_required()
 def show(id):
     interface = Interface.get(id)
+    if not interface:
+        abort(404)
     node = Node.get(interface.node_id)
     return render_template("interface/show.html", interface=interface, node=node)
 
@@ -121,6 +123,8 @@ def create():
 @auth_required()
 def edit(id):
     interface = Interface.get(id)
+    if not interface:
+        abort(404)
     form = InterfaceForm()
     node_id = interface.node_id
     name = interface.name
@@ -165,6 +169,8 @@ def update(id):
     status = request.form["status"]
     if form.validate_on_submit():
         interface = Interface.get(id)
+        if not interface:
+            abort(404)
         interface.node_id = node_id
         interface.name = name
         interface.description = description
@@ -209,6 +215,8 @@ def update(id):
 @auth_required()
 def delete(id):
     interface = Interface.get(id)
+    if not interface:
+        abort(404)
     interface.delete()
     return redirect(url_for("interface.index"))
 

@@ -73,10 +73,11 @@ def node_history_data():
                              node_version.operation_type).join(node_version, node_version.transaction_id == node_transaction.id)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['10'] = OPERATION_TYPE[row['10']]
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 
 @history_bp.route("/interface_history")
@@ -104,10 +105,11 @@ def interface_history_data():
                              interface_version.operation_type).join(interface_version, interface_version.transaction_id == interface_transaction.id)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['6'] = OPERATION_TYPE[row['6']]
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 
 @history_bp.route("/serial_history")
@@ -132,10 +134,11 @@ def serial_history_data():
                              serial_version.operation_type).join(serial_version, serial_version.transaction_id == serial_transaction.id)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['5'] = OPERATION_TYPE[row['5']]
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 
 
@@ -149,8 +152,8 @@ def cable_history_data():
     columns = [
         ColumnDT(cable_transaction.issued_at),
         ColumnDT(cable_version.id),
-        ColumnDT(cable_version.src_interface_id),
-        ColumnDT(cable_version.dst_interface_id),
+        ColumnDT(cable_version.a_interface_id),
+        ColumnDT(cable_version.b_interface_id),
         ColumnDT(cable_version.description),
         ColumnDT(cable_version.cable_type),
         ColumnDT(cable_version.link_speed),
@@ -158,18 +161,19 @@ def cable_history_data():
     ]
     query = db.session.query(cable_transaction.issued_at,
                              cable_version.id,
-                             cable_version.src_interface_id,
-                             cable_version.dst_interface_id,
+                             cable_version.a_interface_id,
+                             cable_version.b_interface_id,
                              cable_version.description,
                              cable_version.cable_type,
                              cable_version.link_speed,
                              cable_version.operation_type).join(cable_version, cable_version.transaction_id == cable_transaction.id)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['7'] = OPERATION_TYPE[row['7']]
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 
 @history_bp.route("/arp_entry_history")
@@ -201,10 +205,11 @@ def arp_entry_history_data():
                              arp_entry_version.operation_type).join(arp_entry_version, arp_entry_version.transaction_id == arp_entry_transaction.id)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
         row['8'] = OPERATION_TYPE[row['8']]
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 @history_bp.route("/command_history")
 def command_history():
@@ -224,9 +229,10 @@ def command_history_data():
     query = db.session.query().select_from(CommandHistory)
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
-    for row in row_table.output_result()["data"]:
+    result = row_table.output_result()
+    for row in result["data"]:
         row['0'] = row['0'].replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
-    return jsonify(row_table.output_result())
+    return jsonify(result)
 
 @history_bp.route("/command_history/<id>/result")
 def command_history_result(id):

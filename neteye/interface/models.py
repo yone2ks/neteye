@@ -30,6 +30,7 @@ class Interface(Base):
             id=self.id, node_id=self.node_id, name=self.name
         )
 
+    @staticmethod
     def exists(node_id, name):
         return (
             Interface.query.filter_by(node_id=node_id)
