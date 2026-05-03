@@ -280,7 +280,7 @@ def show_run(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.raw_command_with_history(command, current_user.email)
+        result = node.raw_command(command, current_user.email)
         result = result.replace("\r\n", "<br />").replace("\n", "<br />")
         return render_template("node/command.html", result=result, command=command)
     except Exception as err:
@@ -297,7 +297,7 @@ def show_inventory(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/parsed_command.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -313,7 +313,7 @@ def show_version(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/parsed_command.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -329,7 +329,7 @@ def show_ip_int_breif(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/parsed_command.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -345,7 +345,7 @@ def show_interfaces_description(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/parsed_command.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -361,7 +361,7 @@ def show_ip_arp(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/show_ip_arp.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -377,7 +377,7 @@ def show_ip_route(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         return render_template("node/show_ip_route.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -393,7 +393,7 @@ def command(id, command):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         if isinstance(result, str):
             result = result.replace("\r\n", "<br />").replace("\n", "<br />")
             return render_template("node/command.html", result=result, command=command)
@@ -413,7 +413,7 @@ def raw_command(id, command):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         result = (
-            node.raw_command_with_history(command, current_user.email)
+            node.raw_command(command, current_user.email)
             .replace("\r\n", "<br />")
             .replace("\n", "<br />")
         )
@@ -432,7 +432,7 @@ def netmiko_command(id, command):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.netmiko_command_with_history(command, current_user.email)
+        result = node.netmiko_command(command, current_user.email)
         if isinstance(result, str):
             result = result.replace("\r\n", "<br />").replace("\n", "<br />")
             return render_template("node/command.html", result=result, command=command)
@@ -452,7 +452,7 @@ def netmiko_raw_command(id, command):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         result = (
-            node.netmiko_raw_command_with_history(command, current_user.email)
+            node.netmiko_raw_command(command, current_user.email)
             .replace("\r\n", "<br />")
             .replace("\n", "<br />")
         )
@@ -471,7 +471,7 @@ def scrapli_command(id, command):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.scrapli_command_with_history(command, current_user.email)
+        result = node.scrapli_command(command, current_user.email)
         if isinstance(result, str):
             result = result.replace("\r\n", "<br />").replace("\n", "<br />")
             return render_template("node/command.html", result=result, command=command)
@@ -491,7 +491,7 @@ def scrapli_raw_command(id, command):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         result = (
-            node.scrapli_raw_command_with_history(command, current_user.email)
+            node.scrapli_raw_command(command, current_user.email)
             .replace("\r\n", "<br />")
             .replace("\n", "<br />")
         )
@@ -730,7 +730,7 @@ def import_common(node, model):
     # get data for each command and merge into after_records
     for command in import_command_mapper.get_commands(import_type):
         # execute import command and get result
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
 
         if isinstance(result, list):
             index = import_command_mapper.get_index(import_type, command)
@@ -789,7 +789,7 @@ def import_node_data(node):
     import_type = IMPORT_TYPES[Node]
     
     for command in import_command_mapper.get_commands(import_type):
-        result = node.command_with_history(command, current_user.email)
+        result = node.command(command, current_user.email)
         if isinstance(result, list):
             index = import_command_mapper.get_index(import_type, command)
             fields = import_command_mapper.get_fields(import_type, command)
