@@ -1,4 +1,6 @@
 import locale
+import logging
+import logging.config
 import os
 import sqlite3
 
@@ -36,9 +38,48 @@ TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, "templates")
 STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
 
+def _configure_logging(log_level: str) -> None:
+    """Apply logging configuration from settings.LOG_LEVEL.
+
+    Uses dictConfig so all existing getLogger(__name__) loggers in blueprints
+    and libs inherit the root handler without any changes to those modules.
+    Third-party chattiness (SQLAlchemy, Werkzeug) is kept at WARNING unless
+    the app itself is in DEBUG mode.
+    """
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "default": {
+                    "format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+                    "datefmt": "%Y-%m-%d %H:%M:%S",
+                }
+            },
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "formatter": "default",
+                }
+            },
+            "loggers": {
+                # Third-party libraries are always kept at WARNING to avoid
+                # query-level / registry noise even when the app is in DEBUG mode.
+                "sqlalchemy": {"level": "WARNING", "propagate": False},
+                "passlib":    {"level": "WARNING", "propagate": False},
+            },
+            "root": {
+                "level": log_level,
+                "handlers": ["console"],
+            },
+        }
+    )
+
+
 def create_app():
     _app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
     FlaskDynaconf(_app)
+    _configure_logging(_app.config.get("LOG_LEVEL", "INFO"))
     db.init_app(_app)
     bootstrap.init_app(_app)
     babel.init_app(_app)
