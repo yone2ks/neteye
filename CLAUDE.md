@@ -1,18 +1,29 @@
 # Neteye — Claude Code Instructions
 
-## ブランチ運用
+## Branching
 
-コードを変更する前に必ずフィーチャーブランチを作成すること。
-`master` への直接コミットは禁止。
+Always create a feature branch before making any code changes.
+Direct commits to `master` are prohibited.
 
-ブランチ命名規則:
-- バグ修正: `fix/<内容>`
-- 機能追加: `feature/<内容>`
-- リファクタリング: `refactor/<内容>`
-- ドキュメント: `docs/<内容>`
+Branch naming conventions:
+- Bug fixes: `fix/<description>`
+- New features: `feature/<description>`
+- Refactoring: `refactor/<description>`
+- Documentation: `docs/<description>`
 
-作業完了後は PR を作成し、`master` へマージすること。
+After completing work, open a PR and merge into `master`.
 
-## コミットメッセージ
+## Commit Messages
 
-- Co-Authored-By は含めない
+- Do not include Co-Authored-By
+- Before committing, always show a summary of changes and `git diff`, and wait for user confirmation
+
+## Proposing Recommendations
+
+When proposing alternatives or recommendations, always evaluate from the following three perspectives, then state the recommended option with reasoning.
+
+1. **Network Engineer perspective**: Network operations and design (observability, incident response, operational conventions)
+2. **Software Engineer perspective**: Code quality, maintainability, and security (naming conventions, design patterns, standards)
+3. **Critical perspective**: Weaknesses, trade-offs, and overlooked risks of the above two options
+
+→ **Recommendation**: `<option name>` — `<1–2 sentence rationale>`
