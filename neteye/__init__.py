@@ -40,7 +40,7 @@ STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
 def create_app():
     _app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
-    FlaskDynaconf(_app)
+    FlaskDynaconf(_app, envvar_prefix="NETEYE")
     logging.basicConfig(
         level=_app.config.get("LOG_LEVEL", "INFO"),
         format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
