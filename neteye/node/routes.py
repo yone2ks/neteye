@@ -643,23 +643,23 @@ def import_node_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/explore_node/<id>", methods=["POST"])
+@node_bp.route("/discover_node/<id>", methods=["POST"])
 @auth_required()
-def explore_node(id):
+def discover_node(id):
     try:
         node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        explore_network(node)
-        flash(f"Started exploring network from node {node.hostname}", "success")
+        discover_network(node)
+        flash(f"Started discovering network from node {node.hostname}", "success")
         return redirect(url_for("node.index"))
     except Exception as err:
-        report_exception(err, f"Error exploring from node {id}")
+        report_exception(err, f"Error discovering from node {id}")
         return redirect(url_for("node.show", id=id))
 
 
-def explore_network(node):
+def discover_network(node):
     interface_ids = [interface.id for interface in node.interfaces]
     arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
     ng_node = []
@@ -675,7 +675,7 @@ def explore_network(node):
 
 
 def try_connect_node(ip_address):
-    for cred in settings.credentials.values():
+    for cred in settings.discovery_credentials.values():
         try:
             logger.debug(f"Trying to connect to {ip_address}")
             id = gen_uuid_str()
