@@ -150,7 +150,7 @@ http://localhost:5001/api/
 | `GET` | `/api/serials` | List all serials |
 
 ## License
-MIT
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Author
 yone2ks
