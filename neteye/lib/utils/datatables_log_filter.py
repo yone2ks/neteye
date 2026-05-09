@@ -33,7 +33,9 @@ class DataTablesLogFilter(logging.Filter):
     _COL_SEARCH_RE = re.compile(r"columns\[(\d+)\]\[search\]\[value\]")
 
     def filter(self, record: logging.LogRecord) -> bool:
-        raw_msg = str(record.msg)
+        # getMessage() merges record.msg and record.args into the final string.
+        # str(record.msg) alone would return the unformatted template (e.g. '"%s %s %s" %s -').
+        raw_msg = record.getMessage()
         url_match = self._URL_RE.search(raw_msg)
         if not url_match:
             return True
