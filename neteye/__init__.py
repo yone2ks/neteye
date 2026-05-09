@@ -18,6 +18,7 @@ from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
 from neteye.error_handlers import register_error_handlers
+from neteye.lib.utils.datatables_log_filter import DataTablesLogFilter
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
                                csrf, db, ma, security, settings)
@@ -48,6 +49,7 @@ def create_app():
     # Keep noisy third-party loggers at WARNING regardless of app log level.
     logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
     logging.getLogger("passlib").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").addFilter(DataTablesLogFilter())
     db.init_app(_app)
     bootstrap.init_app(_app)
     babel.init_app(_app)
