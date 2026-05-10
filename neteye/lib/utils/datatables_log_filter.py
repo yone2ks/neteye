@@ -16,13 +16,13 @@ class DataTablesLogFilter(logging.Filter):
              &search[regex]=false HTTP/1.1" 200 -
 
         After (no search):
-            "GET /node/data [p=0/100 sort=col1:asc] HTTP/1.1" 200 -
+            "GET /node/data [start=0 length=100 sort=col1:asc] HTTP/1.1" 200 -
 
         After (global search):
-            "GET /node/data [p=0/100 sort=col1:asc search=cisco] HTTP/1.1" 200 -
+            "GET /node/data [start=0 length=100 sort=col1:asc search=cisco] HTTP/1.1" 200 -
 
         After (per-column search):
-            "GET /node/data [p=0/100 sort=col1:asc col3=192.168] HTTP/1.1" 200 -
+            "GET /node/data [start=0 length=100 sort=col1:asc col3=192.168] HTTP/1.1" 200 -
 
     Non-DataTables URLs (no 'draw' parameter) are left unchanged.
     """
@@ -49,10 +49,11 @@ class DataTablesLogFilter(logging.Filter):
 
         summary_parts = []
 
-        # Pagination: start_row / rows_per_page → p=start_row/rows_per_page
+        # Pagination: start row and page length as separate keys (matching DataTables param names)
         start_row = params.get("start", ["0"])[0]
         rows_per_page = params.get("length", ["?"])[0]
-        summary_parts.append(f"p={start_row}/{rows_per_page}")
+        summary_parts.append(f"start={start_row}")
+        summary_parts.append(f"length={rows_per_page}")
 
         # Sort: order[0][column] + order[0][dir] → sort=colN:direction
         sort_column = params.get("order[0][column]", [None])[0]

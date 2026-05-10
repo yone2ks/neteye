@@ -19,6 +19,7 @@ from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
 from neteye.error_handlers import register_error_handlers
 from neteye.lib.utils.datatables_log_filter import DataTablesLogFilter
+from neteye.lib.utils.werkzeug_access_log_filter import WerkzeugAccessLogFilter
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
                                csrf, db, ma, security, settings)
@@ -51,6 +52,7 @@ def create_app():
     logging.getLogger("passlib").setLevel(logging.WARNING)
     logging.getLogger("paramiko").setLevel(logging.WARNING)
     logging.getLogger("scrapli").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").addFilter(WerkzeugAccessLogFilter())
     logging.getLogger("werkzeug").addFilter(DataTablesLogFilter())
     db.init_app(_app)
     bootstrap.init_app(_app)
