@@ -27,7 +27,7 @@ scrapli
 scrapli_community
 napalm
 pandas==2.2.3
-dynaconf==3.2.6
+dynaconf==3.2.13
 python-dotenv
 toml==0.10.2
 dictdiffer==0.8.1
