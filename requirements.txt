@@ -1,5 +1,5 @@
 Flask==2.3.3
-Werkzeug==2.3.8
+Werkzeug==3.1.6
 Flask-Babel==3.1.0
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.6.3
