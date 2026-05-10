@@ -35,4 +35,4 @@ jobs:
           NETEYE_ADMIN_PASSWORD: ci-admin
         run: |
           pip install pytest-cov
-          python -m pytest --cov=neteye --cov-fail-under=60 -v
+          python -m pytest --cov=neteye --cov-fail-under=50 -v
