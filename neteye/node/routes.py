@@ -1,6 +1,7 @@
 from logging import debug, error, getLogger, info
 
 import netmiko
+import scrapli.exceptions
 import pandas as pd
 import sqlalchemy
 from datatables import ColumnDT, DataTables
@@ -643,39 +644,43 @@ def import_node_only(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/explore_node/<id>", methods=["POST"])
+@node_bp.route("/discover_node/<id>", methods=["POST"])
 @auth_required()
-def explore_node(id):
+def discover_node(id):
     try:
         node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        explore_network(node)
-        flash(f"Started exploring network from node {node.hostname}", "success")
+        discover_network(node)
+        flash(f"Started discovering network from node {node.hostname}", "success")
         return redirect(url_for("node.index"))
     except Exception as err:
-        report_exception(err, f"Error exploring from node {id}")
+        report_exception(err, f"Error discovering from node {id}")
         return redirect(url_for("node.show", id=id))
 
 
-def explore_network(node):
+def discover_network(node):
     interface_ids = [interface.id for interface in node.interfaces]
     arp_entries = ArpEntry.query.filter(ArpEntry.interface_id.in_(interface_ids)).all()
-    ng_node = []
     for entry in arp_entries:
-        if Interface.query.filter_by(ip_address=entry.ip_address).first() is None:
-            try:
-                target_node = try_connect_node(entry.ip_address)
-                if target_node:
-                    import_target_node(target_node)
-            except Exception as err:
-                logger.error(f"Error exploring ip {entry.ip_address}: {type(err).__name__}, {str(err)}")
-                continue
+        # Skip IPs already registered as an interface or as a node
+        if Interface.query.filter_by(ip_address=entry.ip_address).first() is not None:
+            continue
+        if Node.query.filter_by(ip_address=entry.ip_address).first() is not None:
+            logger.debug(f"Node with IP {entry.ip_address} already exists, skipping discovery")
+            continue
+        try:
+            target_node = try_connect_node(entry.ip_address)
+            if target_node:
+                import_all_data(target_node)
+        except Exception as err:
+            logger.error(f"Error exploring ip {entry.ip_address}: {type(err).__name__}, {str(err)}")
+            continue
 
 
 def try_connect_node(ip_address):
-    for cred in settings.credentials.values():
+    for cred in settings.discovery_credentials.values():
         try:
             logger.debug(f"Trying to connect to {ip_address}")
             id = gen_uuid_str()
@@ -694,14 +699,26 @@ def try_connect_node(ip_address):
             logger.info(f"Successfully connected to {ip_address}")
             return node
         except (
+            netmiko.exceptions.NetMikoAuthenticationException,
+            scrapli.exceptions.ScrapliAuthenticationFailed,
+        ) as err:
+            # Wrong credentials — try the next credential set
+            logger.error(f"Authentication failed for {ip_address}: {type(err).__name__}, {str(err)}")
+            continue
+        except (
             netmiko.exceptions.NetMikoTimeoutException,
             netmiko.exceptions.SSHException,
+            scrapli.exceptions.ScrapliConnectionNotOpened,
+            scrapli.exceptions.ScrapliConnectionError,
+            scrapli.exceptions.ScrapliTimeout,
             ValueError,
         ) as err:
-            logger.error(f"Error connecting to {ip_address}: {type(err).__name__}, {str(err)}")
-            continue
+            # Host unreachable or connection error — no point trying other credentials
+            logger.error(f"Connection failed for {ip_address}: {type(err).__name__}, {str(err)}")
+            break
         except Exception as err:
-            logger.error(f"Error connecting to {ip_address}: {type(err).__name__}, {str(err)}")
+            # Unexpected error (bug, DB error, etc.)
+            logger.exception(f"Unexpected error connecting to {ip_address}")
             break
     return False
 

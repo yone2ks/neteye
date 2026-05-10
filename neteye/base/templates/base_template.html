@@ -30,6 +30,7 @@
           <meta name="author" content="Łukasz Holeczek">
           <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
           <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' code.jquery.com cdn.datatables.net cdnjs.cloudflare.com cdn.jsdelivr.net unpkg.com marvl.infotech.monash.edu www.googletagmanager.com www.google-analytics.com; style-src 'self' 'unsafe-inline' cdn.datatables.net; font-src 'self'; img-src 'self' data: www.googletagmanager.com; connect-src 'self' www.google-analytics.com;">
+          <meta name="csrf-token" content="{{ csrf_token() }}">
           <title>{% block title %}neteye{% endblock title %}</title>
           {% block stylesheet %}
           <!-- Icons-->

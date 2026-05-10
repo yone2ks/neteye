@@ -1,4 +1,5 @@
 import locale
+import logging
 import os
 import sqlite3
 
@@ -17,6 +18,8 @@ from neteye.base.routes import base_bp
 from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
 from neteye.error_handlers import register_error_handlers
+from neteye.lib.utils.datatables_log_filter import DataTablesLogFilter
+from neteye.lib.utils.werkzeug_access_log_filter import WerkzeugAccessLogFilter
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
                                csrf, db, ma, security, settings)
@@ -38,7 +41,19 @@ STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
 def create_app():
     _app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
-    FlaskDynaconf(_app)
+    FlaskDynaconf(_app, envvar_prefix="NETEYE")
+    logging.basicConfig(
+        level=_app.config.get("LOG_LEVEL", "INFO"),
+        format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    # Keep noisy third-party loggers at WARNING regardless of app log level.
+    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+    logging.getLogger("passlib").setLevel(logging.WARNING)
+    logging.getLogger("paramiko").setLevel(logging.WARNING)
+    logging.getLogger("scrapli").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").addFilter(WerkzeugAccessLogFilter())
+    logging.getLogger("werkzeug").addFilter(DataTablesLogFilter())
     db.init_app(_app)
     bootstrap.init_app(_app)
     babel.init_app(_app)

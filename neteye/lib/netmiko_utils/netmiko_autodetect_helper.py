@@ -63,6 +63,11 @@ def detect_device_type(node, specified_device_types: Optional[List[str]] = None)
             )
             return "cisco_ios_telnet"
 
+    except netmiko.exceptions.NetMikoAuthenticationException as err:
+        # Re-raise authentication failures so callers (e.g. try_connect_node)
+        # can cycle through credentials instead of falling back to telnet.
+        logger.error(f"SSH detection failed for {node.ip_address}: {err}")
+        raise
     except (
         netmiko.exceptions.NetMikoTimeoutException,
         netmiko.exceptions.SSHException,

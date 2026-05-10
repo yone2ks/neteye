@@ -22,6 +22,7 @@
             </div>
             <div class="btn-group mr-2">
                 <form action="{{ url_for('management.connection_pool_delete', ip_address=connection_key.ip_address, driver_type=connection_key.driver_type ) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
                 </form>
             </div>
