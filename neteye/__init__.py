@@ -49,6 +49,8 @@ def create_app():
     # Keep noisy third-party loggers at WARNING regardless of app log level.
     logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
     logging.getLogger("passlib").setLevel(logging.WARNING)
+    logging.getLogger("paramiko").setLevel(logging.WARNING)
+    logging.getLogger("scrapli").setLevel(logging.WARNING)
     logging.getLogger("werkzeug").addFilter(DataTablesLogFilter())
     db.init_app(_app)
     bootstrap.init_app(_app)

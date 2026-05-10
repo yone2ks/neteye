@@ -100,7 +100,7 @@ Click **Import Node** to pull the device's interface list, serial numbers, and A
 ![neteye_import_node](https://github.com/yone2ks/neteye/assets/1281910/f50b2b7e-d627-4562-bd14-6c885ae46a0e)
 
 ### Network Discovery
-Send a POST request to `/node/<id>/discover_node` to automatically discover neighboring devices via the node's ARP table. Neteye attempts SSH connections using the credentials defined in `NETEYE_DISCOVERY_CREDENTIALS` and registers reachable devices.
+Click **Discover Node** on a node's detail page to automatically discover neighboring devices via the node's ARP table. Neteye attempts SSH connections using the credentials defined in `NETEYE_DISCOVERY_CREDENTIALS` and registers reachable devices.
 
 ### History View
 The **History** menu shows the change history of device information and a log of all executed commands.

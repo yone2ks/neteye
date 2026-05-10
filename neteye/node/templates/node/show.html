@@ -150,6 +150,12 @@
                         </form>
                     </div>
                 </div>
+                <div class="mt-2 mr-2 border-left pl-2">
+                    <form action="{{ url_for('node.discover_node', id=node.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-warning" type="submit" onclick="return confirm('Start network discovery from {{ node.hostname }}?');">Discover Node</button>
+                    </form>
+                </div>
             </div>
         </td>
     </tr>
@@ -159,6 +165,7 @@
 <button class="btn btn-sm btn-primary" type="button" onclick="location.href='{{ url_for('node.edit', id=node.id) }}'">Edit Node</button>
 <div class="btn-group mr-2">
     <form action="/node/{{node.id}}/delete" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure?');">Delete</button>
     </form>
 </div>

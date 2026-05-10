@@ -30,6 +30,8 @@ security = Security()
 settings = Dynaconf(
     environments=True,
     settings_files=['settings.toml'],
+    envvar_prefix="NETEYE",
+    load_dotenv=True,
     validators=validators,
 )
 connection_pool = ConnectionPool()
