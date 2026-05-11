@@ -141,3 +141,6 @@ custom_templates/**
 
 # AI assistant instructions (local only, not ready for publishing)
 CLAUDE.md
+
+# Local settings overrides (use instead of editing settings.toml directly)
+settings.local.toml
