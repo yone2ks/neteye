@@ -34,14 +34,15 @@ Default admin credentials: email `neteye_admin@yourcompany.com`, password as set
 
 ## Configuration
 
-Neteye uses two configuration files with different responsibilities:
+Neteye uses three configuration files with different responsibilities:
 
 | File | Purpose | Committed to git |
 |------|---------|-----------------|
-| `.env` | Secrets and per-environment values (passwords, keys) | No — git-ignored |
-| `settings.toml` | Application behaviour (timeouts, ports, limits) | Yes |
+| `.env` | Secrets (passwords, keys) | No — git-ignored |
+| `settings.toml` | Application defaults | Yes — do not edit directly |
+| `settings.local.toml` | Local overrides | No — git-ignored |
 
-As a rule of thumb: if a value would be a security risk if leaked, put it in `.env`. Everything else goes in `settings.toml`.
+As a rule of thumb: if a value would be a security risk if leaked, put it in `.env`. For local customisations (DB path, timeouts, etc.), use `settings.local.toml`. The `settings.toml` file contains shared defaults and should not be edited directly — it may be updated by `git pull`.
 
 ### Environment Variables (`.env`)
 
@@ -57,15 +58,26 @@ Copy `.env.example` to `.env` and fill in the values. This file is git-ignored a
 | `NETEYE_DISCOVERY_CREDENTIALS__N__ENABLE` | Enable password for network discovery auto-connect |
 | `NET_TEXTFSM` | Absolute path to the ntc-templates `templates/` directory |
 
-### Application Settings (`settings.toml`)
+### Application Settings (`settings.toml` / `settings.local.toml`)
 
-Main application behaviour is configured in `settings.toml`. Key settings are listed below.
+`settings.toml` contains application defaults and is managed by git. To override values for your environment, create `settings.local.toml` in the same directory — it is git-ignored and will never be overwritten by `git pull`.
+
+Example `settings.local.toml`:
+
+```toml
+[default]
+SQLALCHEMY_DATABASE_URI = "sqlite:////home/user/neteye.db"
+NETMIKO_CONN_TIMEOUT = 5
+NETMIKO_READ_TIMEOUT = 30
+```
+
+Key settings and their defaults:
 
 | Key | Default | Description |
 |-----|---------|-------------|
 | `HOST` | `0.0.0.0` | Server bind address |
 | `PORT` | `5001` | Server port |
-| `SQLALCHEMY_DATABASE_URI` | `sqlite:////var/tmp/neteye.db` | Database path. ⚠️ `/var/tmp` is cleared on reboot — change this for production use |
+| `SQLALCHEMY_DATABASE_URI` | `sqlite:////var/tmp/neteye.db` | Database path. ⚠️ `/var/tmp` is cleared on reboot — override in `settings.local.toml` for production use |
 | `CUSTOM_TEMPLATES_DIR` | `''` | Absolute path to custom ntc-templates directory. Leave empty to disable |
 | `NETMIKO_CONN_TIMEOUT` | `1` | SSH connection timeout in seconds |
 | `NETMIKO_READ_TIMEOUT` | `10` | SSH read timeout in seconds |
@@ -74,13 +86,13 @@ Main application behaviour is configured in `settings.toml`. Key settings are li
 | `ARP_ENTRY_HISTORY_MAX_RECORDS` | `50000` | Max ARP entry history records (0 = unlimited) |
 | `AUTO_DETECT_DEVICE_TYPES` | (list) | Device types targeted by netmiko autodetect |
 
-Environment-specific overrides can be added under `[development]`, `[production]`, or `[testing]` sections in `settings.toml`. Set the `ENV_FOR_DYNACONF` environment variable to switch environments (default: `development`).
+Environment-specific overrides can be added under `[development]`, `[production]`, or `[testing]` sections in `settings.toml` or `settings.local.toml`. Set the `ENV_FOR_DYNACONF` environment variable to switch environments (default: `development`).
 
 ```shell
 ENV_FOR_DYNACONF=production python manage.py
 ```
 
-Note: `.env` is a flat `KEY=VALUE` file with no environment sections — it is always loaded regardless of the active environment. Use it only for secrets that must not be committed. All other environment-specific values (timeouts, limits, etc.) belong in the appropriate section of `settings.toml`.
+Note: `.env` is a flat `KEY=VALUE` file with no environment sections — it is always loaded regardless of the active environment. Use it only for secrets that must not be committed.
 
 ## Usage
 
