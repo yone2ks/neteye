@@ -94,7 +94,22 @@ except Exception as e:
 - No raw SQL — use SQLAlchemy ORM or Core expressions
 - No secrets in code — use `.env` or `settings.local.toml`
 - Type hints are recommended but not required
-- Naming: `snake_case` for functions/variables, `PascalCase` for classes
+
+### Naming Conventions
+
+**Python**
+- `snake_case` for functions and variables
+- `PascalCase` for classes
+- `SCREAMING_SNAKE_CASE` for module-level constants
+
+**JavaScript**
+- `camelCase` for variables and functions
+- `SCREAMING_SNAKE_CASE` for module-level constants (e.g. `STORAGE_PREFIX`, not `SK`)
+- No cryptic abbreviations or single-letter names except loop counters (`i`, `j`) — use descriptive names that make the intent clear without needing a comment
+
+**localStorage keys**
+- Prefix with `neteye_<feature>_` to avoid collisions with other libraries (e.g. DataTables uses unprefixed keys)
+- Example: `neteye_ping_node_id`, `neteye_ping_src_ip`
 
 ## Git Workflow
 
