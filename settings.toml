@@ -54,6 +54,12 @@ SCRAPLI_TIMEOUT_TRANSPORT = 1
 SCRAPLI_TIMEOUT_OPS = 1
 NAPALM_TIMEOUT = 1
 
+# Ping Settings
+# Upper limits for ping form fields. Override in settings.local.toml if needed.
+PING_MAX_COUNT     = 10000
+PING_MAX_TIMEOUT   = 100
+PING_MAX_DATA_SIZE = 1500
+
 # History Settings
 # Maximum number of history records to keep in database for each type
 # NOTE: Set to 0 for unlimited records
