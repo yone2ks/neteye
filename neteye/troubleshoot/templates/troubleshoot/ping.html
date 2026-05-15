@@ -1,52 +1,117 @@
-{% extends "node/index.html" %}
+{% extends "base_template.html" %}
 
 {% block javascript %}
 {{ super() }}
 
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
 <script>
  $(document).ready(function(){
-     var src_node_id = $("#src_node").val()
+     var ipOpts = {
+         valueKey: 'ip_address',
+         textFn:   function(intf) { return intf.ip_address + ' (' + intf.name + ')'; },
+         filter:   function(intf) { return intf.ip_address && intf.ip_address !== 'unassigned'; }
+     };
 
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + src_node_id
-     $.ajax({
-         url: src_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#src_ip_address").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 if (selectOptions[i].ip_address != 'unassigned'){
-                     $("#src_ip_address").append(
-                         $("<option></option>")
-                             .attr("value", selectOptions[i].ip_address)
-                             .text(selectOptions[i].ip_address)
-                     );
-                 }
-             }
-         }
+     // ── localStorage: restore last used values ────────────────────────
+     var STORAGE_PREFIX = 'neteye_ping_';  // key prefix — avoids collision with DataTables keys
+     var savedNodeId = localStorage.getItem(STORAGE_PREFIX + 'node_id');
+     var savedSrcIp  = localStorage.getItem(STORAGE_PREFIX + 'src_ip');
+
+     // Restore plain input fields (count / timeout / data_size / vrf)
+     ['count', 'timeout', 'data_size', 'vrf'].forEach(function(field) {
+         var v = localStorage.getItem(STORAGE_PREFIX + field);
+         if (v !== null) { $('#' + field).val(v); }
      });
- });
 
- $("#src_node").change(function(){
-     var src_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#src_node option:selected').val()
-     $.ajax({
-         url: src_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#src_ip_address").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 if (selectOptions[i].ip_address != 'unassigned'){
-                     $("#src_ip_address").append(
-                         $("<option></option>")
-                             .attr("value", selectOptions[i].id)
-                             .text(selectOptions[i].ip_address)
-                     );
-                 }
+     // Apply Select2 to node selector for search-as-you-type
+     $('#src_node').select2({ theme: 'bootstrap4', width: '100%' });
+
+     // Apply Select2 to IP selector; mark it for auto-reinit after loadInterfaces
+     $('#src_ip_address').data('select2-init', true).select2({ theme: 'bootstrap4', width: '100%' });
+
+     // Restore node selection, then load its interfaces (pre-selecting saved src_ip)
+     if (savedNodeId) {
+         $('#src_node').val(savedNodeId).trigger('change');
+     }
+     loadInterfaces($('#src_node').val(), 'src_ip_address',
+                    $.extend({}, ipOpts, { selectedValue: savedSrcIp }));
+
+     $('#src_node').on('select2:select', function(){
+         loadInterfaces($(this).val(), 'src_ip_address', ipOpts);
+     });
+
+     // ── SSE-based real-time ping execution ────────────────────────────
+     var es = null;
+
+     var $cancel = $('#cancel');
+
+     $cancel.on('click', function() {
+         if (es) { es.close(); es = null; }
+         $cancel.hide();
+         $('#submit').prop('disabled', false).val('Submit');
+         $('#result-output').text($('#result-output').text() + '\n[Cancelled]');
+     });
+
+     $('#ping').on('submit', function(e) {
+         e.preventDefault();
+
+         // Close any in-progress stream
+         if (es) { es.close(); es = null; }
+
+         var $card   = $('#result-card');
+         var $output = $('#result-output');
+         var $submit = $('#submit');
+
+         $output.text('');
+         $card.show();   // Result カードを表示（Cancel ボタンも一緒に表示される）
+         $submit.prop('disabled', true).val('Running...');
+         $cancel.show(); // 前回の完了/エラーで hide された場合に備えて再表示
+
+         // Save current values to localStorage before execution
+         localStorage.setItem(STORAGE_PREFIX + 'node_id',   $('#src_node').val());
+         localStorage.setItem(STORAGE_PREFIX + 'src_ip',     $('#src_ip_address').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'vrf',        $('#vrf').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'count',      $('#count').val());
+         localStorage.setItem(STORAGE_PREFIX + 'timeout',    $('#timeout').val());
+         localStorage.setItem(STORAGE_PREFIX + 'data_size',  $('#data_size').val());
+
+         var params = new URLSearchParams({
+             node_id: $('#src_node').val(),
+             dst_ip:  $('#dst_ip_address').val(),
+             src_ip:  $('#src_ip_address').val() || '',
+             vrf:     $('#vrf').val() || '',
+             count:   $('#count').val(),
+             timeout: $('#timeout').val(),
+             size:    $('#data_size').val()
+         });
+
+         es = new EventSource('{{ url_for("troubleshoot.ping_stream") }}?' + params.toString());
+
+         es.onmessage = function(evt) {
+             if (evt.data === '[DONE]') {
+                 es.close(); es = null;
+                 $cancel.hide();
+                 $submit.prop('disabled', false).val('Submit');
+                 return;
              }
-         }
+             $output.text($output.text() + evt.data + '\n');
+             $output[0].scrollTop = $output[0].scrollHeight;
+         };
+
+         es.onerror = function() {
+             if (es) { es.close(); es = null; }
+             $cancel.hide();
+             $submit.prop('disabled', false).val('Submit');
+             $output.text($output.text() + '\n[Connection closed]');
+         };
+     });
+
+     // Reset handler: native reset clears field values, but Select2 display does not
+     // follow automatically. Re-trigger after the reset event propagates.
+     $('#ping').on('reset', function() {
+         setTimeout(function() {
+             $('#src_node').trigger('change');
+             loadInterfaces($('#src_node').val(), 'src_ip_address', ipOpts);
+         }, 0);
      });
  });
 </script>
@@ -54,30 +119,75 @@
 
 
 {% block main %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 <div class="card">
     <div class="card-header">
         Ping
     </div>
     <div class="card-body">
-        <form action="{{ url_for('troubleshoot.ping_execute') }}" method=post class="form-horizontal " id="ping">
+        {# action targets ping_execute as a no-JS fallback; JS intercepts submit and streams via ping_stream instead #}
+        <form action="{{ url_for('troubleshoot.ping_execute') }}" method="post" class="form-horizontal" id="ping">
             {{ form.csrf_token }}
             <div class="form-group row">
-                {{ form.dst_ip_address.label(class_="col-md-3 col-form-label") }}{{ form.dst_ip_address(class_="form-control col-md-6") }}
+                {{ form.src_node.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.src_node(class_="form-control") }}
+                </div>
             </div>
             <div class="form-group row">
-                {{ form.src_node.label(class_="col-md-3 col-form-label") }}{{ form.src_node(class_="form-control col-md-6") }}
+                {{ form.src_ip_address.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.src_ip_address(class_="form-control") }}
+                </div>
             </div>
             <div class="form-group row">
-                {{ form.src_ip_address.label(class_="col-md-3 col-form-label") }}{{ form.src_ip_address(class_="form-control col-md-6") }}
+                {{ form.vrf.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.vrf(class_="form-control", placeholder="(optional)") }}
+                </div>
             </div>
             <div class="form-group row">
-                {{ form.count.label(class_="col-md-3 col-form-label") }}{{ form.count(class_="form-control col-md-6", value=5) }}
+                {{ form.dst_ip_address.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.dst_ip_address(class_="form-control") }}
+                    {% if form.dst_ip_address.errors %}
+                      <div class="alert-danger">{{ form.dst_ip_address.errors[0] }}</div>
+                    {% endif %}
+                </div>
             </div>
             <div class="form-group row">
-                {{ form.data_size.label(class_="col-md-3 col-form-label") }}{{ form.data_size(class_="form-control col-md-6", value=100) }}
+                {{ form.count.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.count(class_="form-control") }}
+                    {% if form.count.errors %}
+                      <div class="alert-danger">{{ form.count.errors[0] }}</div>
+                    {% endif %}
+                </div>
             </div>
             <div class="form-group row">
-                {{ form.timeout.label(class_="col-md-3 col-form-label") }}{{ form.timeout(class_="form-control col-md-6", value=2) }}
+                {{ form.data_size.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.data_size(class_="form-control") }}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.timeout.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.timeout(class_="form-control") }}
+                    {% if form.timeout.errors %}
+                      <div class="alert-danger">{{ form.timeout.errors[0] }}</div>
+                    {% endif %}
+                </div>
             </div>
         </form>
     </div>
@@ -86,4 +196,32 @@
         {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="ping") }}
     </div>
 </div>
+
+{# SSE real-time result card (shown by JavaScript when streaming starts) #}
+<div id="result-card" class="card mt-3" style="display:none;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Result</span>
+        <button type="button" class="btn btn-warning" id="cancel">Cancel</button>
+    </div>
+    <div class="card-body p-0">
+        <pre id="result-output" class="bg-dark text-white p-3 rounded mb-0"
+             style="max-height:500px; overflow-y:auto; white-space:pre-wrap;"></pre>
+    </div>
+</div>
+
+{# Fallback: result from synchronous POST ping_execute (non-JS environment) #}
+{% if result is defined and result %}
+<div class="card mt-3">
+    <div class="card-header">
+        Result
+        <small class="text-muted ml-2">
+            {{ dst_ip }}{% if dst_annotation %} → <strong>{{ dst_annotation }}</strong>{% endif %}
+        </small>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small mb-1">Command: <code>{{ command }}</code></p>
+        <pre class="bg-dark text-white p-3 rounded">{{ result }}</pre>
+    </div>
+</div>
+{% endif %}
 {% endblock main %}
