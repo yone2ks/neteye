@@ -75,7 +75,7 @@ class InterfaceResource(AuthenticatedResource):
         return '', 204
 
 
-INTERFACE_FILTER_FIELDS = {"ip_address", "name", "description", "status"}
+INTERFACE_FILTER_FIELDS = {"ip_address", "name", "description", "status", "node_id"}
 
 @interfaces_api.route("/filter")
 class InterfaceResourceFilter(AuthenticatedResource):

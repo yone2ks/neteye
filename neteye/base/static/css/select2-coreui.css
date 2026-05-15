@@ -1,0 +1,40 @@
+/*
+ * select2-coreui.css
+ * Overrides select2-bootstrap4-theme to match CoreUI 2.x (Bootstrap 4 base)
+ *
+ * CoreUI 2.x differences from plain Bootstrap 4:
+ *   font-size     : 0.875rem  → height resolves to calc(2.0625rem + 2px) automatically
+ *   color         : #5c6873
+ *   border-color  : #e4e7ea
+ *   focus border  : #8ad4ee
+ *   focus shadow  : rgba(32,168,216,.25)
+ *   primary color : #20a8d8  (used for dropdown highlight)
+ */
+
+/* Base appearance */
+.select2-container--bootstrap4 .select2-selection {
+  border-color: #e4e7ea;
+  font-size: 0.875rem;  /* drives height auto-calculation via 1.5em + .75rem + 2px */
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+  color: #5c6873;
+}
+
+.select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+  color: #73818f;
+}
+
+/* Focus state — CoreUI primary (#20a8d8) instead of Bootstrap blue (#007bff) */
+.select2-container--bootstrap4.select2-container--focus .select2-selection,
+.select2-container--bootstrap4 .select2-selection:focus {
+  border-color: #8ad4ee;
+  box-shadow: 0 0 0 0.2rem rgba(32, 168, 216, 0.25);
+}
+
+/* Dropdown highlight — CoreUI $light-blue (#63c2de, lighter than primary #20a8d8)
+   Mirror the theme's exact selectors so specificity (0,2,0) and (0,3,1) both win */
+.select2-container--bootstrap4 .select2-results__option--highlighted,
+.select2-container--bootstrap4 .select2-results__option--highlighted.select2-results__option[aria-selected="true"] {
+  background-color: #63c2de;
+}

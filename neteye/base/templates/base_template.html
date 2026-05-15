@@ -41,20 +41,12 @@
           <!-- Main styles for this application-->
           <link href="{{ url_for('base.static', filename='css/style.css' )}}" rel="stylesheet">
           <link href="{{ url_for('base.static', filename='vendors/pace-progress/css/pace.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='vendors/select2/css/select2.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='vendors/select2-bootstrap4/select2-bootstrap4.min.css' )}}" rel="stylesheet">
+          <link href="{{ url_for('base.static', filename='css/select2-coreui.css' )}}" rel="stylesheet">
           {% endblock stylesheet %}
-          {% block javascript %}
-          <!-- CoreUI and necessary plugins-->
-          <script src="{{ url_for('base.static', filename='node_modules/jquery/dist/jquery.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='node_modules/popper.js/dist/umd/popper.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js' )}}"></script>
+          <!-- pace must be in head to track page load from the start -->
           <script src="{{ url_for('base.static', filename='node_modules/pace-progress/pace.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui/dist/js/coreui.min.js' )}}"></script>
-          <!-- Plugins and scripts required by this view-->
-          <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
-          <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
-          {% endblock javascript %}
           <!-- Global site tag (gtag.js) - Google Analytics-->
           <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-118965717-3"></script>
           <script>
@@ -122,7 +114,17 @@
                     </a>
                 </li>
                 {# Visualization menu hidden until features are fully implemented #}
-                {# Troubleshoot menu hidden until features are fully implemented #}
+                <li class="nav-item nav-dropdown">
+                    <a class="nav-link nav-dropdown-toggle" href="#">
+                        Troubleshoot
+                    </a>
+                    <ul class="nav-dropdown-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/troubleshoot/ping">Ping</a>
+                        </li>
+                        {# Traceroute hidden until implemented #}
+                    </ul>
+                </li>
                 <li class="nav-item nav-dropdown">
                     <a class="nav-link nav-dropdown-toggle" href="#">
                         History
@@ -196,5 +198,19 @@
             {% endblock footer %}
           </footer>
         {% endblock body %}
+        {% block javascript %}
+        <!-- CoreUI and necessary plugins (loaded after body for correct DOM binding) -->
+        <script src="{{ url_for('base.static', filename='node_modules/jquery/dist/jquery.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='node_modules/popper.js/dist/umd/popper.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui/dist/js/coreui.min.js' )}}"></script>
+        <!-- Plugins and scripts required by this view-->
+        <script src="{{ url_for('base.static', filename='node_modules/chart.js/dist/Chart.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='node_modules/@coreui/coreui-plugin-chartjs-custom-tooltips/dist/js/custom-tooltips.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='js/main.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='vendors/select2/js/select2.min.js' )}}"></script>
+        <script src="{{ url_for('base.static', filename='js/node_interface_select.js' )}}"></script>
+        {% endblock javascript %}
       </body>
     </html>
