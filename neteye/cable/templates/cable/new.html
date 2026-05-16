@@ -3,83 +3,13 @@
 {% block javascript %}
 {{ super() }}
 
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="{{ url_for('base.static', filename='js/DataTablesBS4.js' )}}"></script>
-
 <script>
  $(document).ready(function(){
-     var a_node_id = $("#a_node").val();
-     var b_node_id = $("#b_node").val();
+     loadInterfaces($('#a_node').val(), 'a_interface');
+     loadInterfaces($('#b_node').val(), 'b_interface');
 
-     var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + a_node_id;
-     $.ajax({
-         url: a_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#a_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#a_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
-
-     var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + b_node_id;
-     $.ajax({
-         url: b_interfaces_url,
-         type: 'GET',
-         success: function(selectOptions){
-             $("#b_interface").empty();
-             for (var i = 0; i < selectOptions.length; i++){
-                 $("#b_interface").append(
-                     $("<option></option>")
-                         .attr("value", selectOptions[i].id)
-                         .text(selectOptions[i].name)
-                 );
-             }
-         }
-     });
-
-     $("#a_node").change(function(){
-         var a_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#a_node option:selected').val();
-         $.ajax({
-             url: a_interfaces_url,
-             type: 'GET',
-             success: function(selectOptions){
-                 $("#a_interface").empty();
-                 for (var i = 0; i < selectOptions.length; i++){
-                     $("#a_interface").append(
-                         $("<option></option>")
-                             .attr("value", selectOptions[i].id)
-                             .text(selectOptions[i].name)
-                     );
-                 }
-             }
-         });
-     });
-
-     $("#b_node").change(function(){
-         var b_interfaces_url = '/api/interfaces/filter?field=node_id&filter_str=' + $('#b_node option:selected').val();
-         $.ajax({
-             url: b_interfaces_url,
-             type: 'GET',
-             success: function(selectOptions){
-                 $("#b_interface").empty();
-                 for (var i = 0; i < selectOptions.length; i++){
-                     $("#b_interface").append(
-                         $("<option></option>")
-                             .attr("value", selectOptions[i].id)
-                             .text(selectOptions[i].name)
-                     );
-                 }
-             }
-         });
-     });
-
+     $('#a_node').change(function(){ loadInterfaces($(this).val(), 'a_interface'); });
+     $('#b_node').change(function(){ loadInterfaces($(this).val(), 'b_interface'); });
  });
 </script>
 {% endblock javascript %}

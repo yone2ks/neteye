@@ -21,12 +21,16 @@ from neteye.lib.scrapli_utils import ScrapliCommunityHelper
 from neteye.lib.netmiko_utils.netmiko_autodetect_helper import detect_device_type
 
 def record_history(func):
-    """コマンド実行結果を CommandHistory に記録するデコレータ。
-    session_user を渡した場合のみ保存、省略すれば保存しない（接続テスト等）。
+    """Decorator that saves command results to CommandHistory.
+
+    Records the result only when session_user is provided; omit it to skip
+    recording (e.g. for connection health checks).
+    **kwargs are forwarded to the wrapped function to support extra arguments
+    such as timeout.
     """
     @functools.wraps(func)
-    def wrapper(self, command, session_user=None):
-        result = func(self, command)
+    def wrapper(self, command, session_user=None, **kwargs):
+        result = func(self, command, **kwargs)
         if session_user is not None:
             CommandHistory(
                 username=session_user,
@@ -176,11 +180,15 @@ class Node(Base):
             return self.netmiko_command(command)
 
     @record_history
-    def raw_command(self, command):
+    def raw_command(self, command, timeout=None):
         if not self.scrapli_driver == NOT_SUPPORTED:
-            return self.scrapli_raw_command(command)
+            return self.scrapli_raw_command(
+                command, timeout=timeout or settings.SCRAPLI_TIMEOUT_OPS
+            )
         else:
-            return self.netmiko_raw_command(command)
+            return self.netmiko_raw_command(
+                command, timeout=timeout or settings.NETMIKO_READ_TIMEOUT
+            )
 
     @record_history
     def netmiko_command(self, command):
@@ -193,11 +201,11 @@ class Node(Base):
         return parsed if parsed else raw_output
 
     @record_history
-    def netmiko_raw_command(self, command):
+    def netmiko_raw_command(self, command, timeout=settings.NETMIKO_READ_TIMEOUT):
         if not connection_pool.exists(self, DRIVER_TYPE_NETMIKO):
             connection_pool.add_connection(self, DRIVER_TYPE_NETMIKO)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_NETMIKO)
-        return conn.send_command(command, use_textfsm=False)
+        return conn.send_command(command, use_textfsm=False, read_timeout=timeout)
 
     @record_history
     def scrapli_command(self, command):
@@ -211,11 +219,11 @@ class Node(Base):
         return parsed if parsed else raw_output
 
     @record_history
-    def scrapli_raw_command(self, command):
+    def scrapli_raw_command(self, command, timeout=settings.SCRAPLI_TIMEOUT_OPS):
         if not connection_pool.exists(self, DRIVER_TYPE_SCRAPLI):
             connection_pool.add_connection(self, DRIVER_TYPE_SCRAPLI)
         conn = connection_pool.get_connection(self, DRIVER_TYPE_SCRAPLI)
-        return conn.send_command(command).result
+        return conn.send_command(command, timeout_ops=timeout).result
 
     def napalm_get_facts(self):
         if not connection_pool.exists(self, DRIVER_TYPE_NAPALM):
