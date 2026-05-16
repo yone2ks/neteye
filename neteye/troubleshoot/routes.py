@@ -10,7 +10,7 @@ from neteye.history.model_command_history import CommandHistory
 from neteye.interface.models import Interface
 from neteye.lib.troubleshoot_command_builder import (
     UnsupportedDeviceTypeError,
-    get_ping_interrupt_char,
+    get_interrupt_char,
     get_troubleshoot_builder,
 )
 from neteye.lib.utils.report_exception import report_exception
@@ -229,7 +229,7 @@ def ping_stream():
 
         except GeneratorExit:
             # Client cancelled the stream — send device-specific interrupt to stop the ping.
-            interrupt_char = get_ping_interrupt_char(node.device_type)
+            interrupt_char = get_interrupt_char(node.device_type)
             try:
                 conn.write_channel(interrupt_char)
                 time.sleep(0.2)

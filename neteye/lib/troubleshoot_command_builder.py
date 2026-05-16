@@ -218,7 +218,7 @@ def get_troubleshoot_builder(device_type: str) -> TroubleshootBuilder:
 # ── Ping interrupt sequences ──────────────────────────────────────────
 # Sent to the device when the user cancels a running ping.
 
-_PING_INTERRUPT_CHARS: dict[str, str] = {
+_INTERRUPT_CHARS: dict[str, str] = {
     "cisco_ios":      "\x1e",   # Ctrl+Shift+6 — Cisco standard ping interrupt
     "cisco_xe":       "\x1e",
     "cisco_nxos":     "\x1e",
@@ -231,9 +231,10 @@ _PING_INTERRUPT_CHARS: dict[str, str] = {
 }
 
 
-def get_ping_interrupt_char(device_type: str) -> str:
-    """Return the character sequence that interrupts a running ping for the given device_type.
+def get_interrupt_char(device_type: str) -> str:
+    """Return the character sequence that interrupts a running command for the given device_type.
 
+    Used to abort long-running commands (ping, traceroute, etc.) mid-execution.
     Falls back to Ctrl+C (\\x03) for unknown device types.
     """
-    return _PING_INTERRUPT_CHARS.get(device_type, "\x03")
+    return _INTERRUPT_CHARS.get(device_type, "\x03")
