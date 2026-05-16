@@ -16,12 +16,25 @@ from neteye.lib.troubleshoot_command_builder import (
 from neteye.lib.utils.report_exception import report_exception
 from neteye.node.models import Node
 
-from .forms import PingForm
+from .forms import PING_DEFAULT_COUNT, PING_DEFAULT_DATA_SIZE, PING_DEFAULT_TIMEOUT, PingForm
 
 logger = logging.getLogger(__name__)
 
 troubleshoot_bp = bp_factory("troubleshoot")
 
+
+# ── SSE helpers — shared by all streaming routes ──────────────────────
+
+def _sse_message(text: str) -> str:
+    """Format text as a single SSE data line (data: <text>\\n\\n)."""
+    return f"data: {text}\n\n"
+
+
+_SSE_DONE      = _sse_message("[DONE]")
+_SSE_SEPARATOR = _sse_message("")   # blank line between header info and streaming output
+
+
+# ── Annotation helpers ────────────────────────────────────────────────
 
 def _annotate_ip(ip_address: str) -> str | None:
     """Look up an IP address in the Node and Interface tables and return an annotation string.
@@ -141,21 +154,21 @@ def ping_stream():
     dst_ip = request.args.get("dst_ip", "").strip()
     src_ip = request.args.get("src_ip", "").strip() or None
     vrf = request.args.get("vrf", "").strip() or None
-    count = min(max(request.args.get("count", 5, type=int), 1), settings.PING_MAX_COUNT)
-    timeout = min(max(request.args.get("timeout", 2, type=int), 1), settings.PING_MAX_TIMEOUT)
-    size = request.args.get("size", 100, type=int)
+    count = min(max(request.args.get("count", PING_DEFAULT_COUNT, type=int), 1), settings.PING_MAX_COUNT)
+    timeout = min(max(request.args.get("timeout", PING_DEFAULT_TIMEOUT, type=int), 1), settings.PING_MAX_TIMEOUT)
+    size = request.args.get("size", PING_DEFAULT_DATA_SIZE, type=int)
 
     node = Node.query.filter_by(id=node_id).first() if node_id else None
 
     def generate():
         # --- Validation ---
         if not node:
-            yield "data: ERROR: Node not found\n\n"
-            yield "data: [DONE]\n\n"
+            yield _sse_message("ERROR: Node not found")
+            yield _SSE_DONE
             return
         if not dst_ip:
-            yield "data: ERROR: Destination IP is required\n\n"
-            yield "data: [DONE]\n\n"
+            yield _sse_message("ERROR: Destination IP is required")
+            yield _SSE_DONE
             return
 
         # --- Build command ---
@@ -170,8 +183,8 @@ def ping_stream():
                 size=size,
             )
         except UnsupportedDeviceTypeError:
-            yield f"data: ERROR: Ping is not supported for device type: {node.device_type}\n\n"
-            yield "data: [DONE]\n\n"
+            yield _sse_message(f"ERROR: Ping is not supported for device type: {node.device_type}")
+            yield _SSE_DONE
             return
 
         commands = command if isinstance(command, list) else [command]
@@ -180,17 +193,17 @@ def ping_stream():
         # --- Emit header info ---
         dst_annotation = _annotate_ip(dst_ip)
         annotation_suffix = f" -> {dst_annotation}" if dst_annotation else ""
-        yield f"data: Destination : {dst_ip}{annotation_suffix}\n\n"
-        yield f"data: Command     : {command_str}\n\n"
-        yield "data: \n\n"
+        yield _sse_message(f"Destination : {dst_ip}{annotation_suffix}")
+        yield _sse_message(f"Command     : {command_str}")
+        yield _SSE_SEPARATOR
 
         # --- Open dedicated connection (not from pool) ---
         try:
             conn = node.gen_netmiko_connection()
         except Exception as err:
             report_exception(err, "Ping connection failed")
-            yield f"data: ERROR: Connection failed: {err}\n\n"
-            yield "data: [DONE]\n\n"
+            yield _sse_message(f"ERROR: Connection failed: {err}")
+            yield _SSE_DONE
             return
 
         # --- Stream output ---
@@ -209,7 +222,7 @@ def ping_stream():
                         buffer += chunk
                         for line in chunk.splitlines():
                             if line.strip():
-                                yield f"data: {line}\n\n"
+                                yield _sse_message(line)
                         if prompt in buffer:
                             break
                     else:
@@ -239,14 +252,14 @@ def ping_stream():
 
         except Exception as err:
             report_exception(err, "Ping execution failed")
-            yield f"data: ERROR: {err}\n\n"
+            yield _sse_message(f"ERROR: {err}")
         finally:
             try:
                 conn.disconnect()
             except Exception:
                 pass
 
-        yield "data: [DONE]\n\n"
+        yield _SSE_DONE
 
     return Response(
         stream_with_context(generate()),

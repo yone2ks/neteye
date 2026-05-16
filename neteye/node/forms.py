@@ -2,12 +2,14 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, PasswordField, StringField, SubmitField
 from wtforms.validators import InputRequired, IPAddress
 
+DEFAULT_SSH_PORT = 22
+
 
 class NodeForm(FlaskForm):
     hostname = StringField("Hostname:", validators=[InputRequired()])
     description = StringField("Description:")
     ip_address = StringField("IP Address:", validators=[InputRequired(), IPAddress()])
-    port = IntegerField("Port:", default=22, validators=[InputRequired()])
+    port = IntegerField("Port:", default=DEFAULT_SSH_PORT, validators=[InputRequired()])
     device_type = StringField("Device Type:", default="autodetect", validators=[InputRequired()])
     napalm_driver = StringField("Napalm Driver:")
     scrapli_driver = StringField("Scrapli Driver:")
