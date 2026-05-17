@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -111,19 +112,15 @@ def ping_execute():
     # Use netmiko_raw_command directly: scrapli's timeout_transport is fixed at
     # connection creation and cannot be overridden per-command, causing EOF errors
     # on long-running commands. netmiko's read_timeout works correctly per-command.
+    commands = command if isinstance(command, list) else [command]
+    commands_str = "\n".join(commands)
     read_timeout = count * timeout + 10
     try:
-        if isinstance(command, list):
-            # Multi-step command (e.g. Fortinet): run each step and join the output.
-            outputs = [
-                node.netmiko_raw_command(cmd, current_user.email, timeout=read_timeout)
-                for cmd in command
-            ]
-            result = "\n".join(filter(None, outputs))
-            command_str = "\n".join(command)
-        else:
-            result = node.netmiko_raw_command(command, current_user.email, timeout=read_timeout)
-            command_str = command
+        outputs = [
+            node.netmiko_raw_command(step, current_user.email, timeout=read_timeout)
+            for step in commands
+        ]
+        result = "\n".join(filter(None, outputs))
     except Exception as err:
         report_exception(err, "Ping execution failed")
         return render_template("/troubleshoot/ping.html", form=form)
@@ -135,7 +132,7 @@ def ping_execute():
         "/troubleshoot/ping.html",
         form=form,
         result=result,
-        command=command_str,
+        command=commands_str,
         dst_ip=dst_ip,
         dst_annotation=dst_annotation,
     )
@@ -188,13 +185,13 @@ def ping_stream():
             return
 
         commands = command if isinstance(command, list) else [command]
-        command_str = "\n".join(commands) if isinstance(command, list) else command
+        commands_str = "\n".join(commands)
 
         # --- Emit header info ---
         dst_annotation = _annotate_ip(dst_ip)
         annotation_suffix = f" -> {dst_annotation}" if dst_annotation else ""
         yield _sse_message(f"Destination : {dst_ip}{annotation_suffix}")
-        yield _sse_message(f"Command     : {command_str}")
+        yield _sse_message(f"Command     : {commands_str}")
         yield _SSE_SEPARATOR
 
         # --- Open dedicated connection (not from pool) ---
@@ -207,12 +204,13 @@ def ping_stream():
             return
 
         # --- Stream output ---
+        output_lines: list[str] = []
         try:
             prompt = conn.find_prompt()
             deadline = time.time() + count * timeout + 30
 
-            for cmd in commands:
-                conn.write_channel(cmd + "\n")
+            for command in commands:
+                conn.write_channel(command + "\n")
                 time.sleep(0.2)
 
                 buffer = ""
@@ -222,26 +220,18 @@ def ping_stream():
                         buffer += chunk
                         for line in chunk.splitlines():
                             if line.strip():
+                                output_lines.append(line)
                                 yield _sse_message(line)
                         if prompt in buffer:
                             break
                     else:
                         time.sleep(0.3)
 
-            # --- Record to CommandHistory (normal completion only) ---
-            try:
-                CommandHistory(
-                    username=current_user.email,
-                    node_id=node.id,
-                    hostname=node.hostname,
-                    command=command_str,
-                    result="(streamed via SSE)",
-                ).add()
-            except Exception as err:
-                logger.warning("Failed to record ping to history: %s", err)
+            history_result = "\n".join(output_lines)
 
         except GeneratorExit:
             # Client cancelled the stream — send device-specific interrupt to stop the ping.
+            history_result = "\n".join(output_lines) + "\n(cancelled)"
             interrupt_char = get_interrupt_char(node.device_type)
             try:
                 conn.write_channel(interrupt_char)
@@ -251,9 +241,22 @@ def ping_stream():
             raise   # Re-raise so the generator exits cleanly.
 
         except Exception as err:
+            history_result = "\n".join(output_lines) + "\n(error)"
             report_exception(err, "Ping execution failed")
             yield _sse_message(f"ERROR: {err}")
+
         finally:
+            # --- Record to CommandHistory (always — including cancel and error) ---
+            try:
+                CommandHistory(
+                    username=current_user.email,
+                    node_id=node.id,
+                    hostname=node.hostname,
+                    command=commands_str,
+                    result=json.dumps(history_result),
+                ).add()
+            except Exception as err:
+                logger.warning("Failed to record ping to history: %s", err)
             try:
                 conn.disconnect()
             except Exception:
