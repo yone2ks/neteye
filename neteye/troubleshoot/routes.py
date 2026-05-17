@@ -46,6 +46,15 @@ _SSE_DONE      = _sse_message("[DONE]")
 _SSE_SEPARATOR = _sse_message("")   # blank line between header info and streaming output
 
 
+def _sse_partial(text: str) -> str:
+    """Partial SSE event — hop line in progress (e.g. * * * probes accumulating).
+
+    The client replaces the previous partial content with this text rather than
+    appending, so consecutive partials never cascade into a single garbled line.
+    """
+    return f"event: partial\ndata: {text}\n\n"
+
+
 # ── Annotation helpers ────────────────────────────────────────────────
 
 def _annotate_ip(ip_address: str) -> str | None:
@@ -246,7 +255,9 @@ def ping_stream():
                     chunk = conn.read_channel()
                     if chunk:
                         buffer += chunk
-                        for line in chunk.splitlines():
+                        # Normalize line endings: \r\n → \n, then strip bare \r
+                        # (Cisco uses \r to reprint the "!!!!!" progress line in-place).
+                        for line in chunk.replace("\r\n", "\n").replace("\r", "").split("\n"):
                             if line.strip():
                                 output_lines.append(line)
                                 yield _sse_message(line)
@@ -378,18 +389,51 @@ def traceroute_stream():
                 time.sleep(0.2)
 
                 buffer = ""
+                line_buffer = ""
+                line_buffer_ts = time.time()
                 while time.time() < deadline:
                     chunk = conn.read_channel()
                     if chunk:
                         buffer += chunk
-                        for line in chunk.splitlines():
+                        # Normalize \r\n → \n, then split on \n to get complete lines.
+                        # Bare \r (no \n) means Cisco overwrote the terminal cursor back
+                        # to line start (probe-by-probe update for * * * hops);
+                        # split("\r")[-1] keeps only the final overwrite state.
+                        data = line_buffer + chunk.replace("\r\n", "\n")
+                        parts = data.split("\n")
+                        line_buffer = parts.pop()   # last (incomplete) segment
+                        line_buffer_ts = time.time()
+                        for raw_line in parts:
+                            line = raw_line.split("\r")[-1]
                             if line.strip():
                                 output_lines.append(line)
                                 yield _sse_message(_annotate_traceroute_line(line))
                         if prompt in buffer:
                             break
                     else:
+                        # No new data — emit a partial event showing the current state
+                        # of the in-progress hop line (e.g. "  5  * *" while still waiting
+                        # for the third probe to time out). Client replaces the previous
+                        # partial rather than appending, so no cascade occurs.
+                        if line_buffer.strip() and time.time() - line_buffer_ts > 1.0:
+                            partial = next(
+                                (s for s in reversed(line_buffer.split("\r")) if s.strip()),
+                                "",
+                            )
+                            if partial:
+                                yield _sse_partial(_annotate_traceroute_line(partial))
+                            line_buffer_ts = time.time()  # reset to avoid re-sending same partial
                         time.sleep(0.3)
+
+                # Flush any remaining partial line (e.g. the device prompt).
+                if line_buffer.strip():
+                    line = next(
+                        (s for s in reversed(line_buffer.split("\r")) if s.strip()),
+                        "",
+                    )
+                    if line:
+                        output_lines.append(line)
+                        yield _sse_message(_annotate_traceroute_line(line))
 
             history_result = "\n".join(output_lines)
 
