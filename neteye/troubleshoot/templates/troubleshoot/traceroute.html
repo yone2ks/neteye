@@ -1,0 +1,214 @@
+{% extends "base_template.html" %}
+
+{% block javascript %}
+{{ super() }}
+
+<script>
+ $(document).ready(function(){
+     var ipOpts = {
+         valueKey: 'ip_address',
+         textFn:   function(intf) { return intf.ip_address + ' (' + intf.name + ')'; },
+         filter:   function(intf) { return intf.ip_address && intf.ip_address !== 'unassigned'; }
+     };
+
+     // ── localStorage: restore last used values ────────────────────────
+     var STORAGE_PREFIX = 'neteye_traceroute_';  // key prefix — avoids collision with DataTables keys
+     var savedNodeId = localStorage.getItem(STORAGE_PREFIX + 'node_id');
+     var savedSrcIp  = localStorage.getItem(STORAGE_PREFIX + 'src_ip');
+
+     // Restore plain input fields
+     ['max_ttl', 'timeout', 'probe', 'vrf'].forEach(function(field) {
+         var v = localStorage.getItem(STORAGE_PREFIX + field);
+         if (v !== null) { $('#' + field).val(v); }
+     });
+
+     // Apply Select2 to node selector for search-as-you-type
+     $('#src_node').select2({ theme: 'bootstrap4', width: '100%' });
+
+     // Apply Select2 to IP selector; mark it for auto-reinit after loadInterfaces
+     $('#src_ip_address').data('select2-init', true).select2({ theme: 'bootstrap4', width: '100%' });
+
+     // Restore node selection, then load its interfaces (pre-selecting saved src_ip)
+     if (savedNodeId) {
+         $('#src_node').val(savedNodeId).trigger('change');
+     }
+     loadInterfaces($('#src_node').val(), 'src_ip_address',
+                    $.extend({}, ipOpts, { selectedValue: savedSrcIp }));
+
+     $('#src_node').on('select2:select', function(){
+         loadInterfaces($(this).val(), 'src_ip_address', ipOpts);
+     });
+
+     // ── SSE-based real-time traceroute execution ──────────────────────
+     var es = null;
+
+     var $cancel = $('#cancel');
+
+     $cancel.on('click', function() {
+         if (es) { es.close(); es = null; }
+         $cancel.hide();
+         $('#submit').prop('disabled', false).val('Submit');
+         var $output = $('#result-output');
+         $output.text($output.text() + '\n[Cancelled]');
+         $output[0].scrollTop = $output[0].scrollHeight;
+     });
+
+     $('#traceroute').on('submit', function(e) {
+         e.preventDefault();
+
+         // Close any in-progress stream
+         if (es) { es.close(); es = null; }
+
+         var $card   = $('#result-card');
+         var $output = $('#result-output');
+         var $submit = $('#submit');
+
+         $output.text('');
+         $card.show();
+         $submit.prop('disabled', true).val('Running...');
+         $cancel.show();
+
+         // Save current values to localStorage before execution
+         localStorage.setItem(STORAGE_PREFIX + 'node_id', $('#src_node').val());
+         localStorage.setItem(STORAGE_PREFIX + 'src_ip',  $('#src_ip_address').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'vrf',     $('#vrf').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'max_ttl', $('#max_ttl').val());
+         localStorage.setItem(STORAGE_PREFIX + 'timeout', $('#timeout').val());
+         localStorage.setItem(STORAGE_PREFIX + 'probe',   $('#probe').val());
+
+         var params = new URLSearchParams({
+             node_id: $('#src_node').val(),
+             dst_ip:  $('#dst_ip_address').val(),
+             src_ip:  $('#src_ip_address').val() || '',
+             vrf:     $('#vrf').val() || '',
+             max_ttl: $('#max_ttl').val(),
+             timeout: $('#timeout').val(),
+             probe:   $('#probe').val()
+         });
+
+         es = new EventSource('{{ url_for("troubleshoot.traceroute_stream") }}?' + params.toString());
+
+         es.onmessage = function(evt) {
+             if (evt.data === '[DONE]') {
+                 es.close(); es = null;
+                 $cancel.hide();
+                 $submit.prop('disabled', false).val('Submit');
+                 return;
+             }
+             $output.text($output.text() + evt.data + '\n');
+             $output[0].scrollTop = $output[0].scrollHeight;
+         };
+
+         es.onerror = function() {
+             if (es) { es.close(); es = null; }
+             $cancel.hide();
+             $submit.prop('disabled', false).val('Submit');
+             $output.text($output.text() + '\n[Connection closed]');
+         };
+     });
+
+     // Reset handler
+     $('#traceroute').on('reset', function() {
+         setTimeout(function() {
+             $('#src_node').trigger('change');
+             loadInterfaces($('#src_node').val(), 'src_ip_address', ipOpts);
+         }, 0);
+     });
+ });
+</script>
+{% endblock javascript %}
+
+
+{% block main %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+    <div class="card-header">
+        Traceroute
+    </div>
+    <div class="card-body">
+        <form action="#" method="post" class="form-horizontal" id="traceroute">
+            {{ form.csrf_token }}
+            <div class="form-group row">
+                {{ form.src_node.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.src_node(class_="form-control") }}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.src_ip_address.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.src_ip_address(class_="form-control") }}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.vrf.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.vrf(class_="form-control", placeholder="(optional)") }}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.dst_ip_address.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.dst_ip_address(class_="form-control") }}
+                    {% if form.dst_ip_address.errors %}
+                      <div class="alert-danger">{{ form.dst_ip_address.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.max_ttl.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.max_ttl(class_="form-control") }}
+                    {% if form.max_ttl.errors %}
+                      <div class="alert-danger">{{ form.max_ttl.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.probe.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.probe(class_="form-control") }}
+                    {% if form.probe.errors %}
+                      <div class="alert-danger">{{ form.probe.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group row">
+                {{ form.timeout.label(class_="col-md-3 col-form-label") }}
+                <div class="col-md-6">
+                    {{ form.timeout(class_="form-control") }}
+                    {% if form.timeout.errors %}
+                      <div class="alert-danger">{{ form.timeout.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        {{ form.submit(class_="btn btn-sm btn-primary", form="traceroute") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="traceroute") }}
+    </div>
+</div>
+
+{# SSE real-time result card (shown by JavaScript when streaming starts) #}
+<div id="result-card" class="card mt-3" style="display:none;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Result</span>
+        <button type="button" class="btn btn-warning" id="cancel">Cancel</button>
+    </div>
+    <div class="card-body p-0">
+        <pre id="result-output" class="bg-dark text-white p-3 rounded mb-0"
+             style="max-height:500px; overflow-y:auto; white-space:pre-wrap;"></pre>
+    </div>
+</div>
+{% endblock main %}
