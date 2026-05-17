@@ -2,11 +2,12 @@
 
 Device-specific troubleshoot command builders.
 
-Each device type has a corresponding subclass that implements build_ping().
-build_traceroute() and build_telnet() are planned for future releases.
+Each device type has a corresponding subclass that implements build_ping()
+and build_traceroute(). build_telnet() is planned for future releases.
 
 To add support for a new device type:
-  1. Create a subclass of TroubleshootBuilder and implement build_ping().
+  1. Create a subclass of TroubleshootBuilder and implement build_ping()
+     and build_traceroute().
   2. Add one entry to _BUILDER_REGISTRY.
   3. Add test cases to tests/test_troubleshoot_command_builder.py.
   No changes to callers (routes.py etc.) are required.
@@ -23,10 +24,9 @@ class UnsupportedDeviceTypeError(Exception):
 class TroubleshootBuilder(ABC):
     """Abstract base class for device-specific troubleshoot command builders.
 
-    Subclasses must implement build_ping().
-    build_traceroute() and build_telnet() raise NotImplementedError until implemented.
-    The helper methods _vrf_part() and _src_part() are shared across ping, traceroute,
-    and telnet commands.
+    Subclasses must implement build_ping() and build_traceroute().
+    build_telnet() raises NotImplementedError until implemented.
+    The helper method _optional() is shared across ping, traceroute, and telnet commands.
     """
 
     @abstractmethod
@@ -42,18 +42,23 @@ class TroubleshootBuilder(ABC):
         """Return the ping command string, or a list of strings for multi-step devices."""
         ...
 
+    @abstractmethod
     def build_traceroute(
         self,
         dst_ip: str,
         src_ip: str | None,
         vrf: str | None,
-        count: int,
+        probe: int,
         timeout: int,
-        size: int,
+        max_ttl: int,
     ) -> str | list[str]:
-        raise NotImplementedError(
-            f"traceroute is not yet implemented for {type(self).__name__}"
-        )
+        """Return the traceroute command string, or a list of strings for multi-step devices.
+
+        Args:
+            probe: Number of probes per hop (sent per TTL value).
+            max_ttl: Maximum TTL (controls the maximum number of hops).
+        """
+        ...
 
     def build_telnet(
         self,
@@ -68,13 +73,14 @@ class TroubleshootBuilder(ABC):
 
     # ── Shared helpers ───────────────────────────────────────────────
 
-    def _vrf_part(self, keyword: str, vrf: str | None) -> str:
-        """Return 'keyword vrf ' (trailing space) when vrf is given, else empty string."""
-        return f"{keyword} {vrf} " if vrf else ""
+    def _optional(self, keyword: str, value: str | None) -> list[str]:
+        """Return ['{keyword} {value}'] when value is given, else [].
 
-    def _src_part(self, keyword: str, src_ip: str | None) -> str:
-        """Return ' keyword src_ip' (leading space) when src_ip is given, else empty string."""
-        return f" {keyword} {src_ip}" if src_ip else ""
+        Use with += to conditionally append a keyword-value pair to a command list:
+            command += self._optional("vrf", vrf)
+        """
+        return [f"{keyword} {value}"] if value else []
+
 
 
 # ── Device-specific builders ─────────────────────────────────────────
@@ -84,84 +90,149 @@ class CiscoIOSTroubleshootBuilder(TroubleshootBuilder):
     """Cisco IOS / IOS-XE (shared — identical syntax)."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping [vrf <vrf>] <dst> [source <src>] [repeat <n>] [timeout <n>] [size <n>]
-        vrf_part = self._vrf_part("vrf", vrf)
-        src_part = self._src_part("source", src_ip)
-        return (
-            f"ping {vrf_part}{dst_ip}{src_part}"
-            f" repeat {count} timeout {timeout} size {size}"
-        )
+        # ping [vrf VRF] DST [source SRC] repeat N timeout N size N
+        command  = ["ping"]
+        command += self._optional("vrf", vrf)
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"repeat {count}"]
+        command += [f"timeout {timeout}"]
+        command += [f"size {size}"]
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute [vrf VRF] DST [source SRC] probe N timeout N ttl 1 N
+        command  = ["traceroute"]
+        command += self._optional("vrf", vrf)
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"probe {probe}"]
+        command += [f"timeout {timeout}"]
+        command += [f"ttl 1 {max_ttl}"]
+        return " ".join(command)
 
 
 class CiscoNXOSTroubleshootBuilder(TroubleshootBuilder):
     """Cisco NX-OS."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping <dst> [count <n>] [source <src>] [vrf <vrf>] [packet-size <n>] [timeout <n>]
-        parts = [f"ping {dst_ip}", f"count {count}"]
-        if src_ip:
-            parts.append(f"source {src_ip}")
-        if vrf:
-            parts.append(f"vrf {vrf}")
-        parts.append(f"packet-size {size}")
-        parts.append(f"timeout {timeout}")
-        return " ".join(parts)
+        # ping DST count N [source SRC] [vrf VRF] packet-size N timeout N
+        command  = ["ping"]
+        command += [dst_ip]
+        command += [f"count {count}"]
+        command += self._optional("source", src_ip)
+        command += self._optional("vrf", vrf)
+        command += [f"packet-size {size}"]
+        command += [f"timeout {timeout}"]
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute DST [source SRC] [vrf VRF] probe N timeout N
+        # NX-OS does not support a max-ttl option (max_ttl is ignored)
+        command  = ["traceroute"]
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += self._optional("vrf", vrf)
+        command += [f"probe {probe}"]
+        command += [f"timeout {timeout}"]
+        return " ".join(command)
 
 
 class CiscoXRTroubleshootBuilder(TroubleshootBuilder):
     """Cisco IOS-XR."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping [vrf <vrf>] <dst> [source <src>] [count <n>] [timeout <n>] [size <n>]
-        vrf_part = self._vrf_part("vrf", vrf)
-        src_part = self._src_part("source", src_ip)
-        return (
-            f"ping {vrf_part}{dst_ip}{src_part}"
-            f" count {count} timeout {timeout} size {size}"
-        )
+        # ping [vrf VRF] DST [source SRC] count N timeout N size N
+        command  = ["ping"]
+        command += self._optional("vrf", vrf)
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"count {count}"]
+        command += [f"timeout {timeout}"]
+        command += [f"size {size}"]
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute [vrf VRF] DST [source SRC] probe N timeout N max-ttl N
+        command  = ["traceroute"]
+        command += self._optional("vrf", vrf)
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"probe {probe}"]
+        command += [f"timeout {timeout}"]
+        command += [f"max-ttl {max_ttl}"]
+        return " ".join(command)
 
 
 class AristaEOSTroubleshootBuilder(TroubleshootBuilder):
     """Arista EOS."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping <dst> [source <src>] [repeat <n>] [size <n>] [vrf <vrf>]
-        parts = [f"ping {dst_ip}"]
-        if src_ip:
-            parts.append(f"source {src_ip}")
-        parts.append(f"repeat {count}")
-        parts.append(f"size {size}")
-        if vrf:
-            parts.append(f"vrf {vrf}")
-        return " ".join(parts)
+        # ping DST [source SRC] repeat N size N [vrf VRF]
+        command  = ["ping"]
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"repeat {count}"]
+        command += [f"size {size}"]
+        command += self._optional("vrf", vrf)
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute DST [source SRC] probe N maxttl N
+        # Arista does not support a timeout option (timeout is ignored)
+        command  = ["traceroute"]
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"probe {probe}"]
+        command += [f"maxttl {max_ttl}"]
+        return " ".join(command)
 
 
 class JuniperJunOSTroubleshootBuilder(TroubleshootBuilder):
     """Juniper JunOS. VRF keyword is 'routing-instance' (differs from other vendors)."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping <dst> [count <n>] [source <src>] [routing-instance <vrf>] [size <n>] [wait <n>]
-        src_part = self._src_part("source", src_ip)
-        ri_part = self._vrf_part("routing-instance", vrf)
-        return (
-            f"ping {dst_ip} count {count}{src_part}"
-            f" {ri_part}size {size} wait {timeout}"
-        ).strip()
+        # ping DST count N [source SRC] [routing-instance VRF] size N wait N
+        command  = ["ping"]
+        command += [dst_ip]
+        command += [f"count {count}"]
+        command += self._optional("source", src_ip)
+        command += self._optional("routing-instance", vrf)
+        command += [f"size {size}"]
+        command += [f"wait {timeout}"]
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute DST [source SRC] [routing-instance VRF] probe-count N wait N ttl N
+        command  = ["traceroute"]
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        command += self._optional("routing-instance", vrf)
+        command += [f"probe-count {probe}"]
+        command += [f"wait {timeout}"]
+        command += [f"ttl {max_ttl}"]
+        return " ".join(command)
 
 
 class PaloAltoTroubleshootBuilder(TroubleshootBuilder):
     """Palo Alto PAN-OS. VRF equivalent is 'vrouter'."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> str:
-        # ping [vrouter <vrf>] host <dst> [source <src>] [count <n>]
-        parts = ["ping"]
-        if vrf:
-            parts.append(f"vrouter {vrf}")
-        parts.append(f"host {dst_ip}")
-        if src_ip:
-            parts.append(f"source {src_ip}")
-        parts.append(f"count {count}")
-        return " ".join(parts)
+        # ping [vrouter VRF] host DST [source SRC] count N
+        command  = ["ping"]
+        command += self._optional("vrouter", vrf)
+        command += ["host", dst_ip]
+        command += self._optional("source", src_ip)
+        command += [f"count {count}"]
+        return " ".join(command)
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute host DST [source SRC]
+        # vrouter/probe/timeout/max_ttl are not supported for traceroute on PAN-OS
+        command  = ["traceroute", "host"]
+        command += [dst_ip]
+        command += self._optional("source", src_ip)
+        return " ".join(command)
 
 
 class CiscoASATroubleshootBuilder(TroubleshootBuilder):
@@ -171,9 +242,13 @@ class CiscoASATroubleshootBuilder(TroubleshootBuilder):
         # ping <dst>
         return f"ping {dst_ip}"
 
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # traceroute DST (src/vrf/probe/timeout/ttl not supported)
+        return f"traceroute {dst_ip}"
+
 
 class FortinetTroubleshootBuilder(TroubleshootBuilder):
-    """Fortinet FortiOS. Returns a list of commands (multi-step). VRF not supported."""
+    """Fortinet FortiOS. Returns a list of commands (multi-step) for ping. VRF not supported."""
 
     def build_ping(self, dst_ip, src_ip, vrf, count, timeout, size) -> list[str]:
         # Configure options with 'execute ping-options', then run 'execute ping'
@@ -185,6 +260,10 @@ class FortinetTroubleshootBuilder(TroubleshootBuilder):
         commands.append(f"execute ping-options data-size {size}")
         commands.append(f"execute ping {dst_ip}")
         return commands
+
+    def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
+        # execute traceroute DST (single command; src/vrf/probe/timeout not supported)
+        return f"execute traceroute {dst_ip}"
 
 
 # ── Factory ──────────────────────────────────────────────────────────
