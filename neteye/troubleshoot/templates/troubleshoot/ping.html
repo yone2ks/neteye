@@ -93,6 +93,8 @@
                  es.close(); es = null;
                  $cancel.hide();
                  $submit.prop('disabled', false).val('Submit');
+                 $output.text($output.text() + '\n[Done]');
+                 $output[0].scrollTop = $output[0].scrollHeight;
                  return;
              }
              $output.text($output.text() + evt.data + '\n');

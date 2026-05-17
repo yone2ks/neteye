@@ -42,6 +42,18 @@
      // ── SSE-based real-time traceroute execution ──────────────────────
      var es = null;
 
+     // completedText holds finalized lines; partialText holds the current
+     // in-progress hop line (e.g. "  5  * *" while the third probe is pending).
+     // Keeping them separate lets partial events REPLACE rather than APPEND,
+     // which prevents consecutive partials from cascading into one garbled line.
+     var completedText = '';
+     var partialText   = '';
+
+     function updateOutput($output) {
+         $output.text(completedText + partialText);
+         $output[0].scrollTop = $output[0].scrollHeight;
+     }
+
      var $cancel = $('#cancel');
 
      $cancel.on('click', function() {
@@ -49,8 +61,9 @@
          $cancel.hide();
          $('#submit').prop('disabled', false).val('Submit');
          var $output = $('#result-output');
-         $output.text($output.text() + '\n[Cancelled]');
-         $output[0].scrollTop = $output[0].scrollHeight;
+         if (partialText) { completedText += partialText + '\n'; partialText = ''; }
+         completedText += '\n[Cancelled]';
+         updateOutput($output);
      });
 
      $('#traceroute').on('submit', function(e) {
@@ -63,6 +76,8 @@
          var $output = $('#result-output');
          var $submit = $('#submit');
 
+         completedText = '';
+         partialText   = '';
          $output.text('');
          $card.show();
          $submit.prop('disabled', true).val('Running...');
@@ -88,22 +103,36 @@
 
          es = new EventSource('{{ url_for("troubleshoot.traceroute_stream") }}?' + params.toString());
 
+         // "partial" events: REPLACE partialText with the current hop-line state.
+         // Because we replace (not append), consecutive partials never cascade.
+         es.addEventListener('partial', function(evt) {
+             partialText = evt.data;
+             updateOutput($output);
+         });
+
+         // Default "message" events: complete lines.
+         // If a partial was in progress, discard it (the complete line supersedes it).
          es.onmessage = function(evt) {
+             partialText = '';
              if (evt.data === '[DONE]') {
                  es.close(); es = null;
                  $cancel.hide();
                  $submit.prop('disabled', false).val('Submit');
+                 completedText += '\n[Done]';
+                 updateOutput($output);
                  return;
              }
-             $output.text($output.text() + evt.data + '\n');
-             $output[0].scrollTop = $output[0].scrollHeight;
+             completedText += evt.data + '\n';
+             updateOutput($output);
          };
 
          es.onerror = function() {
              if (es) { es.close(); es = null; }
              $cancel.hide();
              $submit.prop('disabled', false).val('Submit');
-             $output.text($output.text() + '\n[Connection closed]');
+             if (partialText) { completedText += partialText + '\n'; partialText = ''; }
+             completedText += '\n[Connection closed]';
+             updateOutput($output);
          };
      });
 
