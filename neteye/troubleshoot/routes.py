@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 import time
 
 from flask import Response, flash, render_template, request, stream_with_context
@@ -16,7 +18,17 @@ from neteye.lib.troubleshoot_command_builder import (
 from neteye.lib.utils.report_exception import report_exception
 from neteye.node.models import Node
 
-from .forms import PING_DEFAULT_COUNT, PING_DEFAULT_DATA_SIZE, PING_DEFAULT_TIMEOUT, PingForm
+from .forms import (
+    PING_DEFAULT_COUNT,
+    PING_DEFAULT_DATA_SIZE,
+    PING_DEFAULT_TIMEOUT,
+    TRACEROUTE_DEFAULT_MAX_TTL,
+    TRACEROUTE_DEFAULT_PROBE,
+    TRACEROUTE_DEFAULT_TIMEOUT,
+    TRACEROUTE_MAX_PROBE,
+    PingForm,
+    TracerouteForm,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +44,15 @@ def _sse_message(text: str) -> str:
 
 _SSE_DONE      = _sse_message("[DONE]")
 _SSE_SEPARATOR = _sse_message("")   # blank line between header info and streaming output
+
+
+def _sse_partial(text: str) -> str:
+    """Partial SSE event — hop line in progress (e.g. * * * probes accumulating).
+
+    The client replaces the previous partial content with this text rather than
+    appending, so consecutive partials never cascade into a single garbled line.
+    """
+    return f"event: partial\ndata: {text}\n\n"
 
 
 # ── Annotation helpers ────────────────────────────────────────────────
@@ -51,6 +72,23 @@ def _annotate_ip(ip_address: str) -> str | None:
         return f"{iface.node.hostname} ({iface.name})"
 
     return None
+
+
+_IP_RE = re.compile(r'\b(\d{1,3}(?:\.\d{1,3}){3})\b')
+
+
+def _annotate_traceroute_line(line: str) -> str:
+    """Annotate IPv4 addresses in a traceroute hop line with Node/Interface DB lookups.
+
+    Each IPv4 address found in the line is looked up via _annotate_ip().
+    If a match is found, the annotation is appended in brackets:
+      192.168.1.1  ->  192.168.1.1 [router1 (Gi0/0)]
+    """
+    def _replace(match: re.Match) -> str:
+        ip = match.group(1)
+        annotation = _annotate_ip(ip)
+        return f"{ip} [{annotation}]" if annotation else ip
+    return _IP_RE.sub(_replace, line)
 
 
 @troubleshoot_bp.route("/ping")
@@ -111,19 +149,15 @@ def ping_execute():
     # Use netmiko_raw_command directly: scrapli's timeout_transport is fixed at
     # connection creation and cannot be overridden per-command, causing EOF errors
     # on long-running commands. netmiko's read_timeout works correctly per-command.
+    commands = command if isinstance(command, list) else [command]
+    commands_str = "\n".join(commands)
     read_timeout = count * timeout + 10
     try:
-        if isinstance(command, list):
-            # Multi-step command (e.g. Fortinet): run each step and join the output.
-            outputs = [
-                node.netmiko_raw_command(cmd, current_user.email, timeout=read_timeout)
-                for cmd in command
-            ]
-            result = "\n".join(filter(None, outputs))
-            command_str = "\n".join(command)
-        else:
-            result = node.netmiko_raw_command(command, current_user.email, timeout=read_timeout)
-            command_str = command
+        outputs = [
+            node.netmiko_raw_command(step, current_user.email, timeout=read_timeout)
+            for step in commands
+        ]
+        result = "\n".join(filter(None, outputs))
     except Exception as err:
         report_exception(err, "Ping execution failed")
         return render_template("/troubleshoot/ping.html", form=form)
@@ -135,7 +169,7 @@ def ping_execute():
         "/troubleshoot/ping.html",
         form=form,
         result=result,
-        command=command_str,
+        command=commands_str,
         dst_ip=dst_ip,
         dst_annotation=dst_annotation,
     )
@@ -188,13 +222,13 @@ def ping_stream():
             return
 
         commands = command if isinstance(command, list) else [command]
-        command_str = "\n".join(commands) if isinstance(command, list) else command
+        commands_str = "\n".join(commands)
 
         # --- Emit header info ---
         dst_annotation = _annotate_ip(dst_ip)
         annotation_suffix = f" -> {dst_annotation}" if dst_annotation else ""
         yield _sse_message(f"Destination : {dst_ip}{annotation_suffix}")
-        yield _sse_message(f"Command     : {command_str}")
+        yield _sse_message(f"Command     : {commands_str}")
         yield _SSE_SEPARATOR
 
         # --- Open dedicated connection (not from pool) ---
@@ -207,12 +241,13 @@ def ping_stream():
             return
 
         # --- Stream output ---
+        output_lines: list[str] = []
         try:
             prompt = conn.find_prompt()
             deadline = time.time() + count * timeout + 30
 
-            for cmd in commands:
-                conn.write_channel(cmd + "\n")
+            for command in commands:
+                conn.write_channel(command + "\n")
                 time.sleep(0.2)
 
                 buffer = ""
@@ -220,28 +255,22 @@ def ping_stream():
                     chunk = conn.read_channel()
                     if chunk:
                         buffer += chunk
-                        for line in chunk.splitlines():
+                        # Normalize line endings: \r\n → \n, then strip bare \r
+                        # (Cisco uses \r to reprint the "!!!!!" progress line in-place).
+                        for line in chunk.replace("\r\n", "\n").replace("\r", "").split("\n"):
                             if line.strip():
+                                output_lines.append(line)
                                 yield _sse_message(line)
                         if prompt in buffer:
                             break
                     else:
                         time.sleep(0.3)
 
-            # --- Record to CommandHistory (normal completion only) ---
-            try:
-                CommandHistory(
-                    username=current_user.email,
-                    node_id=node.id,
-                    hostname=node.hostname,
-                    command=command_str,
-                    result="(streamed via SSE)",
-                ).add()
-            except Exception as err:
-                logger.warning("Failed to record ping to history: %s", err)
+            history_result = "\n".join(output_lines)
 
         except GeneratorExit:
             # Client cancelled the stream — send device-specific interrupt to stop the ping.
+            history_result = "\n".join(output_lines) + "\n(cancelled)"
             interrupt_char = get_interrupt_char(node.device_type)
             try:
                 conn.write_channel(interrupt_char)
@@ -251,9 +280,190 @@ def ping_stream():
             raise   # Re-raise so the generator exits cleanly.
 
         except Exception as err:
+            history_result = "\n".join(output_lines) + "\n(error)"
             report_exception(err, "Ping execution failed")
             yield _sse_message(f"ERROR: {err}")
+
         finally:
+            # --- Record to CommandHistory (always — including cancel and error) ---
+            try:
+                CommandHistory(
+                    username=current_user.email,
+                    node_id=node.id,
+                    hostname=node.hostname,
+                    command=commands_str,
+                    result=json.dumps(history_result),
+                ).add()
+            except Exception as err:
+                logger.warning("Failed to record ping to history: %s", err)
+            try:
+                conn.disconnect()
+            except Exception:
+                pass
+
+        yield _SSE_DONE
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@troubleshoot_bp.route("/traceroute")
+@auth_required()
+def traceroute():
+    form = TracerouteForm()
+    return render_template("/troubleshoot/traceroute.html", form=form)
+
+
+@troubleshoot_bp.route("/traceroute/stream")
+@auth_required()
+def traceroute_stream():
+    """SSE endpoint for real-time traceroute output."""
+    node_id = request.args.get("node_id", "").strip()
+    dst_ip  = request.args.get("dst_ip", "").strip()
+    src_ip  = request.args.get("src_ip", "").strip() or None
+    vrf     = request.args.get("vrf", "").strip() or None
+    max_ttl = min(max(request.args.get("max_ttl", TRACEROUTE_DEFAULT_MAX_TTL, type=int), 1), settings.TRACEROUTE_MAX_TTL)
+    probe   = min(max(request.args.get("probe",   TRACEROUTE_DEFAULT_PROBE,   type=int), 1), TRACEROUTE_MAX_PROBE)
+    timeout = min(max(request.args.get("timeout", TRACEROUTE_DEFAULT_TIMEOUT, type=int), 1), settings.TRACEROUTE_MAX_TIMEOUT)
+
+    node = Node.query.filter_by(id=node_id).first() if node_id else None
+
+    def generate():
+        # --- Validation ---
+        if not node:
+            yield _sse_message("ERROR: Node not found")
+            yield _SSE_DONE
+            return
+        if not dst_ip:
+            yield _sse_message("ERROR: Destination IP is required")
+            yield _SSE_DONE
+            return
+
+        # --- Build command ---
+        try:
+            builder = get_troubleshoot_builder(node.device_type)
+            command = builder.build_traceroute(
+                dst_ip=dst_ip,
+                src_ip=src_ip,
+                vrf=vrf,
+                probe=probe,
+                timeout=timeout,
+                max_ttl=max_ttl,
+            )
+        except (UnsupportedDeviceTypeError, NotImplementedError):
+            yield _sse_message(f"ERROR: Traceroute is not supported for device type: {node.device_type}")
+            yield _SSE_DONE
+            return
+
+        commands = command if isinstance(command, list) else [command]
+        commands_str = "\n".join(commands)
+
+        # --- Emit header info ---
+        dst_annotation = _annotate_ip(dst_ip)
+        annotation_suffix = f" -> {dst_annotation}" if dst_annotation else ""
+        yield _sse_message(f"Destination : {dst_ip}{annotation_suffix}")
+        yield _sse_message(f"Command     : {commands_str}")
+        yield _SSE_SEPARATOR
+
+        # --- Open dedicated connection ---
+        try:
+            conn = node.gen_netmiko_connection()
+        except Exception as err:
+            report_exception(err, "Traceroute connection failed")
+            yield _sse_message(f"ERROR: Connection failed: {err}")
+            yield _SSE_DONE
+            return
+
+        # --- Stream output ---
+        output_lines: list[str] = []
+        try:
+            prompt = conn.find_prompt()
+            # Traceroute can take up to max_ttl * timeout seconds
+            deadline = time.time() + max_ttl * timeout + 60
+
+            for command in commands:
+                conn.write_channel(command + "\n")
+                time.sleep(0.2)
+
+                buffer = ""
+                line_buffer = ""
+                line_buffer_ts = time.time()
+                while time.time() < deadline:
+                    chunk = conn.read_channel()
+                    if chunk:
+                        buffer += chunk
+                        # Normalize \r\n → \n, then split on \n to get complete lines.
+                        # Bare \r (no \n) means Cisco overwrote the terminal cursor back
+                        # to line start (probe-by-probe update for * * * hops);
+                        # split("\r")[-1] keeps only the final overwrite state.
+                        data = line_buffer + chunk.replace("\r\n", "\n")
+                        parts = data.split("\n")
+                        line_buffer = parts.pop()   # last (incomplete) segment
+                        line_buffer_ts = time.time()
+                        for raw_line in parts:
+                            line = raw_line.split("\r")[-1]
+                            if line.strip():
+                                output_lines.append(line)
+                                yield _sse_message(_annotate_traceroute_line(line))
+                        if prompt in buffer:
+                            break
+                    else:
+                        # No new data — emit a partial event showing the current state
+                        # of the in-progress hop line (e.g. "  5  * *" while still waiting
+                        # for the third probe to time out). Client replaces the previous
+                        # partial rather than appending, so no cascade occurs.
+                        if line_buffer.strip() and time.time() - line_buffer_ts > 1.0:
+                            partial = next(
+                                (s for s in reversed(line_buffer.split("\r")) if s.strip()),
+                                "",
+                            )
+                            if partial:
+                                yield _sse_partial(_annotate_traceroute_line(partial))
+                            line_buffer_ts = time.time()  # reset to avoid re-sending same partial
+                        time.sleep(0.3)
+
+                # Flush any remaining partial line (e.g. the device prompt).
+                if line_buffer.strip():
+                    line = next(
+                        (s for s in reversed(line_buffer.split("\r")) if s.strip()),
+                        "",
+                    )
+                    if line:
+                        output_lines.append(line)
+                        yield _sse_message(_annotate_traceroute_line(line))
+
+            history_result = "\n".join(output_lines)
+
+        except GeneratorExit:
+            history_result = "\n".join(output_lines) + "\n(cancelled)"
+            interrupt_char = get_interrupt_char(node.device_type)
+            try:
+                conn.write_channel(interrupt_char)
+                time.sleep(0.2)
+            except Exception:
+                pass
+            raise
+
+        except Exception as err:
+            history_result = "\n".join(output_lines) + "\n(error)"
+            report_exception(err, "Traceroute execution failed")
+            yield _sse_message(f"ERROR: {err}")
+
+        finally:
+            # --- Record to CommandHistory (always — including cancel and error) ---
+            try:
+                CommandHistory(
+                    username=current_user.email,
+                    node_id=node.id,
+                    hostname=node.hostname,
+                    command=commands_str,
+                    result=json.dumps(history_result),
+                ).add()
+            except Exception as err:
+                logger.warning("Failed to record traceroute to history: %s", err)
             try:
                 conn.disconnect()
             except Exception:

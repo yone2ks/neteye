@@ -60,6 +60,11 @@ PING_MAX_COUNT     = 10000
 PING_MAX_TIMEOUT   = 100
 PING_MAX_DATA_SIZE = 1500
 
+# Traceroute Settings
+# Upper limits for traceroute form fields. Override in settings.local.toml if needed.
+TRACEROUTE_MAX_TTL     = 255
+TRACEROUTE_MAX_TIMEOUT = 100
+
 # History Settings
 # Maximum number of history records to keep in database for each type
 # NOTE: Set to 0 for unlimited records

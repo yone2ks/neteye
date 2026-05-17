@@ -12,12 +12,12 @@
      };
 
      // ── localStorage: restore last used values ────────────────────────
-     var STORAGE_PREFIX = 'neteye_ping_';  // key prefix — avoids collision with DataTables keys
+     var STORAGE_PREFIX = 'neteye_traceroute_';  // key prefix — avoids collision with DataTables keys
      var savedNodeId = localStorage.getItem(STORAGE_PREFIX + 'node_id');
      var savedSrcIp  = localStorage.getItem(STORAGE_PREFIX + 'src_ip');
 
-     // Restore plain input fields (count / timeout / data_size / vrf)
-     ['count', 'timeout', 'data_size', 'vrf'].forEach(function(field) {
+     // Restore plain input fields
+     ['max_ttl', 'timeout', 'probe', 'vrf'].forEach(function(field) {
          var v = localStorage.getItem(STORAGE_PREFIX + field);
          if (v !== null) { $('#' + field).val(v); }
      });
@@ -39,8 +39,20 @@
          loadInterfaces($(this).val(), 'src_ip_address', ipOpts);
      });
 
-     // ── SSE-based real-time ping execution ────────────────────────────
+     // ── SSE-based real-time traceroute execution ──────────────────────
      var es = null;
+
+     // completedText holds finalized lines; partialText holds the current
+     // in-progress hop line (e.g. "  5  * *" while the third probe is pending).
+     // Keeping them separate lets partial events REPLACE rather than APPEND,
+     // which prevents consecutive partials from cascading into one garbled line.
+     var completedText = '';
+     var partialText   = '';
+
+     function updateOutput($output) {
+         $output.text(completedText + partialText);
+         $output[0].scrollTop = $output[0].scrollHeight;
+     }
 
      var $cancel = $('#cancel');
 
@@ -49,11 +61,12 @@
          $cancel.hide();
          $('#submit').prop('disabled', false).val('Submit');
          var $output = $('#result-output');
-         $output.text($output.text() + '\n[Cancelled]');
-         $output[0].scrollTop = $output[0].scrollHeight;
+         if (partialText) { completedText += partialText + '\n'; partialText = ''; }
+         completedText += '\n[Cancelled]';
+         updateOutput($output);
      });
 
-     $('#ping').on('submit', function(e) {
+     $('#traceroute').on('submit', function(e) {
          e.preventDefault();
 
          // Close any in-progress stream
@@ -63,55 +76,68 @@
          var $output = $('#result-output');
          var $submit = $('#submit');
 
+         completedText = '';
+         partialText   = '';
          $output.text('');
-         $card.show();   // Result カードを表示（Cancel ボタンも一緒に表示される）
+         $card.show();
          $submit.prop('disabled', true).val('Running...');
-         $cancel.show(); // 前回の完了/エラーで hide された場合に備えて再表示
+         $cancel.show();
 
          // Save current values to localStorage before execution
-         localStorage.setItem(STORAGE_PREFIX + 'node_id',   $('#src_node').val());
-         localStorage.setItem(STORAGE_PREFIX + 'src_ip',     $('#src_ip_address').val() || '');
-         localStorage.setItem(STORAGE_PREFIX + 'vrf',        $('#vrf').val() || '');
-         localStorage.setItem(STORAGE_PREFIX + 'count',      $('#count').val());
-         localStorage.setItem(STORAGE_PREFIX + 'timeout',    $('#timeout').val());
-         localStorage.setItem(STORAGE_PREFIX + 'data_size',  $('#data_size').val());
+         localStorage.setItem(STORAGE_PREFIX + 'node_id', $('#src_node').val());
+         localStorage.setItem(STORAGE_PREFIX + 'src_ip',  $('#src_ip_address').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'vrf',     $('#vrf').val() || '');
+         localStorage.setItem(STORAGE_PREFIX + 'max_ttl', $('#max_ttl').val());
+         localStorage.setItem(STORAGE_PREFIX + 'timeout', $('#timeout').val());
+         localStorage.setItem(STORAGE_PREFIX + 'probe',   $('#probe').val());
 
          var params = new URLSearchParams({
              node_id: $('#src_node').val(),
              dst_ip:  $('#dst_ip_address').val(),
              src_ip:  $('#src_ip_address').val() || '',
              vrf:     $('#vrf').val() || '',
-             count:   $('#count').val(),
+             max_ttl: $('#max_ttl').val(),
              timeout: $('#timeout').val(),
-             size:    $('#data_size').val()
+             probe:   $('#probe').val()
          });
 
-         es = new EventSource('{{ url_for("troubleshoot.ping_stream") }}?' + params.toString());
+         es = new EventSource('{{ url_for("troubleshoot.traceroute_stream") }}?' + params.toString());
 
+         // "partial" events: REPLACE partialText with the current hop-line state.
+         // Because we replace (not append), consecutive partials never cascade.
+         es.addEventListener('partial', function(evt) {
+             partialText = evt.data;
+             updateOutput($output);
+         });
+
+         // Default "message" events: complete lines.
+         // If a partial was in progress, discard it (the complete line supersedes it).
          es.onmessage = function(evt) {
+             partialText = '';
              if (evt.data === '[DONE]') {
                  es.close(); es = null;
                  $cancel.hide();
                  $submit.prop('disabled', false).val('Submit');
-                 $output.text($output.text() + '\n[Done]');
-                 $output[0].scrollTop = $output[0].scrollHeight;
+                 completedText += '\n[Done]';
+                 updateOutput($output);
                  return;
              }
-             $output.text($output.text() + evt.data + '\n');
-             $output[0].scrollTop = $output[0].scrollHeight;
+             completedText += evt.data + '\n';
+             updateOutput($output);
          };
 
          es.onerror = function() {
              if (es) { es.close(); es = null; }
              $cancel.hide();
              $submit.prop('disabled', false).val('Submit');
-             $output.text($output.text() + '\n[Connection closed]');
+             if (partialText) { completedText += partialText + '\n'; partialText = ''; }
+             completedText += '\n[Connection closed]';
+             updateOutput($output);
          };
      });
 
-     // Reset handler: native reset clears field values, but Select2 display does not
-     // follow automatically. Re-trigger after the reset event propagates.
-     $('#ping').on('reset', function() {
+     // Reset handler
+     $('#traceroute').on('reset', function() {
          setTimeout(function() {
              $('#src_node').trigger('change');
              loadInterfaces($('#src_node').val(), 'src_ip_address', ipOpts);
@@ -136,11 +162,10 @@
 
 <div class="card">
     <div class="card-header">
-        Ping
+        Traceroute
     </div>
     <div class="card-body">
-        {# action targets ping_execute as a no-JS fallback; JS intercepts submit and streams via ping_stream instead #}
-        <form action="{{ url_for('troubleshoot.ping_execute') }}" method="post" class="form-horizontal" id="ping">
+        <form action="#" method="post" class="form-horizontal" id="traceroute">
             {{ form.csrf_token }}
             <div class="form-group row">
                 {{ form.src_node.label(class_="col-md-3 col-form-label") }}
@@ -170,18 +195,21 @@
                 </div>
             </div>
             <div class="form-group row">
-                {{ form.count.label(class_="col-md-3 col-form-label") }}
+                {{ form.max_ttl.label(class_="col-md-3 col-form-label") }}
                 <div class="col-md-6">
-                    {{ form.count(class_="form-control") }}
-                    {% if form.count.errors %}
-                      <div class="alert-danger">{{ form.count.errors[0] }}</div>
+                    {{ form.max_ttl(class_="form-control") }}
+                    {% if form.max_ttl.errors %}
+                      <div class="alert-danger">{{ form.max_ttl.errors[0] }}</div>
                     {% endif %}
                 </div>
             </div>
             <div class="form-group row">
-                {{ form.data_size.label(class_="col-md-3 col-form-label") }}
+                {{ form.probe.label(class_="col-md-3 col-form-label") }}
                 <div class="col-md-6">
-                    {{ form.data_size(class_="form-control") }}
+                    {{ form.probe(class_="form-control") }}
+                    {% if form.probe.errors %}
+                      <div class="alert-danger">{{ form.probe.errors[0] }}</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
@@ -196,8 +224,8 @@
         </form>
     </div>
     <div class="card-footer">
-        {{ form.submit(class_="btn btn-sm btn-primary", form="ping") }}
-        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="ping") }}
+        {{ form.submit(class_="btn btn-sm btn-primary", form="traceroute") }}
+        {{ form.reset(type="reset", class_="btn btn-sm btn-danger", form="traceroute") }}
     </div>
 </div>
 
@@ -212,20 +240,4 @@
              style="max-height:500px; overflow-y:auto; white-space:pre-wrap;"></pre>
     </div>
 </div>
-
-{# Fallback: result from synchronous POST ping_execute (non-JS environment) #}
-{% if result is defined and result %}
-<div class="card mt-3">
-    <div class="card-header">
-        Result
-        <small class="text-muted ml-2">
-            {{ dst_ip }}{% if dst_annotation %} → <strong>{{ dst_annotation }}</strong>{% endif %}
-        </small>
-    </div>
-    <div class="card-body">
-        <p class="text-muted small mb-1">Command: <code>{{ command }}</code></p>
-        <pre class="bg-dark text-white p-3 rounded">{{ result }}</pre>
-    </div>
-</div>
-{% endif %}
 {% endblock main %}
