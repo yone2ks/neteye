@@ -104,19 +104,36 @@ def create():
     password = request.form["password"]
     enable = request.form["enable"]
     if form.validate_on_submit():
-        node = Node(
-            hostname=hostname,
-            description=description,
-            ip_address=ip_address,
-            port=port,
-            device_type=device_type,
-            username=username,
-            password=password,
-            enable=enable,
-        )
-        node.add()
-        flash(f"Node '{hostname}' was created successfully", "success")
-        return redirect(url_for("node.show", id=node.id))
+        try:
+            node = Node(
+                hostname=hostname,
+                description=description,
+                ip_address=ip_address,
+                port=port,
+                device_type=device_type,
+                username=username,
+                password=password,
+                enable=enable,
+            )
+            node.add()
+            flash(f"Node '{hostname}' was created successfully", "success")
+            return redirect(url_for("node.show", id=node.id))
+        except Exception as err:
+            report_exception(err, f"Failed to create node '{hostname}'")
+            device_type_datalist = NETMIKO_PLATFORMS
+            return render_template(
+                "node/new.html",
+                form=form,
+                hostname=hostname,
+                description=description,
+                ip_address=ip_address,
+                port=port,
+                device_type=device_type,
+                username=username,
+                password=password,
+                enable=enable,
+                device_type_datalist=device_type_datalist,
+            )
     else:
         flash("Validation failed. Please check your input.", "danger")
         device_type_datalist = NETMIKO_PLATFORMS
@@ -200,24 +217,52 @@ def update(id):
     password = request.form["password"]
     enable = request.form["enable"]
     if form.validate_on_submit():
-        node = Node.get(id)
-        node.hostname = hostname
-        node.description = description
-        node.ip_address = ip_address
-        node.port = port
-        node.device_type = device_type
-        node.napalm_driver = napalm_driver
-        node.scrapli_driver = scrapli_driver
-        node.ntc_template_platform = ntc_template_platform
-        node.model = model
-        node.os_type = os_type
-        node.os_version = os_version
-        node.username = username
-        node.password = password
-        node.enable = enable
-        node.commit()
-        flash(f"Node '{hostname}' was updated successfully", "success")
-        return redirect(url_for("node.show", id=id))
+        try:
+            node = Node.get(id)
+            node.hostname = hostname
+            node.description = description
+            node.ip_address = ip_address
+            node.port = port
+            node.device_type = device_type
+            node.napalm_driver = napalm_driver
+            node.scrapli_driver = scrapli_driver
+            node.ntc_template_platform = ntc_template_platform
+            node.model = model
+            node.os_type = os_type
+            node.os_version = os_version
+            node.username = username
+            node.password = password
+            node.enable = enable
+            node.commit()
+            flash(f"Node '{hostname}' was updated successfully", "success")
+            return redirect(url_for("node.show", id=id))
+        except Exception as err:
+            report_exception(err, f"Failed to update node '{hostname}'")
+            device_type_datalist = NETMIKO_PLATFORMS
+            napalm_driver_datalist = NAPALM_DRIVERS
+            scrapli_driver_datalist = SCRAPLI_DRIVERS
+            return render_template(
+                "node/edit.html",
+                id=id,
+                form=form,
+                hostname=hostname,
+                description=description,
+                ip_address=ip_address,
+                port=port,
+                device_type=device_type,
+                napalm_driver=napalm_driver,
+                scrapli_driver=scrapli_driver,
+                ntc_template_platform=ntc_template_platform,
+                model=model,
+                os_type=os_type,
+                os_version=os_version,
+                username=username,
+                password=password,
+                enable=enable,
+                device_type_datalist=device_type_datalist,
+                napalm_driver_datalist=napalm_driver_datalist,
+                scrapli_driver_datalist=scrapli_driver_datalist,
+            )
     else:
         flash("Validation failed. Please check your input.", "danger")
         device_type_datalist = NETMIKO_PLATFORMS
