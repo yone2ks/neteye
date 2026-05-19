@@ -7,6 +7,9 @@ Neteye is a simple web database for network devices, and a hub for network-to-co
 4. Parsed command results: Command output is displayed in table format when a matching ntc-template exists. Results can be exported to CSV.
 5. REST API: Provides an API corresponding to each GUI operation. Command results are returned in JSON format when an ntc-template exists.
 6. Versioning: All network device information, command execution history, and output results are tracked. You can review past data and change history.
+7. Import: Automatically fetch interface lists, serial numbers, and ARP tables from a device over SSH and store them in the database with a single click.
+8. Ping (Preview): Execute ping from a network device via the GUI and view results in real time.
+9. Traceroute (Preview): Execute traceroute from a network device via the GUI and view hop-by-hop results in real time.
 
 ## Requirements
 Python 3.10+
@@ -116,6 +119,14 @@ Click **Discover Node** on a node's detail page to automatically discover neighb
 
 ### History View
 The **History** menu shows the change history of device information and a log of all executed commands.
+
+### Troubleshoot (Preview)
+The **Troubleshoot** menu provides real-time network diagnostic tools executed directly from a registered device.
+
+- **Ping** (`/troubleshoot/ping`): Send ping from a selected source node to a destination IP. Output streams live via Server-Sent Events. Supports source interface, VRF, packet count, timeout, and data size.
+- **Traceroute** (`/troubleshoot/traceroute`): Run traceroute from a selected source node. Each hop appears as it is received. Supports source interface, VRF, max TTL, probe count, and timeout. Known IP addresses are automatically annotated with their hostname or interface name.
+
+Both tools record execution history to the **Command History** log.
 
 ## REST API
 
