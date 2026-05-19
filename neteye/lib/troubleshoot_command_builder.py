@@ -127,14 +127,12 @@ class CiscoNXOSTroubleshootBuilder(TroubleshootBuilder):
         return " ".join(command)
 
     def build_traceroute(self, dst_ip, src_ip, vrf, probe, timeout, max_ttl) -> str:
-        # traceroute DST [source SRC] [vrf VRF] probe N timeout N
-        # NX-OS does not support a max-ttl option (max_ttl is ignored)
+        # traceroute DST [vrf VRF] [source SRC]
+        # NX-OS does not support probe, timeout, or max-ttl options (all ignored).
         command  = ["traceroute"]
         command += [dst_ip]
-        command += self._optional("source", src_ip)
         command += self._optional("vrf", vrf)
-        command += [f"probe {probe}"]
-        command += [f"timeout {timeout}"]
+        command += self._optional("source", src_ip)
         return " ".join(command)
 
 
