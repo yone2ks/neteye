@@ -48,6 +48,7 @@
      // which prevents consecutive partials from cascading into one garbled line.
      var completedText = '';
      var partialText   = '';
+     var hopBuffer     = [];
 
      function updateOutput($output) {
          $output.text(completedText + partialText);
@@ -55,6 +56,27 @@
      }
 
      var $cancel = $('#cancel');
+
+     function renderHopTable() {
+         if (hopBuffer.length === 0) return;
+         hopBuffer.forEach(function(hop) {
+             var nodeCell = hop.hostname
+                 ? (hop.node_url ? '<a href="' + hop.node_url + '">' + hop.hostname + '</a>' : hop.hostname)
+                 : '-';
+             var ifaceCell = (hop.interface_name && hop.interface_url)
+                 ? '<a href="' + hop.interface_url + '">' + hop.interface_name + '</a>'
+                 : (hop.interface_name || '-');
+             var row = '<tr>'
+                 + '<td>' + hop.hop + '</td>'
+                 + '<td>' + hop.ip + '</td>'
+                 + '<td>' + nodeCell + '</td>'
+                 + '<td>' + ifaceCell + '</td>'
+                 + '<td>' + (hop.rtts.join('&nbsp;&nbsp;') || '-') + '</td>'
+                 + '</tr>';
+             $('#hop-tbody').append(row);
+         });
+         $('#hop-table').show();
+     }
 
      $cancel.on('click', function() {
          if (es) { es.close(); es = null; }
@@ -64,6 +86,7 @@
          if (partialText) { completedText += partialText + '\n'; partialText = ''; }
          completedText += '\n[Cancelled]';
          updateOutput($output);
+         renderHopTable();
      });
 
      $('#traceroute').on('submit', function(e) {
@@ -78,6 +101,9 @@
 
          completedText = '';
          partialText   = '';
+         hopBuffer     = [];
+         $('#hop-tbody').empty();
+         $('#hop-table').hide();
          $output.text('');
          $card.show();
          $submit.prop('disabled', true).val('Running...');
@@ -110,6 +136,11 @@
              updateOutput($output);
          });
 
+         // "hop" events: buffer structured hop data; table is rendered on [DONE] / cancel.
+         es.addEventListener('hop', function(evt) {
+             hopBuffer.push(JSON.parse(evt.data));
+         });
+
          // Default "message" events: complete lines.
          // If a partial was in progress, discard it (the complete line supersedes it).
          es.onmessage = function(evt) {
@@ -120,6 +151,7 @@
                  $submit.prop('disabled', false).val('Submit');
                  completedText += '\n[Done]';
                  updateOutput($output);
+                 renderHopTable();
                  return;
              }
              completedText += evt.data + '\n';
@@ -235,9 +267,21 @@
         <span>Result</span>
         <button type="button" class="btn btn-warning" id="cancel">Cancel</button>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body">
         <pre id="result-output" class="bg-dark text-white p-3 rounded mb-0"
-             style="max-height:500px; overflow-y:auto; white-space:pre-wrap;"></pre>
+             style="max-height:400px; overflow-y:auto; white-space:pre-wrap;"></pre>
+        <table id="hop-table" class="table table-sm table-bordered mt-3 mb-0" style="display:none;">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width:4em;">Hop</th>
+                    <th style="width:12em;">Address</th>
+                    <th>Node</th>
+                    <th>Interface</th>
+                    <th>RTT</th>
+                </tr>
+            </thead>
+            <tbody id="hop-tbody"></tbody>
+        </table>
     </div>
 </div>
 {% endblock main %}
