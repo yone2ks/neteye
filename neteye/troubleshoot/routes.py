@@ -3,7 +3,7 @@ import logging
 import re
 import time
 
-from flask import Response, flash, render_template, request, stream_with_context
+from flask import Response, flash, render_template, request, stream_with_context, url_for
 from flask_security import auth_required, current_user
 
 from neteye.blueprints import bp_factory
@@ -74,21 +74,54 @@ def _annotate_ip(ip_address: str) -> str | None:
     return None
 
 
-_IP_RE = re.compile(r'\b(\d{1,3}(?:\.\d{1,3}){3})\b')
+def _sse_hop(data: dict) -> str:
+    """SSE hop event — structured hop data for table rendering."""
+    return f"event: hop\ndata: {json.dumps(data)}\n\n"
 
 
-def _annotate_traceroute_line(line: str) -> str:
-    """Annotate IPv4 addresses in a traceroute hop line with Node/Interface DB lookups.
+_HOP_LINE_RE = re.compile(
+    r'^\s*(\d+)\s+'                               # hop number
+    r'(?:\S+\s+\()?'                               # optional leading token + "(" — e.g. "192.168.0.1 (" or "dns.google ("
+    r'([\d.]+|\*)'                                 # IP or *
+    r'\)?'                                         # optional closing ")"
+    r'((?:\s+(?:[\d.]+\s*ms(?:ec)?|\*))+)'         # RTT values (ms or msec)
+)
 
-    Each IPv4 address found in the line is looked up via _annotate_ip().
-    If a match is found, the annotation is appended in brackets:
-      192.168.1.1  ->  192.168.1.1 [router1 (Gi0/0)]
+
+def _parse_traceroute_hop(line: str) -> dict | None:
+    """Parse a traceroute hop line into a structured dict for the hop table.
+
+    Returns None if the line does not match a hop pattern.
     """
-    def _replace(match: re.Match) -> str:
-        ip = match.group(1)
-        annotation = _annotate_ip(ip)
-        return f"{ip} [{annotation}]" if annotation else ip
-    return _IP_RE.sub(_replace, line)
+    m = _HOP_LINE_RE.match(line)
+    if not m:
+        return None
+    ip = m.group(2)
+    rtts = re.findall(r'[\d.]+\s*ms(?:ec)?|\*', m.group(3))
+
+    node_url = hostname = interface_name = interface_url = None
+    if ip != '*':
+        iface = Interface.query.filter_by(ip_address=ip).first()
+        if iface:
+            hostname = iface.node.hostname
+            interface_name = iface.name
+            node_url = url_for('node.show', id=iface.node_id)
+            interface_url = url_for('interface.show', id=iface.id)
+        else:
+            node = Node.query.filter_by(ip_address=ip).first()
+            if node:
+                hostname = node.hostname
+                node_url = url_for('node.show', id=node.id)
+
+    return {
+        "hop": int(m.group(1)),
+        "ip": ip,
+        "hostname": hostname,
+        "interface_name": interface_name,
+        "node_url": node_url,
+        "interface_url": interface_url,
+        "rtts": rtts,
+    }
 
 
 @troubleshoot_bp.route("/ping")
@@ -407,7 +440,10 @@ def traceroute_stream():
                             line = raw_line.split("\r")[-1]
                             if line.strip():
                                 output_lines.append(line)
-                                yield _sse_message(_annotate_traceroute_line(line))
+                                yield _sse_message(line)
+                                hop_data = _parse_traceroute_hop(line)
+                                if hop_data:
+                                    yield _sse_hop(hop_data)
                         if prompt in buffer:
                             break
                     else:
@@ -421,7 +457,7 @@ def traceroute_stream():
                                 "",
                             )
                             if partial:
-                                yield _sse_partial(_annotate_traceroute_line(partial))
+                                yield _sse_partial(partial)
                             line_buffer_ts = time.time()  # reset to avoid re-sending same partial
                         time.sleep(0.3)
 
@@ -433,7 +469,10 @@ def traceroute_stream():
                     )
                     if line:
                         output_lines.append(line)
-                        yield _sse_message(_annotate_traceroute_line(line))
+                        yield _sse_message(line)
+                        hop_data = _parse_traceroute_hop(line)
+                        if hop_data:
+                            yield _sse_hop(hop_data)
 
             history_result = "\n".join(output_lines)
 
