@@ -1,5 +1,27 @@
 Neteye is a simple web database for network devices, and a hub for network-to-code inspired by netmiko/scrapli/ntc-templates.
 
+## Demo
+
+### Node Registration
+
+https://github.com/yone2ks/neteye/releases/download/v1.0.0/node-registration.mov
+
+### Import Node Information
+
+https://github.com/yone2ks/neteye/releases/download/v1.0.0/import-node-info.mov
+
+### Execute Command
+
+https://github.com/yone2ks/neteye/releases/download/v1.0.0/execute-command.mov
+
+### Ping
+
+https://github.com/yone2ks/neteye/releases/download/v1.0.0/ping.mov
+
+### Traceroute
+
+https://github.com/yone2ks/neteye/releases/download/v1.0.0/traceroute.mov
+
 ## Features
 1. Simple UI: Easily register and manage network device information with a simple and intuitive UI.
 2. Incremental search: All tables support incremental search using DataTables. Quickly filter the information you need.
