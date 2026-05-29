@@ -4,23 +4,23 @@ Neteye is a simple web database for network devices, and a hub for network-to-co
 
 ### Node Registration
 
-https://github.com/yone2ks/neteye/releases/download/v1.0.0/node-registration.mov
+https://github.com/user-attachments/assets/9ad0afd1-ce86-4020-b71f-ef6aada7de57
 
 ### Import Node Information
 
-https://github.com/yone2ks/neteye/releases/download/v1.0.0/import-node-info.mov
+https://github.com/user-attachments/assets/f209fee1-e170-4028-b701-6152659f4431
 
 ### Execute Command
 
-https://github.com/yone2ks/neteye/releases/download/v1.0.0/execute-command.mov
+https://github.com/user-attachments/assets/830b55cb-f88a-4c12-89c4-bcf171af8d92
 
 ### Ping
 
-https://github.com/yone2ks/neteye/releases/download/v1.0.0/ping.mov
+https://github.com/user-attachments/assets/72ce72e7-3801-418b-9c0e-43b0767cf719
 
 ### Traceroute
 
-https://github.com/yone2ks/neteye/releases/download/v1.0.0/traceroute.mov
+https://github.com/user-attachments/assets/cc7c7215-de67-4e0d-8da6-f48a2ce34ffa
 
 ## Features
 1. Simple UI: Easily register and manage network device information with a simple and intuitive UI.
