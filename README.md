@@ -1,27 +1,5 @@
 Neteye is a simple web database for network devices, and a hub for network-to-code inspired by netmiko/scrapli/ntc-templates.
 
-## Demo
-
-### Node Registration
-
-https://github.com/user-attachments/assets/9ad0afd1-ce86-4020-b71f-ef6aada7de57
-
-### Import Node Information
-
-https://github.com/user-attachments/assets/f209fee1-e170-4028-b701-6152659f4431
-
-### Execute Command
-
-https://github.com/user-attachments/assets/830b55cb-f88a-4c12-89c4-bcf171af8d92
-
-### Ping
-
-https://github.com/user-attachments/assets/72ce72e7-3801-418b-9c0e-43b0767cf719
-
-### Traceroute
-
-https://github.com/user-attachments/assets/cc7c7215-de67-4e0d-8da6-f48a2ce34ffa
-
 ## Features
 1. Simple UI: Easily register and manage network device information with a simple and intuitive UI.
 2. Incremental search: All tables support incremental search using DataTables. Quickly filter the information you need.
@@ -124,20 +102,17 @@ Note: `.env` is a flat `KEY=VALUE` file with no environment sections — it is a
 ### Device Registration
 Register a network device by entering its hostname, IP address, credentials, and device type. If Device Type is set to `autodetect`, the device type is identified automatically via netmiko's SSH fingerprinting.
 
-![neteye_device_registration](https://github.com/yone2ks/neteye/assets/1281910/1a20797d-e374-4355-b59a-17b0c30f9234)
+https://github.com/user-attachments/assets/9ad0afd1-ce86-4020-b71f-ef6aada7de57
 
 ### Execute Command
 Enter a command and click **Command** to execute it on the device. When a matching ntc-template exists, results are displayed in a structured table. **Command (Raw)** always returns plain text output.
 
-![neteye_execute_command](https://github.com/yone2ks/neteye/assets/1281910/fbb6f27b-e7e9-48bb-96bd-6ff34b593306)
+https://github.com/user-attachments/assets/830b55cb-f88a-4c12-89c4-bcf171af8d92
 
 ### Import Device Information
-Click **Import Node** to pull the device's interface list, serial numbers, and ARP table into the database.
+Click **Import All Data** to pull the device's interface list, serial numbers, and ARP table into the database.
 
-![neteye_import_node](https://github.com/yone2ks/neteye/assets/1281910/f50b2b7e-d627-4562-bd14-6c885ae46a0e)
-
-### Network Discovery
-Click **Discover Node** on a node's detail page to automatically discover neighboring devices via the node's ARP table. Neteye attempts SSH connections using the credentials defined in `NETEYE_DISCOVERY_CREDENTIALS` and registers reachable devices.
+https://github.com/user-attachments/assets/f209fee1-e170-4028-b701-6152659f4431
 
 ### History View
 The **History** menu shows the change history of device information and a log of all executed commands.
@@ -146,9 +121,17 @@ The **History** menu shows the change history of device information and a log of
 The **Troubleshoot** menu provides real-time network diagnostic tools executed directly from a registered device.
 
 - **Ping** (`/troubleshoot/ping`): Send ping from a selected source node to a destination IP. Output streams live via Server-Sent Events. Supports source interface, VRF, packet count, timeout, and data size.
+
+https://github.com/user-attachments/assets/72ce72e7-3801-418b-9c0e-43b0767cf719
+
+
 - **Traceroute** (`/troubleshoot/traceroute`): Run traceroute from a selected source node. Each hop appears as it is received. Supports source interface, VRF, max TTL, probe count, and timeout. Known IP addresses are automatically annotated with their hostname or interface name.
 
+https://github.com/user-attachments/assets/cc7c7215-de67-4e0d-8da6-f48a2ce34ffa
+
 Both tools record execution history to the **Command History** log.
+
+
 
 ## REST API
 
