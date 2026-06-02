@@ -1,5 +1,16 @@
 Neteye is a simple web database for network devices, and a hub for network-to-code inspired by netmiko/scrapli/ntc-templates.
 
+## Background
+
+Managing network devices in the 2020s still means opening a terminal for each device, running commands, and reading raw text output. Commercial tools that automate configuration collection exist, but they are expensive and often overkill for smaller operations. Meanwhile, REST APIs are increasingly common on modern devices, yet many critical pieces of information are still only accessible via CLI commands.
+
+Neteye was built to close these gaps:
+
+- **One place, every device** — no more jumping between terminals; manage and operate all devices from a single web UI.
+- **Human-readable output** — command results are rendered as sortable, filterable tables instead of raw text, making them far easier to read and act on.
+- **Lightweight, open-source alternative** — self-host it without licensing costs, without the complexity of enterprise solutions.
+- **Structured data from CLI** — commands that have no API equivalent are parsed via ntc-templates and exposed through a REST API, turning CLI output into structured JSON and pushing network-to-code forward.
+
 ## Features
 1. Simple UI: Easily register and manage network device information with a simple and intuitive UI.
 2. Incremental search: All tables support incremental search using DataTables. Quickly filter the information you need.
