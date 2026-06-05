@@ -8,7 +8,7 @@ Neteye was built to close these gaps:
 
 - **One place, every device** — no more jumping between terminals; manage and operate all devices from a single web UI.
 - **Human-readable output** — command results are rendered as sortable, filterable tables instead of raw text, making them far easier to read and act on.
-- **Lightweight, open-source alternative** — self-host it without the licensing costs of commercial device inventory tools.
+- **Lightweight, open-source alternative** — self-host it without the licensing costs of commercial device inventory collection tools.
 - **Structured data from CLI** — commands that have no API equivalent are parsed via ntc-templates and exposed through a REST API, turning CLI output into structured JSON and pushing network-to-code forward.
 
 ## Features
