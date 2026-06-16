@@ -92,21 +92,26 @@ class NodeResourceFilter(AuthenticatedResource):
         return nodes
 
 
-@nodes_api.route("/<string:id>/command/<string:command>")
+command_model = nodes_api.model('Command', {
+    'command': fields.String(required=True, description='The command to execute'),
+})
+
+
+@nodes_api.route("/<string:id>/command")
 class NodeResourceCommand(AuthenticatedResource):
-    def get(self, id, command):
-        command = command.replace("+", " ")
+    @nodes_api.expect(command_model, validate=True)
+    def post(self, id):
         node = db.get_or_404(Node, id)
-        result = node.command(command, current_user.email)
+        result = node.command(api.payload["command"], current_user.email)
         return jsonify(result)
 
 
-@nodes_api.route("/<string:id>/raw_command/<string:command>")
+@nodes_api.route("/<string:id>/raw_command")
 class NodeResourceRawCommand(AuthenticatedResource):
-    def get(self, id, command):
-        command = command.replace("+", " ")
+    @nodes_api.expect(command_model, validate=True)
+    def post(self, id):
         node = db.get_or_404(Node, id)
-        result = node.raw_command(command, current_user.email)
+        result = node.raw_command(api.payload["command"], current_user.email)
         return jsonify(result)
 
 
