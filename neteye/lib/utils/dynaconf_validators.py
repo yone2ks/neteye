@@ -35,6 +35,15 @@ validators = [
         messages={"condition": "SECRET_KEY must be set to a secure random value"},
         when=Validator("ENV_FOR_DYNACONF", eq="production"),
     ),
+    # Node credentials: dedicated encryption key for SSH username/password/enable at rest.
+    # Kept separate from SECRET_KEY so rotating session/CSRF signing never breaks decryption
+    # of stored device credentials.
+    Validator(
+        "NODE_CREDENTIAL_KEY", must_exist=True,
+        condition=lambda v: v not in INSECURE_SECRET_KEYS,
+        messages={"condition": "NODE_CREDENTIAL_KEY must be set to a secure random value"},
+        when=Validator("ENV_FOR_DYNACONF", eq="production"),
+    ),
     # Netmiko
     Validator("NETMIKO_READ_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NETMIKO_READ_TIMEOUT"]),
     Validator("NETMIKO_CONN_TIMEOUT", is_type_of=int, gt=0, default=DEFAULTS["NETMIKO_CONN_TIMEOUT"]),

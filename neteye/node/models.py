@@ -7,8 +7,10 @@ import scrapli
 from netmiko.ssh_autodetect import SSHDetect
 from scrapli import Scrapli
 from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
-                        String)
+                        String, Text)
 from sqlalchemy.orm import backref, relationship
+from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from neteye.base.models import Base
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
@@ -54,6 +56,15 @@ SCRAPLI_DRIVERS = list(Scrapli.CORE_PLATFORM_MAP.keys()) + list(ScrapliCommunity
 NAPALM_DRIVERS = list(napalm.SUPPORTED_DRIVERS) + [NOT_SUPPORTED]
 
 
+def _node_credential_key():
+    """Return the encryption key for SSH credential columns.
+
+    Read lazily (called by StringEncryptedType on each encrypt/decrypt) so
+    Dynaconf settings are fully loaded first.
+    """
+    return settings.NODE_CREDENTIAL_KEY
+
+
 class Node(Base):
     __tablename__ = "nodes"
 
@@ -69,8 +80,8 @@ class Node(Base):
     os_type = Column(String)
     os_version = Column(String)
     username = Column(String)
-    password = Column(String)
-    enable = Column(String)
+    password = Column(StringEncryptedType(Text, _node_credential_key, AesEngine, "pkcs5"))
+    enable = Column(StringEncryptedType(Text, _node_credential_key, AesEngine, "pkcs5"))
     interfaces = relationship(
         "Interface",
         back_populates="node",

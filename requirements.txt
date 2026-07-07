@@ -20,6 +20,9 @@ SQLAlchemy>=2.0,<3.0
 Flask-SQLAlchemy>=3.1,<4.0
 SQLAlchemy-Continuum>=1.4.0
 SQLAlchemy-Utils==0.41.1
+# Required directly by SQLAlchemy-Utils EncryptedType (node credential encryption at rest);
+# also pulled in transitively via paramiko, but pin explicitly since it's now load-bearing.
+cryptography>=44.0.0
 sqlalchemy-datatables==2.0.1
 netaddr
 ssh2-python

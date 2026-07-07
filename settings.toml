@@ -102,4 +102,5 @@ WTF_CSRF_ENABLED = false
 SECURITY_CSRF_PROTECT_MECHANISMS = []
 SECRET_KEY = "test-secret-key"
 SECURITY_PASSWORD_SALT = "test-salt"
+NODE_CREDENTIAL_KEY = "test-node-credential-key"
 ADMIN_PASSWORD = "Test-Admin-Pass-1!"
