@@ -3,7 +3,7 @@ Werkzeug==3.1.6
 Flask-Babel==4.0.0
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.6.3
-Flask-Security-Too==5.8.0
+Flask-Security-Too==5.8.1
 bcrypt  # required by paramiko (SSH key encryption)
 argon2_cffi  # Flask-Security-Too 5.5+ uses argon2 as default password hash
 Flask-WTF==1.1.2
