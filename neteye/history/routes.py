@@ -60,7 +60,7 @@ def node_history_data():
         ColumnDT(node_version.model),
         ColumnDT(node_version.os_type),
         ColumnDT(node_version.os_version),
-        ColumnDT(node_version.username, global_search=False),
+        ColumnDT(node_version.username),
         ColumnDT(node_version.operation_type),
     ]
     query = db.session.query(node_transaction.issued_at,

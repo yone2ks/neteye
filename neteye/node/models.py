@@ -79,7 +79,7 @@ class Node(Base):
     model = Column(String)
     os_type = Column(String)
     os_version = Column(String)
-    username = Column(StringEncryptedType(Text, _node_credential_key, AesEngine, "pkcs5"))
+    username = Column(String)
     password = Column(StringEncryptedType(Text, _node_credential_key, AesEngine, "pkcs5"))
     enable = Column(StringEncryptedType(Text, _node_credential_key, AesEngine, "pkcs5"))
     interfaces = relationship(

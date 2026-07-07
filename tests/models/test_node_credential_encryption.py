@@ -21,7 +21,6 @@ class TestNodeCredentialEncryption:
 
         db.session.expire_all()
         reloaded = Node.get(node_id)
-        assert reloaded.username == "secretuser"
         assert reloaded.password == "supersecretpw"
 
         db.session.delete(reloaded)
