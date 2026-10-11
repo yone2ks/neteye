@@ -28,6 +28,10 @@ SECURITY_LOGIN_USER_TEMPLATE = 'login.html'
 SECURITY_REGISTER_USER_TEMPLATE = 'register.html'
 # Flask-Security-Too 5.x manages CSRF internally; disable Flask-WTF's default check
 WTF_CSRF_CHECK_DEFAULT = false
+# CSRF applies only to mechanisms the browser sends automatically (session
+# cookie, cached Basic credentials). Token auth is sent explicitly in a header
+# by API/automation clients, so it cannot be forged cross-site.
+SECURITY_CSRF_PROTECT_MECHANISMS = ['session', 'basic']
 # Token authentication for REST API / automation clients
 # Header: Authentication-Token: <token>
 SECURITY_TOKEN_AUTHENTICATION_HEADER = 'Authentication-Token'
@@ -99,7 +103,6 @@ LOG_LEVEL = 'INFO'
 [testing]
 SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/neteye_test.db"
 WTF_CSRF_ENABLED = false
-SECURITY_CSRF_PROTECT_MECHANISMS = []
 SECRET_KEY = "test-secret-key"
 SECURITY_PASSWORD_SALT = "test-salt"
 NODE_CREDENTIAL_KEY = "test-node-credential-key"
