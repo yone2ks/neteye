@@ -32,6 +32,7 @@ from neteye.api.history_namespace import (arp_entry_transaction_schema,
                                            serial_versions_schema)
 from neteye.blueprints import bp_factory
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
+from neteye.lib.utils.format_raw_output import format_raw_output
 
 from .models import (OPERATION_TYPE, arp_entry_transaction, arp_entry_version,
                      cable_transaction, cable_version, interface_transaction,
@@ -254,6 +255,6 @@ def command_history_result(id):
     result = json.loads(command_history.result)
     date = command_history.created_at.replace(tzinfo=datetime.timezone.utc).astimezone(tz.tzlocal()).strftime('%Y-%m-%d %H:%M:%S.%f %Z')
     if isinstance(result, str):
-        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        result = format_raw_output(result)
         return render_template("history/command_result.html", result=result, command=command_history.command, hostname=command_history.hostname, username=command_history.username, date=date)
     return render_template("history/parsed_command_result.html", result=result, command=command_history.command, hostname=command_history.hostname, username=command_history.username, date=date)
