@@ -16,7 +16,9 @@ marshmallow>=3.0,<4.0
 marshmallow-sqlalchemy>=0.29.0
 # Upgraded from SQLAlchemy 1.4.46 / Flask-SQLAlchemy 2.5.1
 # Flask-Continuum removed: using sqlalchemy-continuum directly
-SQLAlchemy>=2.0,<3.0
+# SQLAlchemy-Utils 0.41.1 does not support SQLAlchemy 2.1
+# (sqlalchemy.orm.attributes.ScalarAttributeImpl was removed).
+SQLAlchemy>=2.0,<2.1
 Flask-SQLAlchemy>=3.1,<4.0
 SQLAlchemy-Continuum>=1.4.0
 SQLAlchemy-Utils==0.41.1
