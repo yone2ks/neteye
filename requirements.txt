@@ -28,8 +28,11 @@ netaddr
 ssh2-python
 netmiko
 ntc_templates
-scrapli
-scrapli_community
+# scrapli 2026.10 is a rewrite on top of libscrapli with a new exception
+# hierarchy (e.g. ScrapliConnectionNotOpened was removed); stay on the
+# pure-Python line until neteye is ported.
+scrapli<2026.10
+scrapli_community<2026.10
 napalm
 pandas==2.2.3
 dynaconf==3.2.13
