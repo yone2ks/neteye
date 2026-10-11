@@ -19,6 +19,7 @@ from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
 from neteye.lib.utils.get_records_by_node import get_records_dict_by_node
 from neteye.serial.models import Serial
+from neteye.lib.utils.format_raw_output import format_raw_output
 from neteye.lib.utils.report_exception import report_exception
 from sqlalchemy.sql import exists
 
@@ -326,8 +327,7 @@ def show_run(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.raw_command(command, current_user.email)
-        result = result.replace("\r\n", "<br />").replace("\n", "<br />")
+        result = format_raw_output(node.raw_command(command, current_user.email))
         return render_template("node/command.html", result=result, command=command)
     except Exception as err:
         report_exception(err, f"Error executing '{command}' for node {id}")
@@ -430,121 +430,65 @@ def show_ip_route(id):
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/<id>/command/<command>")
-@auth_required()
-def command(id, command):
-    command = command.replace("+", " ")
+def _execute_user_command(id, execute, label, parsed):
+    """Run a user-supplied command from the node page form and render the result.
+
+    These routes accept POST only so that the command cannot be triggered by
+    a crafted link or <img> tag (CSRF); auth_required() validates the CSRF
+    token for session-authenticated requests.
+    """
+    command = request.form.get("command", "").strip()
+    if not command:
+        flash("Command is required", "danger")
+        return redirect(url_for("node.show", id=id))
     try:
         node = Node.get(id)
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        result = node.command(command, current_user.email)
-        if isinstance(result, str):
-            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-            return render_template("node/command.html", result=result, command=command)
-        return render_template("node/parsed_command.html", result=result, command=command)
+        result = execute(node, command, current_user.email)
+        if parsed and not isinstance(result, str):
+            return render_template("node/parsed_command.html", result=result, command=command)
+        return render_template("node/command.html", result=format_raw_output(result), command=command)
     except Exception as err:
-        report_exception(err, f"Error executing '{command}' for node {id}")
+        report_exception(err, f"Error executing {label} '{command}' for node {id}")
         return redirect(url_for("node.show", id=id))
 
 
-@node_bp.route("/<id>/raw_command/<command>")
+@node_bp.route("/<id>/command", methods=["POST"])
 @auth_required()
-def raw_command(id, command):
-    command = command.replace("+", " ")
-    try:
-        node = Node.get(id)
-        if not node:
-            flash(f"Node with ID {id} not found", "danger")
-            return redirect(url_for("node.index"))
-        result = (
-            node.raw_command(command, current_user.email)
-            .replace("\r\n", "<br />")
-            .replace("\n", "<br />")
-        )
-        return render_template("node/command.html", result=result, command=command)
-    except Exception as err:
-        report_exception(err, f"Error executing raw '{command}' for node {id}")
-        return redirect(url_for("node.show", id=id))
+def command(id):
+    return _execute_user_command(id, Node.command, "command", parsed=True)
 
 
-@node_bp.route("/<id>/netmiko/<command>")
+@node_bp.route("/<id>/raw_command", methods=["POST"])
 @auth_required()
-def netmiko_command(id, command):
-    command = command.replace("+", " ")
-    try:
-        node = Node.get(id)
-        if not node:
-            flash(f"Node with ID {id} not found", "danger")
-            return redirect(url_for("node.index"))
-        result = node.netmiko_command(command, current_user.email)
-        if isinstance(result, str):
-            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-            return render_template("node/command.html", result=result, command=command)
-        return render_template("node/parsed_command.html", result=result, command=command)
-    except Exception as err:
-        report_exception(err, f"Error executing netmiko '{command}' for node {id}")
-        return redirect(url_for("node.show", id=id))
+def raw_command(id):
+    return _execute_user_command(id, Node.raw_command, "raw command", parsed=False)
 
 
-@node_bp.route("/<id>/raw_netmiko/<command>")
+@node_bp.route("/<id>/netmiko", methods=["POST"])
 @auth_required()
-def netmiko_raw_command(id, command):
-    command = command.replace("+", " ")
-    try:
-        node = Node.get(id)
-        if not node:
-            flash(f"Node with ID {id} not found", "danger")
-            return redirect(url_for("node.index"))
-        result = (
-            node.netmiko_raw_command(command, current_user.email)
-            .replace("\r\n", "<br />")
-            .replace("\n", "<br />")
-        )
-        return render_template("node/command.html", result=result, command=command)
-    except Exception as err:
-        report_exception(err, f"Error executing netmiko raw '{command}' for node {id}")
-        return redirect(url_for("node.show", id=id))
+def netmiko_command(id):
+    return _execute_user_command(id, Node.netmiko_command, "netmiko", parsed=True)
 
 
-@node_bp.route("/<id>/scrapli/<command>")
+@node_bp.route("/<id>/raw_netmiko", methods=["POST"])
 @auth_required()
-def scrapli_command(id, command):
-    command = command.replace("+", " ")
-    try:
-        node = Node.get(id)
-        if not node:
-            flash(f"Node with ID {id} not found", "danger")
-            return redirect(url_for("node.index"))
-        result = node.scrapli_command(command, current_user.email)
-        if isinstance(result, str):
-            result = result.replace("\r\n", "<br />").replace("\n", "<br />")
-            return render_template("node/command.html", result=result, command=command)
-        return render_template("node/parsed_command.html", result=result, command=command)
-    except Exception as err:
-        report_exception(err, f"Error executing scrapli '{command}' for node {id}")
-        return redirect(url_for("node.show", id=id))
+def netmiko_raw_command(id):
+    return _execute_user_command(id, Node.netmiko_raw_command, "netmiko raw", parsed=False)
 
 
-@node_bp.route("/<id>/raw_scrapli/<command>")
+@node_bp.route("/<id>/scrapli", methods=["POST"])
 @auth_required()
-def scrapli_raw_command(id, command):
-    command = command.replace("+", " ")
-    try:
-        node = Node.get(id)
-        if not node:
-            flash(f"Node with ID {id} not found", "danger")
-            return redirect(url_for("node.index"))
-        result = (
-            node.scrapli_raw_command(command, current_user.email)
-            .replace("\r\n", "<br />")
-            .replace("\n", "<br />")
-        )
-        return render_template("node/command.html", result=result, command=command)
-    except Exception as err:
-        report_exception(err, f"Error executing scrapli raw '{command}' for node {id}")
-        return redirect(url_for("node.show", id=id))
+def scrapli_command(id):
+    return _execute_user_command(id, Node.scrapli_command, "scrapli", parsed=True)
+
+
+@node_bp.route("/<id>/raw_scrapli", methods=["POST"])
+@auth_required()
+def scrapli_raw_command(id):
+    return _execute_user_command(id, Node.scrapli_raw_command, "scrapli raw", parsed=False)
 
 
 @node_bp.route("/<id>/napalm/get_facts")
