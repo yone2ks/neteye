@@ -1,6 +1,7 @@
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
 from flask_marshmallow import Marshmallow
+from flask_migrate import Migrate
 from flask_restx import Api
 from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
@@ -24,6 +25,7 @@ bootstrap = Bootstrap()
 csrf = CSRFProtect()
 db = SQLAlchemy()
 ma = Marshmallow()
+migrate = Migrate()
 security = Security()
 
 # Application singletons

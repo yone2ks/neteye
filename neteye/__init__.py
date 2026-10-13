@@ -19,10 +19,11 @@ from neteye.cable.routes import cable_bp
 from neteye.blueprints import root_bp
 from neteye.error_handlers import register_error_handlers
 from neteye.lib.utils.datatables_log_filter import DataTablesLogFilter
+from neteye.lib.utils.database_bootstrap import schema_diff_command
 from neteye.lib.utils.werkzeug_access_log_filter import WerkzeugAccessLogFilter
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
-                               csrf, db, ma, security, settings)
+                               csrf, db, ma, migrate, security, settings)
 from neteye.history.routes import history_bp
 from neteye.interface.routes import interface_bp
 from neteye.management.routes import management_bp
@@ -30,11 +31,12 @@ from neteye.node.models import Node
 from neteye.node.routes import node_bp
 from neteye.serial.routes import serial_bp
 from neteye.troubleshoot.routes import troubleshoot_bp
-from neteye.user.models import user_datastore, initialize_roles, initialize_admin
+from neteye.user.models import user_datastore
 from neteye.user.routes import user_bp
 from neteye.visualization.routes import visualization_bp
 
 APP_ROOT_FOLDER = os.path.abspath(os.path.dirname(app_root.__file__))
+MIGRATIONS_FOLDER = os.path.join(os.path.dirname(APP_ROOT_FOLDER), "migrations")
 TEMPLATE_FOLDER = os.path.join(APP_ROOT_FOLDER, "templates")
 STATIC_FOLDER = os.path.join(APP_ROOT_FOLDER, "static")
 
@@ -59,6 +61,9 @@ def create_app():
     babel.init_app(_app)
     csrf.init_app(_app)
     ma.init_app(_app)
+    # render_as_batch: SQLite cannot ALTER most column/constraint changes in
+    # place, so Alembic recreates the table instead.
+    migrate.init_app(_app, db, directory=MIGRATIONS_FOLDER, render_as_batch=True)
 
     _app.register_blueprint(root_bp)
     _app.register_blueprint(base_bp)
@@ -82,12 +87,13 @@ def create_app():
     # must run after all models are imported (via blueprint registration above).
     configure_mappers()
     register_error_handlers(_app)
+    _app.cli.add_command(schema_diff_command)
 
+    # Schema creation and seeding live in ensure_database_ready() (called by
+    # manage.py), not here: importing the app must not touch the database so
+    # that `flask db upgrade` can run against an outdated schema.
     with _app.app_context():
         security.init_app(_app, user_datastore)
-        db.create_all()
-        initialize_roles()
-        initialize_admin()
 
     return _app
 

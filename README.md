@@ -46,6 +46,36 @@ python manage.py
 The application will be available at `http://localhost:5001`.
 Default admin credentials: email `neteye_admin@yourcompany.com`, password as set in `NETEYE_ADMIN_PASSWORD`.
 
+On first start with an empty database, the schema is created automatically.
+
+## Upgrading
+
+The database schema is managed with [Flask-Migrate](https://flask-migrate.readthedocs.io/) (Alembic). After pulling a new version, back up the database and apply pending migrations before starting the application:
+
+```shell
+pip install -r requirements.txt
+cp /path/to/neteye.db /path/to/neteye.db.bak
+flask --app neteye db upgrade
+python manage.py
+```
+
+`python manage.py` refuses to start while the schema is behind the code, so a missed upgrade cannot silently corrupt data.
+
+### Databases created before migrations were introduced
+
+Databases created by older versions have tables but no migration revision. Mark them as the baseline schema once, then upgrade and verify:
+
+```shell
+cp /path/to/neteye.db /path/to/neteye.db.bak
+flask --app neteye db stamp 0001
+flask --app neteye db upgrade
+flask --app neteye schema-diff
+```
+
+`schema-diff` should print `Database schema matches the models.` If it lists differences, restore the backup and open an issue with the output.
+
+Outside the Docker image (which sets `FLASK_APP=neteye`), pass `--app neteye` to `flask` commands.
+
 ## Configuration
 
 Neteye uses three configuration files with different responsibilities:
