@@ -74,6 +74,18 @@ flask --app neteye schema-diff
 
 `schema-diff` should print `Database schema matches the models.` If it lists differences, restore the backup and open an issue with the output.
 
+### Node credentials stored before encryption at rest
+
+Node passwords and enable secrets are encrypted with `NODE_CREDENTIAL_KEY`. Databases from older versions may still hold them in plaintext, in which case `python manage.py` refuses to start. Review what would change (values are never printed), then apply:
+
+```shell
+cp /path/to/neteye.db /path/to/neteye.db.bak
+flask --app neteye encrypt-legacy-credentials
+flask --app neteye encrypt-legacy-credentials --apply
+```
+
+The change history (`nodes_version`) is encrypted too, without adding new history entries. If any value is reported as `undecryptable`, `NODE_CREDENTIAL_KEY` does not match the key the data was encrypted with; nothing is changed until that is fixed.
+
 Outside the Docker image (which sets `FLASK_APP=neteye`), pass `--app neteye` to `flask` commands.
 
 ## Configuration
