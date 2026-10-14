@@ -20,6 +20,7 @@ from neteye.blueprints import root_bp
 from neteye.error_handlers import register_error_handlers
 from neteye.lib.utils.datatables_log_filter import DataTablesLogFilter
 from neteye.lib.utils.database_bootstrap import schema_diff_command
+from neteye.lib.utils.legacy_credentials import encrypt_legacy_credentials_command
 from neteye.lib.utils.werkzeug_access_log_filter import WerkzeugAccessLogFilter
 from sqlalchemy.orm import configure_mappers
 from neteye.extensions import (api, babel, bootstrap, connection_pool,
@@ -88,6 +89,7 @@ def create_app():
     configure_mappers()
     register_error_handlers(_app)
     _app.cli.add_command(schema_diff_command)
+    _app.cli.add_command(encrypt_legacy_credentials_command)
 
     # Schema creation and seeding live in ensure_database_ready() (called by
     # manage.py), not here: importing the app must not touch the database so
