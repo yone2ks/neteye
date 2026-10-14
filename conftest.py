@@ -10,6 +10,7 @@ import pytest
 from flask_security import hash_password
 from neteye import app as flask_app
 from neteye.extensions import db as _db
+from neteye.lib.utils.database_bootstrap import ensure_database_ready
 from neteye.user.models import user_datastore
 
 TEST_ADMIN_EMAIL = "test_admin@example.com"
@@ -24,6 +25,9 @@ def app():
 @pytest.fixture(scope="session", autouse=True)
 def seed_test_db(app):
     with app.app_context():
+        # Same path as manage.py: an empty database is built by running the
+        # migrations, so the tests also exercise them.
+        ensure_database_ready()
         user_datastore.create_user(
             email=TEST_ADMIN_EMAIL,
             password=hash_password(TEST_ADMIN_PASSWORD),

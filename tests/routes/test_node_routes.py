@@ -112,14 +112,12 @@ class TestNodeCommandRoutes:
     def test_post_without_csrf_token_is_rejected(self, app, auth_client, sample_node, executed_commands, monkeypatch):
         # The testing environment disables CSRF; restore the production behaviour.
         monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", True)
-        monkeypatch.setitem(app.config, "SECURITY_CSRF_PROTECT_MECHANISMS", ["session", "basic"])
         resp = auth_client.post(f"/node/{sample_node}/raw_command", data={"command": "reload"})
         assert resp.status_code == 400
         assert executed_commands == []
 
     def test_post_with_csrf_token_from_show_page_succeeds(self, app, auth_client, sample_node, executed_commands, monkeypatch):
         monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", True)
-        monkeypatch.setitem(app.config, "SECURITY_CSRF_PROTECT_MECHANISMS", ["session", "basic"])
         body = auth_client.get(f"/node/{sample_node}").get_data(as_text=True)
         csrf_token = re.search(r'name="csrf_token" value="([^"]+)"', body).group(1)
         resp = auth_client.post(
