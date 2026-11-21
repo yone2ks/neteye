@@ -11,6 +11,9 @@ Schema changes are managed by Alembic (Flask-Migrate). On startup:
   revision, upgrades, and checks ``flask schema-diff``
 
 Only the empty-database case migrates automatically: it has no data to lose.
+
+Node credentials still stored in plaintext (databases from before encryption
+at rest) also refuse startup; see ``legacy_credentials``.
 """
 import enum
 import logging
@@ -25,6 +28,9 @@ from flask_migrate import upgrade
 from sqlalchemy import inspect
 
 from neteye.extensions import db
+from neteye.lib.utils.legacy_credentials import (ENCRYPT_COMMAND,
+                                                 CredentialState,
+                                                 scan_credentials)
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +109,25 @@ def ensure_database_ready() -> None:
             f"the database, then run `{UPGRADE_COMMAND}`."
         )
 
+    check_credentials_encrypted(db.engine)
     initialize_roles()
     initialize_admin()
+
+
+def check_credentials_encrypted(engine) -> None:
+    states = {value.state for value in scan_credentials(engine)}
+    if CredentialState.UNDECRYPTABLE in states:
+        raise DatabaseNotReadyError(
+            "Some node credentials do not decrypt with the current "
+            f"NODE_CREDENTIAL_KEY. Check the key; `{ENCRYPT_COMMAND}` lists "
+            "the affected rows."
+        )
+    if CredentialState.PLAINTEXT in states:
+        raise DatabaseNotReadyError(
+            "Some node credentials are stored in plaintext (created before "
+            f"encryption at rest). Back up the database, review `{ENCRYPT_COMMAND}`, "
+            f"then run `{ENCRYPT_COMMAND} --apply`."
+        )
 
 
 @click.command("schema-diff")
