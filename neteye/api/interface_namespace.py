@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from flask_restx import Namespace, ValidationError, fields, abort
+from flask_restx import Namespace, fields, abort
+from marshmallow import ValidationError
 
 from neteye.api.node_namespace import NodeSchema
 from neteye.api.routes import api_bp
@@ -13,6 +14,7 @@ class InterfaceSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Interface
         load_instance = True
+        include_fk = True
 
 
 interfaces_schema = InterfaceSchema(many=True)
