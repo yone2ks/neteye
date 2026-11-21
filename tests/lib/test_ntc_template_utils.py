@@ -23,9 +23,11 @@ class TestNtcTemplateUtilsParse:
         if result:
             assert isinstance(result[0], dict)
 
-    def test_unknown_platform_raises(self, utils):
-        with pytest.raises(Exception):
-            utils.parse("nonexistent_platform", "show version", "some output")
+    def test_unknown_platform_returns_empty_list(self, utils):
+        assert utils.parse("nonexistent_platform", "show version", "some output") == []
+
+    def test_command_without_template_returns_empty_list(self, utils):
+        assert utils.parse("cisco_ios", "show running-config", "hostname r1\n") == []
 
     def test_platform_mapping_applied(self, utils):
         # device_type "cisco_ios" should map through ntc_template_platform_mapping

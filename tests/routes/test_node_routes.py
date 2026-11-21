@@ -95,6 +95,32 @@ class TestNodeCommandRoutes:
         assert f"<pre" in body
         assert config in body
 
+    def test_command_without_template_falls_back_to_raw_output(self, auth_client, sample_node, monkeypatch):
+        """No ntc-template for the command: show the raw output instead of an error."""
+
+        class FakeResponse(str):
+            @property
+            def result(self):  # scrapli returns an object with .result
+                return str(self)
+
+        class FakeConnection:
+            def send_command(self, command, *args, **kwargs):
+                return FakeResponse("hostname r1\n  ip address 10.0.0.1")
+
+        class FakePool:
+            def exists(self, *args, **kwargs):
+                return True
+
+            def get_connection(self, *args, **kwargs):
+                return FakeConnection()
+
+        monkeypatch.setattr("neteye.node.models.connection_pool", FakePool())
+        resp = auth_client.post(f"/node/{sample_node}/command", data={"command": "show running-config"})
+        assert resp.status_code == 200
+        body = resp.get_data(as_text=True)
+        assert "<pre" in body
+        assert "hostname r1\n  ip address 10.0.0.1" in body
+
     def test_command_post_renders_parsed_result(self, auth_client, sample_node, executed_commands):
         resp = auth_client.post(f"/node/{sample_node}/command", data={"command": "show ip int brief"})
         assert resp.status_code == 200
