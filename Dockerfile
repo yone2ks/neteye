@@ -9,6 +9,7 @@ COPY . .
 
 ENV FLASK_APP=neteye
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV NETEYE_HOST=0.0.0.0
 ENV FLASK_DEBUG=1
 
 ENV NET_TEXTFSM=/app/ntc-templates/ntc_templates/templates/

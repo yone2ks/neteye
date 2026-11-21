@@ -14,7 +14,8 @@ DEBUG = false
 LOG_LEVEL = 'INFO'
 
 # Server Setting
-HOST = '0.0.0.0'
+# Loopback by default; set HOST = '0.0.0.0' (or NETEYE_HOST) explicitly to expose on the LAN
+HOST = '127.0.0.1'
 PORT = 5001
 
 # Database Setting

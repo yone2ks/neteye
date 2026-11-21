@@ -552,6 +552,8 @@ def import_node_from_ip(ip_address):
             logger.info(f"Node {ip_address} imported successfully")
             flash(f"Node {ip_address} imported successfully", "success")
             return redirect(url_for("node.index"))
+        flash(f"Could not connect to {ip_address}", "danger")
+        return redirect(url_for("node.index"))
     except Exception as err:
         report_exception(err, f"Error importing node {ip_address}")
         return redirect(url_for("node.index"))

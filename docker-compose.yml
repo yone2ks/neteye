@@ -7,4 +7,5 @@ services:
       - .:/app
     environment:
       - FLASK_ENV=development
+      - ENV_FOR_DYNACONF=development
       - NET_TEXTFSM=/app/ntc-templates/ntc_templates/templates/

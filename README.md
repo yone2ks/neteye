@@ -131,7 +131,7 @@ Key settings and their defaults:
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `HOST` | `0.0.0.0` | Server bind address |
+| `HOST` | `127.0.0.1` | Server bind address. Set `0.0.0.0` explicitly to expose on the LAN |
 | `PORT` | `5001` | Server port |
 | `SQLALCHEMY_DATABASE_URI` | `sqlite:////var/tmp/neteye.db` | Database path. ⚠️ `/var/tmp` is cleared on reboot — override in `settings.local.toml` for production use |
 | `CUSTOM_TEMPLATES_DIR` | `''` | Absolute path to custom ntc-templates directory. Leave empty to disable |
@@ -142,7 +142,7 @@ Key settings and their defaults:
 | `ARP_ENTRY_HISTORY_MAX_RECORDS` | `50000` | Max ARP entry history records (0 = unlimited) |
 | `AUTO_DETECT_DEVICE_TYPES` | (list) | Device types targeted by netmiko autodetect |
 
-Environment-specific overrides can be added under `[development]`, `[production]`, or `[testing]` sections in `settings.toml` or `settings.local.toml`. Set the `ENV_FOR_DYNACONF` environment variable to switch environments (default: `development`).
+Environment-specific overrides can be added under `[development]`, `[production]`, or `[testing]` sections in `settings.toml` or `settings.local.toml`. Set the `ENV_FOR_DYNACONF` environment variable to switch environments (default: `production`; use `ENV_FOR_DYNACONF=development` for `DEBUG = true`).
 
 ```shell
 ENV_FOR_DYNACONF=production python manage.py
