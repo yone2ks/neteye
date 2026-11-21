@@ -37,7 +37,7 @@ git clone https://github.com/networktocode/ntc-templates.git
 
 # Copy and edit the environment file
 cp .env.example .env
-# Edit .env and fill in SECRET_KEY, SECURITY_PASSWORD_SALT, ADMIN_PASSWORD, etc.
+# Edit .env and fill in SECRET_KEY, SECURITY_PASSWORD_SALT, NODE_CREDENTIAL_KEY, ADMIN_PASSWORD, etc.
 
 # Start the application
 python manage.py
@@ -45,6 +45,8 @@ python manage.py
 
 The application will be available at `http://localhost:5001`.
 Default admin credentials: email `neteye_admin@yourcompany.com`, password as set in `NETEYE_ADMIN_PASSWORD`.
+
+By default Neteye runs in the `production` environment, which requires `NETEYE_SECRET_KEY` and `NETEYE_NODE_CREDENTIAL_KEY` to be set to non-default values. To try it locally with `DEBUG = true`, start it with `ENV_FOR_DYNACONF=development python manage.py`.
 
 On first start with an empty database, the schema is created automatically.
 
@@ -119,6 +121,7 @@ Copy `.env.example` to `.env` and fill in the values. This file is git-ignored a
 |----------|-------------|
 | `NETEYE_SECRET_KEY` | Flask session encryption key (use a long random string) |
 | `NETEYE_SECURITY_PASSWORD_SALT` | Salt for password hashing (use a long random string) |
+| `NETEYE_NODE_CREDENTIAL_KEY` | Key that encrypts node SSH credentials at rest (use a long random string, e.g. `python -c "import secrets; print(secrets.token_urlsafe(32))"`). Keep it separate from `SECRET_KEY`; changing it makes stored credentials undecryptable |
 | `NETEYE_ADMIN_PASSWORD` | Initial administrator password |
 | `NETEYE_DISCOVERY_CREDENTIALS__N__USERNAME` | Username for network discovery auto-connect (N=1,2,3,...) |
 | `NETEYE_DISCOVERY_CREDENTIALS__N__PASSWORD` | Password for network discovery auto-connect |
@@ -146,9 +149,9 @@ Key settings and their defaults:
 | `PORT` | `5001` | Server port |
 | `SQLALCHEMY_DATABASE_URI` | `sqlite:////var/tmp/neteye.db` | Database path. ⚠️ `/var/tmp` is cleared on reboot — override in `settings.local.toml` for production use |
 | `CUSTOM_TEMPLATES_DIR` | `''` | Absolute path to custom ntc-templates directory. Leave empty to disable |
-| `NETMIKO_CONN_TIMEOUT` | `1` | SSH connection timeout in seconds |
+| `NETMIKO_CONN_TIMEOUT` | `5` | SSH connection timeout in seconds |
 | `NETMIKO_READ_TIMEOUT` | `10` | SSH read timeout in seconds |
-| `NAPALM_TIMEOUT` | `1` | NAPALM connection timeout in seconds |
+| `NAPALM_TIMEOUT` | `5` | NAPALM connection timeout in seconds |
 | `COMMAND_HISTORY_MAX_RECORDS` | `10000` | Max command history records kept in DB (0 = unlimited) |
 | `ARP_ENTRY_HISTORY_MAX_RECORDS` | `50000` | Max ARP entry history records (0 = unlimited) |
 | `AUTO_DETECT_DEVICE_TYPES` | (list) | Device types targeted by netmiko autodetect |
@@ -156,7 +159,7 @@ Key settings and their defaults:
 Environment-specific overrides can be added under `[development]`, `[production]`, or `[testing]` sections in `settings.toml` or `settings.local.toml`. Set the `ENV_FOR_DYNACONF` environment variable to switch environments (default: `production`; use `ENV_FOR_DYNACONF=development` for `DEBUG = true`).
 
 ```shell
-ENV_FOR_DYNACONF=production python manage.py
+ENV_FOR_DYNACONF=development python manage.py
 ```
 
 Note: `.env` is a flat `KEY=VALUE` file with no environment sections — it is always loaded regardless of the active environment. Use it only for secrets that must not be committed.
@@ -235,11 +238,20 @@ http://localhost:5001/api/
 | `GET` | `/api/nodes/<id>` | Get a node |
 | `PUT` | `/api/nodes/<id>` | Update a node |
 | `DELETE` | `/api/nodes/<id>` | Delete a node |
-| `GET` | `/api/nodes/<id>/command/<command>` | Execute command (parsed) |
-| `GET` | `/api/nodes/<id>/raw_command/<command>` | Execute command (raw) |
+| `POST` | `/api/nodes/<id>/command` | Execute command (parsed). Body: `{"command": "show version"}` |
+| `POST` | `/api/nodes/<id>/raw_command` | Execute command (raw). Body: `{"command": "show version"}` |
 | `POST` | `/api/nodes/<id>/import/all_data` | Import all device data |
 | `GET` | `/api/interfaces` | List all interfaces |
 | `GET` | `/api/serials` | List all serials |
+
+Example: run a command and get parsed JSON back:
+
+```shell
+curl -X POST http://localhost:5001/api/nodes/<id>/command \
+  -H "Authentication-Token: <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"command": "show version"}'
+```
 
 ## License
 MIT — see [LICENSE](LICENSE) for details.
