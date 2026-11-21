@@ -36,3 +36,19 @@ class TestNtcTemplateUtilsParse:
     def test_empty_data_returns_list(self, utils):
         result = utils.parse("cisco_ios", "show version", "")
         assert isinstance(result, list)
+
+
+class TestNtcTemplateIndexLoading:
+    INDEX = (
+        "Template, Hostname, Platform, Command\n"
+        "cisco_nxos_show_version.textfsm, .*, cisco_nxos, sh[[ow]] ver[[sion]]\n"
+    )
+
+    def test_index_is_read_when_net_textfsm_is_set_after_import(self, tmp_path, monkeypatch):
+        (tmp_path / "index").write_text(self.INDEX)
+        monkeypatch.setenv("NET_TEXTFSM", str(tmp_path))
+        assert NtcTemplateUtils().get_command_list("cisco_nxos") == ["show version"]
+
+    def test_index_is_empty_without_net_textfsm(self, monkeypatch):
+        monkeypatch.delenv("NET_TEXTFSM", raising=False)
+        assert NtcTemplateUtils().get_command_list("cisco_nxos") == []
