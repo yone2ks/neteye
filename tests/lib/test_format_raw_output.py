@@ -4,8 +4,12 @@ from neteye.lib.utils.format_raw_output import format_raw_output
 
 
 class TestFormatRawOutput:
-    def test_converts_newlines_to_br(self):
-        assert format_raw_output("a\r\nb\nc") == Markup("a<br />b<br />c")
+    def test_normalizes_line_endings_to_newline(self):
+        assert format_raw_output("a\r\nb\nc") == Markup("a\nb\nc")
+
+    def test_preserves_leading_indentation(self):
+        text = "interface Ethernet1\n  description uplink\n    ip address 10.0.0.1/24"
+        assert format_raw_output(text) == Markup(text)
 
     def test_escapes_html(self):
         result = format_raw_output('description <script>alert("x")</script>')
