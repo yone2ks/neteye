@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -5,9 +6,12 @@ import pandas as pd
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from ntc_templates.parse import ParsingException
 from ntc_templates.parse import parse_output as ntc_parse_output
 from neteye.lib.device_type_to_driver_mapping.device_type_to_driver_mapping import DeviceTypeToDriverMapping
 
+
+logger = logging.getLogger(__name__)
 
 ntc_template_platform_mapping = DeviceTypeToDriverMapping("ntc-template")
 
@@ -60,6 +64,10 @@ class NtcTemplateUtils:
         Order:
         1) Try custom_dir (if set and exists)
         2) Fallback to default ntc-templates resolution (NET_TEXTFSM / package)
+
+        Returns an empty list when no template exists for the platform/command
+        (or the template cannot parse the output), so callers can fall back to
+        the raw output.
         """
         platform = ntc_template_platform_mapping.mapping_dict.get(platform, platform)
 
@@ -77,4 +85,8 @@ class NtcTemplateUtils:
                 pass
 
         # 2) Default resolution (env NET_TEXTFSM or package)
-        return ntc_parse_output(platform=platform, command=command, data=data)
+        try:
+            return ntc_parse_output(platform=platform, command=command, data=data)
+        except ParsingException as err:
+            logger.debug("No parsed result for %r on %s: %s", command, platform, err)
+            return []
