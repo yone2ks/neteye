@@ -85,7 +85,15 @@ class TestNodeCommandRoutes:
         assert executed_commands == ["show run"]
         body = resp.get_data(as_text=True)
         assert "<script>alert(1)</script>" not in body
-        assert "&lt;script&gt;alert(1)&lt;/script&gt;<br />line2" in body
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;\nline2" in body
+
+    def test_raw_command_output_is_in_pre_and_keeps_indentation(self, auth_client, sample_node, monkeypatch):
+        config = "interface Ethernet1\n  description uplink\n    ip address 10.0.0.1/24"
+        monkeypatch.setattr(Node, "raw_command", lambda node, command, session_user=None: config)
+        resp = auth_client.post(f"/node/{sample_node}/raw_command", data={"command": "show run"})
+        body = resp.get_data(as_text=True)
+        assert f"<pre" in body
+        assert config in body
 
     def test_command_post_renders_parsed_result(self, auth_client, sample_node, executed_commands):
         resp = auth_client.post(f"/node/{sample_node}/command", data={"command": "show ip int brief"})

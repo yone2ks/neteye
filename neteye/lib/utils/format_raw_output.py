@@ -1,6 +1,6 @@
 from markupsafe import Markup, escape
 
-LINE_BREAK = Markup("<br />")
+LINE_SEPARATOR = Markup("\n")
 
 
 def format_raw_output(text: str) -> Markup:
@@ -8,6 +8,7 @@ def format_raw_output(text: str) -> Markup:
 
     Device output can contain attacker-controlled text (e.g. an interface
     description such as "<script>..."), so each line is HTML-escaped before
-    newlines are turned into <br /> tags.
+    lines are rejoined with plain newlines. Render the result inside <pre> so
+    the device's indentation (e.g. nested config blocks) is preserved.
     """
-    return LINE_BREAK.join(escape(line) for line in text.splitlines())
+    return LINE_SEPARATOR.join(escape(line) for line in text.splitlines())
