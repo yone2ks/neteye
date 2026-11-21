@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from flask_restx import Namespace, ValidationError, fields, abort
+from flask_restx import Namespace, fields, abort
+from marshmallow import ValidationError
 
 from neteye.api.interface_namespace import InterfaceSchema
 from neteye.api.routes import api_bp
@@ -12,6 +13,12 @@ class CableSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Cable
         load_instance = True
+        include_fk = True
+
+
+def _sorted_ids(cable):
+    # Same key the web UI uses, so a duplicate A/B pair is rejected by the unique constraint.
+    return "-".join(sorted([cable.a_interface_id, cable.b_interface_id]))
 
 
 cables_schema = CableSchema(many=True)
@@ -40,6 +47,7 @@ class CablesResource(AuthenticatedResource):
     def post(self):
         try:
             cable = cable_schema.load(api.payload)
+            cable.sorted_interface_ids = _sorted_ids(cable)
             cable.add()
             return cable, 201
         except ValidationError as err:
@@ -58,6 +66,7 @@ class CableResource(AuthenticatedResource):
         cable = db.get_or_404(Cable, id)
         try:
             cable = cable_schema.load(api.payload, instance=cable)
+            cable.sorted_interface_ids = _sorted_ids(cable)
             cable.commit()
             return cable
         except ValidationError as err:

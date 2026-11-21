@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from flask_restx import Namespace, ValidationError, fields, abort
+from flask_restx import Namespace, fields, abort
+from marshmallow import ValidationError
 
 from neteye.api.interface_namespace import InterfaceSchema
 from neteye.api.routes import api_bp
@@ -12,6 +13,7 @@ class ArpEntrySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ArpEntry
         load_instance = True
+        include_fk = True
 
 
 arp_entries_schema = ArpEntrySchema(many=True)
