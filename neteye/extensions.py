@@ -29,8 +29,11 @@ migrate = Migrate()
 security = Security()
 
 # Application singletons
+# env= is the fallback when ENV_FOR_DYNACONF is unset: fail safe (production),
+# never silently fall into development (DEBUG on).
 settings = Dynaconf(
     environments=True,
+    env="production",
     settings_files=['settings.toml'],
     envvar_prefix="NETEYE",
     load_dotenv=True,
