@@ -1,0 +1,21 @@
+/* Keep the Action column (Show / Edit / Delete) pinned to the right edge of
+   the scrolling .table-responsive container. Cells need an opaque background,
+   otherwise the columns scrolling underneath show through. The striped and
+   hover tints are layered on top of white to match Bootstrap's translucent ones. */
+#index th.dt-action-col,
+#index td.dt-action-col {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background-color: #fff;
+    background-clip: padding-box;
+    box-shadow: -1px 0 0 rgba(0, 0, 0, 0.125);
+}
+
+#index.table-striped tbody tr:nth-of-type(odd) td.dt-action-col {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05));
+}
+
+#index.table-hover tbody tr:hover td.dt-action-col {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.075), rgba(0, 0, 0, 0.075));
+}
