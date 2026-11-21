@@ -1,0 +1,48 @@
+# Direct dependencies. Do NOT install from this file; requirements.txt is the
+# fully pinned lock generated from it:
+#   pip-compile --strip-extras --no-emit-index-url -o requirements.txt requirements.in
+# To upgrade one package: pip-compile --upgrade-package <name> ...
+Flask==3.1.3
+Werkzeug==3.1.9
+Flask-Babel==4.0.0
+Flask-Bootstrap==3.3.7.1
+Flask-Login==0.6.3
+Flask-Security-Too==5.8.1
+bcrypt  # required by paramiko (SSH key encryption)
+argon2_cffi  # Flask-Security-Too 5.5+ uses argon2 as default password hash
+Flask-WTF==1.1.2
+flask-marshmallow>=1.0.0,<2.0
+flask-nav==0.6
+flask-restx==1.3.0
+WTForms==3.2.1
+WTForms-SQLAlchemy==0.4.2
+marshmallow>=3.0,<4.0
+marshmallow-sqlalchemy>=0.29.0
+# Upgraded from SQLAlchemy 1.4.46 / Flask-SQLAlchemy 2.5.1
+# Flask-Continuum removed: using sqlalchemy-continuum directly
+# SQLAlchemy-Utils 0.41.1 does not support SQLAlchemy 2.1
+# (sqlalchemy.orm.attributes.ScalarAttributeImpl was removed).
+SQLAlchemy>=2.0,<2.1
+Flask-SQLAlchemy>=3.1,<4.0
+Flask-Migrate>=4.1,<5.0
+SQLAlchemy-Continuum>=1.4.0
+SQLAlchemy-Utils==0.41.1
+# Required directly by SQLAlchemy-Utils EncryptedType (node credential encryption at rest);
+# also pulled in transitively via paramiko, but pin explicitly since it's now load-bearing.
+cryptography>=44.0.0
+sqlalchemy-datatables==2.0.1
+netaddr
+ssh2-python
+netmiko
+ntc_templates
+# scrapli 2026.10 is a rewrite on top of libscrapli with a new exception
+# hierarchy (e.g. ScrapliConnectionNotOpened was removed); stay on the
+# pure-Python line until neteye is ported.
+scrapli<2026.10
+scrapli_community<2026.10
+napalm
+pandas==2.2.3
+dynaconf==3.2.13
+python-dotenv
+toml==0.10.2
+dictdiffer==0.8.1

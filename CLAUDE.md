@@ -6,7 +6,7 @@ Neteye is a Flask-based web application for managing network devices. It provide
 
 ## Tech Stack
 
-- **Backend**: Python 3.10+, Flask 3.x, SQLAlchemy 2.x (via Flask-SQLAlchemy)
+- **Backend**: Python 3.11+, Flask 3.x, SQLAlchemy 2.x (via Flask-SQLAlchemy)
 - **Auth**: Flask-Security-Too 5.x (argon2 password hashing, token auth for API)
 - **Config**: Dynaconf (settings.toml + .env + settings.local.toml)
 - **History/Versioning**: SQLAlchemy-Continuum
