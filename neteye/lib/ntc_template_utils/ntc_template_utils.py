@@ -13,16 +13,18 @@ ntc_template_platform_mapping = DeviceTypeToDriverMapping("ntc-template")
 
 
 class NtcTemplateUtils:
-    INDEX_FILE = (
-        (os.environ.get("NET_TEXTFSM") + "/index") if os.environ.get("NET_TEXTFSM") else ""
-    )
     TEMPLATE_EXTENSION = ".textfsm"
     ntc_template_index_df = pd.DataFrame()
 
     def __init__(self, custom_dir: Optional[str] = None):
-        if self.INDEX_FILE and Path(self.INDEX_FILE).exists():
+        # NET_TEXTFSM must be read here, not at class-definition time: when it is
+        # set only in .env, Dynaconf exports it to os.environ lazily, after this
+        # module has been imported. Callers must therefore touch settings first.
+        net_textfsm = os.environ.get("NET_TEXTFSM")
+        self.index_file = f"{net_textfsm}/index" if net_textfsm else ""
+        if self.index_file and Path(self.index_file).exists():
             self.ntc_template_index_df = pd.read_csv(
-                self.INDEX_FILE,
+                self.index_file,
                 comment="#",
                 skip_blank_lines=True,
                 skipinitialspace=True,
