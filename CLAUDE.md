@@ -123,9 +123,25 @@ except Exception as e:
 - Do NOT include `Co-Authored-By` lines
 - Before committing: show a summary of changes and `git diff`, then wait for user confirmation
 
+## Agent Workflow
+
+Review roles are defined as subagents in `.claude/agents/`. They only read and report; they never edit files. The maintainer makes the final decision.
+
+| Agent | Model | Role |
+|-------|-------|------|
+| `neteye-network-reviewer` | opus | Network Engineer perspective: real device behavior, ntc-templates fields, interface naming, operational safety |
+| `neteye-architect` | opus | Software Engineer perspective: repository-wide consistency, duplication, layering, impact analysis |
+| `neteye-critic` | opus | Critical perspective: assumptions, trade-offs, risks, blind spots of the other two |
+| `neteye-code-reviewer` | sonnet | Reviews a diff against these rules, security and tests |
+
+- **Design decisions and new-feature proposals**: launch `neteye-network-reviewer`, `neteye-architect` and `neteye-critic` in parallel, then present the options with the recommended one.
+- **Before opening a PR**: run `neteye-code-reviewer` on the change.
+- **After adding a feature or device type**: run `neteye-architect` once as a consistency audit.
+- **Do not launch agents for small fixes** (typos, one-line changes, simple bug fixes). Use your own judgment there.
+
 ## Proposing Recommendations
 
-When proposing options, evaluate from 3 perspectives and state the recommended option:
+When proposing options, state the recommended option, based on the three perspectives above (the agents' output for design decisions, or your own evaluation for small choices):
 
 1. **Network Engineer perspective**: operational and design considerations
 2. **Software Engineer perspective**: code quality, maintainability, security
