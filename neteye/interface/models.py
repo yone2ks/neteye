@@ -3,6 +3,7 @@ from sqlalchemy import (Boolean, Column, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import relationship
 
 from neteye.base.models import Base
+from neteye.extensions import db
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 
 
@@ -32,13 +33,22 @@ class Interface(Base):
 
     @staticmethod
     def exists(node_id, name):
-        return (
-            Interface.query.filter_by(node_id=node_id)
-            .filter_by(name=IntfAbbrevConverter("cisco_ios").normalization(name))
-            .scalar()
-            != None
-        )
-    
+        """Return True if the node has an interface with this name.
+
+        An abbreviated name (e.g. ``Eth1/1``) is expanded with the node's
+        device type before the lookup. A device type without an abbreviation
+        template is looked up as given.
+        """
+        from neteye.node.models import Node
+
+        node = db.session.get(Node, node_id)
+        if node is not None:
+            try:
+                name = IntfAbbrevConverter(node.device_type).normalization(name)
+            except FileNotFoundError:
+                pass
+        return Interface.query.filter_by(node_id=node_id, name=name).first() is not None
+
     def to_dict(self):
         return {
             'id': self.id,

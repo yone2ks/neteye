@@ -14,14 +14,11 @@ from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
 from neteye.lib.import_command_mapper.import_command_mapper import ForeignKeyNotFoundError, ImportCommandMapper, IMPORT_TYPES
-from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
-from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
 from neteye.lib.utils.get_records_by_node import get_records_dict_by_node
 from neteye.serial.models import Serial
 from neteye.lib.utils.format_raw_output import format_raw_output
 from neteye.lib.utils.report_exception import report_exception
-from sqlalchemy.sql import exists
 
 from .forms import NodeForm
 from .models import NAPALM_DRIVERS, NETMIKO_PLATFORMS, SCRAPLI_DRIVERS, Node

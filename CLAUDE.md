@@ -64,7 +64,7 @@ ENV_FOR_DYNACONF=testing python -m pytest --cov=neteye --cov-report=term-missing
 
 - Test environment uses `[testing]` section in `settings.toml` (SQLite at `/tmp/neteye_test.db`, CSRF disabled)
 - Always prefix test runs with `ENV_FOR_DYNACONF=testing`
-- `conftest.py` provides `flask_app` and `client` fixtures — do not recreate them in tests
+- `conftest.py` provides `app`, `auth_client`, `db` and `client` fixtures — do not recreate them in tests
 
 ## Architecture Patterns
 
