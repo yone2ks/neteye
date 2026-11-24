@@ -69,6 +69,7 @@ import_arp_entry:
         source: type
       interface_id:
         source: interface
+        normalizer: interface
         foreign_key: interface
     ignore:
       - age: '-'
