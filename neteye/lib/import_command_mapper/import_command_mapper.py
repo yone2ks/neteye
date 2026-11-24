@@ -1,7 +1,7 @@
 import yaml
 import os
 from logging import getLogger
-from typing import Callable
+from typing import Callable, Optional
 
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
@@ -13,6 +13,11 @@ from neteye.node.models import Node
 from neteye.cable.models import Cable
 
 logger = getLogger(__name__)
+
+
+class ForeignKeyNotFoundError(LookupError):
+    """Raised when a record refers to a row that is not registered (for example, an unknown interface)."""
+
 
 # Import types
 IMPORT_TYPES = {
@@ -186,7 +191,7 @@ class ImportCommandMapper:
         return foreign_key_mapping.get(foreign_key_type)
 
 
-    def get_value_from_record(self, import_type: str, command: str, field: str, record: dict) -> str:
+    def get_value_from_record(self, import_type: str, command: str, field: str, record: dict, node_id: Optional[str] = None) -> str:
         """
         Get the record value by type, command, field, and record.
 
@@ -195,19 +200,33 @@ class ImportCommandMapper:
             command (str): The command.
             field (str): The field.
             record (dict): The record.
-        
+            node_id (str, optional): The node being imported. When the field is a foreign key
+                to a model that belongs to a node (such as an interface), the lookup is limited
+                to that node.
+
         Returns:
             str: The record value.
+
+        Raises:
+            ForeignKeyNotFoundError: If the field is a foreign key and no matching row exists.
         """
         source = self.get_source(import_type, command, field)
-        normalizer = self.get_normalizer(import_type, command, field)
-        value = normalizer(record.get(source, ""))
         foreign_model = self.get_foreign_key(import_type, command, field)
 
         if foreign_model:
-            # Retrieve the foreign key ID by filtering the model's key with the value.
-            return foreign_model.query.filter_by(**{foreign_model.KEY: value}).first().id
-        return value
+            raw_value = record.get(source, "")
+            if not raw_value:
+                raise ForeignKeyNotFoundError(f"{source} is empty")
+            value = self.get_normalizer(import_type, command, field)(raw_value)
+            query = foreign_model.query.filter_by(**{foreign_model.KEY: value})
+            if node_id is not None and hasattr(foreign_model, "node_id"):
+                query = query.filter_by(node_id=node_id)
+            matched = query.first()
+            if matched is None:
+                raise ForeignKeyNotFoundError(f"{foreign_model.__name__} {value!r} is not registered")
+            return matched.id
+
+        return self.get_normalizer(import_type, command, field)(record.get(source, ""))
 
 
     def get_index(self, import_type: str, command: str) -> int:

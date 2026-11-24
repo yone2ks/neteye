@@ -13,7 +13,7 @@ from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
-from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper, IMPORT_TYPES
+from neteye.lib.import_command_mapper.import_command_mapper import ForeignKeyNotFoundError, ImportCommandMapper, IMPORT_TYPES
 from neteye.lib.intf_abbrev.intf_abbrev import IntfAbbrevConverter
 from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.lib.utils.neteye_normalizer import normalize_noop, normalize_mac_address, normalize_mask, normalize_speed, normalize_duplex
@@ -752,23 +752,28 @@ def import_common(node, model):
 
             # If an index is specified, only the record information of the corresponding index is processed. Otherwise, all records are processed.
             for record in (filtered_result if index is None else [filtered_result[index]]):
-                record_key = import_command_mapper.get_value_from_record(
-                    import_type=import_type, command=command, field=key_field, record=record
-                )
-
-                # Start from what we already collected in this set for the key,
-                # otherwise empty (missing fields will be filled from previous DB state below)
-                base_entry = dict(after_records.get(record_key, {}))
-
-                # Ensure node linkage if applicable
-                if "node_id" in before_field:
-                    base_entry["node_id"] = node.id
-
-                # Overwrite/update fields present in this command
-                for field_name in import_command_mapper.get_fields(import_type, command):
-                    base_entry[field_name] = import_command_mapper.get_value_from_record(
-                        import_type=import_type, command=command, field=field_name, record=record
+                try:
+                    record_key = import_command_mapper.get_value_from_record(
+                        import_type=import_type, command=command, field=key_field, record=record, node_id=node.id
                     )
+
+                    # Start from what we already collected in this set for the key,
+                    # otherwise empty (missing fields will be filled from previous DB state below)
+                    base_entry = dict(after_records.get(record_key, {}))
+
+                    # Ensure node linkage if applicable
+                    if "node_id" in before_field:
+                        base_entry["node_id"] = node.id
+
+                    # Overwrite/update fields present in this command
+                    for field_name in import_command_mapper.get_fields(import_type, command):
+                        base_entry[field_name] = import_command_mapper.get_value_from_record(
+                            import_type=import_type, command=command, field=field_name, record=record, node_id=node.id
+                        )
+                except ForeignKeyNotFoundError as err:
+                    # The record refers to a row that is not registered for this node. Skip only this record.
+                    logger.warning("Skipped a record of %r on %s: %s", command, node.hostname, err)
+                    continue
 
                 # For fields not produced by this command, keep what we already have in base_entry,
                 # otherwise fallback to the previous DB value
