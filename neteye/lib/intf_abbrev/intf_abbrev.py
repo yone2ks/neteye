@@ -5,13 +5,17 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+# Template paths already reported as missing, so the warning is logged once per path
+# instead of once per converter (a converter is created for every imported field).
+_missing_template_paths = set()
+
 
 class IntfAbbrevConverter:
     TEMPLATE_DIR = os.path.dirname(__file__) + "/templates/"
     SUFFIX = ".json"
     device_type = ""
-    abbrev_dict = {}
-    long_dict = {}
+    abbrev_to_long = {}
+    long_to_abbrev = {}
 
     def __init__(self, device_type: str) -> None:
         """
@@ -30,13 +34,29 @@ class IntfAbbrevConverter:
         template_file_path = f"{self.TEMPLATE_DIR}{self.device_type}{self.SUFFIX}"
         try:
             with open(template_file_path, "r") as abbrev_json:
-                self.abbrev_dict = json.load(abbrev_json)
-                self.long_dict = {value: key for key, value in self.abbrev_dict.items()}
+                self.abbrev_to_long = json.load(abbrev_json)
+                self.long_to_abbrev = {value: key for key, value in self.abbrev_to_long.items()}
         except FileNotFoundError:
-            logger.error(
-                f"Interface abbrev template file '{template_file_path}' not found"
-            )
+            if template_file_path not in _missing_template_paths:
+                _missing_template_paths.add(template_file_path)
+                # A device type without a template is expected (callers fall back to no conversion).
+                logger.warning(
+                    f"Interface abbrev template file '{template_file_path}' not found"
+                )
             raise
+
+    @staticmethod
+    def _convert_by_longest_prefix(intf_name: str, conversion_table: dict) -> str:
+        """
+        Convert the interface name using the longest key of the conversion table that it starts with.
+
+        Returns the interface name unchanged if no key matches.
+        """
+        matched_keys = [key for key in conversion_table if intf_name.startswith(key)]
+        if not matched_keys:
+            return intf_name
+        longest_key = max(matched_keys, key=len)
+        return conversion_table[longest_key] + intf_name[len(longest_key):]
 
     def to_long(self, abbrev_intf: str) -> str:
         """
@@ -46,10 +66,9 @@ class IntfAbbrevConverter:
             abbrev_intf (str): The abbreviated interface name.
 
         Returns:
-            str: The long style of the interface name.
+            str: The long style of the interface name, or the input if it has no known abbreviation.
         """
-        abbrev_key = max([key for key in self.abbrev_dict.keys() if key in abbrev_intf])
-        return abbrev_intf.replace(abbrev_key, self.abbrev_dict[abbrev_key])
+        return self._convert_by_longest_prefix(abbrev_intf, self.abbrev_to_long)
 
     def to_abbrev(self, long_intf: str) -> str:
         """
@@ -59,10 +78,9 @@ class IntfAbbrevConverter:
             long_intf (str): The long interface name.
 
         Returns:
-            str: The abbreviated style of the interface name.
+            str: The abbreviated style of the interface name, or the input if it has no known long style.
         """
-        long_key = max([key for key in self.long_dict.keys() if key in long_intf])
-        return long_intf.replace(long_key, self.long_dict[long_key])
+        return self._convert_by_longest_prefix(long_intf, self.long_to_abbrev)
 
     def normalization(self, intf_name: str) -> str:
         """
@@ -89,9 +107,7 @@ class IntfAbbrevConverter:
         Returns:
             bool: True if the interface name is abbreviated, False otherwise.
         """
-        base_intf = re.search(r"(?i)[a-z]+", intf_name).group()
-        for key in self.abbrev_dict.keys():
-            if base_intf == key:
-                return True
-
-        return False
+        base_match = re.search(r"(?i)[a-z]+", intf_name)
+        if base_match is None:
+            return False
+        return base_match.group() in self.abbrev_to_long
