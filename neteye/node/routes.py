@@ -604,8 +604,15 @@ def import_arp_only(id):
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
         
-        import_arp_entries(node)
-        flash(f"ARP entry data imported successfully for node {node.hostname}", "success")
+        skipped_count = import_arp_entries(node)
+        if skipped_count:
+            flash(
+                f"ARP entry data imported for node {node.hostname}, but {skipped_count} records were skipped "
+                "because their interface is not registered. Import the interfaces first.",
+                "warning",
+            )
+        else:
+            flash(f"ARP entry data imported successfully for node {node.hostname}", "success")
         logger.info(f"ARP entry data imported for node {id}")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
@@ -719,6 +726,9 @@ def import_common(node, model):
     Args:
         node: The target node from which data is retrieved.
         model: The SQLAlchemy model where the data will be stored.
+
+    Returns:
+        int: The number of records skipped because they refer to a row that is not registered.
     """
     import_command_mapper = ImportCommandMapper(node.device_type)
     import_type = IMPORT_TYPES[model]
@@ -731,6 +741,7 @@ def import_common(node, model):
 
     # Accumulate all records observed across this set of commands
     after_records = {}
+    skipped_count = 0
 
     # get data for each command and merge into after_records
     for command in import_command_mapper.get_commands(import_type):
@@ -770,6 +781,7 @@ def import_common(node, model):
                 except ForeignKeyNotFoundError as err:
                     # The record refers to a row that is not registered for this node. Skip only this record.
                     logger.warning("Skipped a record of %r on %s: %s", command, node.hostname, err)
+                    skipped_count += 1
                     continue
 
                 # For fields not produced by this command, keep what we already have in base_entry,
@@ -780,6 +792,16 @@ def import_common(node, model):
 
                 after_records[record_key] = base_entry
 
+    # Interface names come from the template, so a short form it does not list becomes a second row.
+    if model is Interface and import_command_mapper.interface_converter is not None:
+        unexpanded = import_command_mapper.interface_converter.find_unexpanded(after_records.keys())
+        if unexpanded:
+            logger.warning(
+                "Interface names on %s that look abbreviated and were not expanded by the %s template: %s. "
+                "If they are short forms, add them to the template; otherwise they are stored as separate rows.",
+                node.hostname, node.device_type, ", ".join(unexpanded),
+            )
+
     # After processing all commands, commit the consolidated delta once
     delta_commit(
         model=model,
@@ -788,10 +810,11 @@ def import_common(node, model):
         after_keys=set(after_records.keys()),
         after=after_records,
     )
+    return skipped_count
 
 
 def import_serials(node):
-    import_common(node, Serial)
+    return import_common(node, Serial)
 
 
 def import_node_data(node):
@@ -811,10 +834,10 @@ def import_node_data(node):
 
 
 def import_interfaces(node):
-    import_common(node, Interface)
+    return import_common(node, Interface)
 
 def import_arp_entries(node):
-    import_common(node, ArpEntry)
+    return import_common(node, ArpEntry)
 
 def import_all_data(node):
     import_node_data(node)

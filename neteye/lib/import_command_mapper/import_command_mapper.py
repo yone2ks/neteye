@@ -46,6 +46,11 @@ class ImportCommandMapper:
         """
         self.device_type = device_type
         self.mapping_dict = self._load_mapping()
+        # Loaded once per mapper. None when the device type has no abbreviation template.
+        try:
+            self.interface_converter = IntfAbbrevConverter(device_type)
+        except FileNotFoundError:
+            self.interface_converter = None
 
 
     def _load_mapping(self) -> dict:
@@ -147,10 +152,7 @@ class ImportCommandMapper:
         Returns:
             Callable: The normalizer.
         """
-        try:
-            interface_normalizer = IntfAbbrevConverter(self.device_type).normalization
-        except FileNotFoundError:
-            interface_normalizer = normalize_noop
+        interface_normalizer = self.interface_converter.normalization if self.interface_converter else normalize_noop
 
         normalizer_mapping = {
             "noop": normalize_noop,

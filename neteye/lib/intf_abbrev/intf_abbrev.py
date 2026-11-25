@@ -97,6 +97,23 @@ class IntfAbbrevConverter:
         else:
             return intf_name
 
+    def find_unexpanded(self, intf_names) -> list:
+        """
+        List names that still look abbreviated after normalization.
+
+        A normalized name that starts with a capital letter, up to two more letters and then a
+        digit (for example "Di1") is probably a short form this device type's template does not
+        list. Lower-case names such as "nve1" or "eth0" are native names, not Cisco-style
+        abbreviations, and are not reported. The result is a list to review, not proof of a gap.
+
+        Args:
+            intf_names: Normalized interface names.
+
+        Returns:
+            list: The suspicious names, sorted.
+        """
+        return sorted(name for name in intf_names if re.match(r"[A-Z][A-Za-z]{0,2}\d", name))
+
     def is_abbrev(self, intf_name: str) -> bool:
         """
         Checks if the given interface name is abbreviated.
