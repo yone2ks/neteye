@@ -23,5 +23,9 @@
     "MFR" : "MFR",
     "Twe" : "TwentyFiveGigE",
     "Fo" : "FortyGigabitEthernet",
-    "Ap" : "Ap"
+    "Ap" : "AppGigabitEthernet",
+    "Tw" : "TwoGigabitEthernet",
+    "Fi" : "FiveGigabitEthernet",
+    "Hu" : "HundredGigE",
+    "Nu" : "Null"
 }
