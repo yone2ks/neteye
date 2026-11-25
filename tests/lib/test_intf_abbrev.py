@@ -101,6 +101,20 @@ def test_missing_template_is_logged_once(caplog):
     assert len([r for r in caplog.records if "no_such_device" in r.getMessage()]) == 1
 
 
+def test_find_unexpanded_lists_names_that_still_look_abbreviated(converter):
+    names = ["GigabitEthernet1/0/1", "Di1", "BD10", "mgmt0", "Port-channel1", "nve1"]
+    assert converter.find_unexpanded(names) == ["BD10", "Di1"]
+
+
+def test_find_unexpanded_ignores_lower_case_native_names(converter):
+    assert converter.find_unexpanded(["nve1", "eth0", "ens3", "br0", "lo0"]) == []
+
+
+def test_find_unexpanded_ignores_long_names_and_empty_input(converter):
+    assert converter.find_unexpanded([]) == []
+    assert converter.find_unexpanded(["GigabitEthernet1/0/1", "Vlan10", "Loopback0"]) == []
+
+
 @pytest.mark.parametrize("device_type", ["cisco_ios", "cisco_ios_telnet", "cisco_xe"])
 def test_ios_family_templates_are_identical(device_type):
     reference = IntfAbbrevConverter("cisco_ios")
