@@ -154,3 +154,23 @@ def test_arp_route_reports_plain_success_without_skips(app, auth_client, nxos_no
     page = response.get_data(as_text=True)
     assert "imported successfully" in page
     assert "were skipped" not in page
+
+
+def test_incomplete_entry_is_imported_and_vendor_follows_the_resolved_mac(app, nxos_node):
+    with app.app_context():
+        _run(import_interfaces, nxos_node, {BRIEF_COMMAND: [_brief_row("Vlan10")]})
+        unresolved = dict(_arp_row("10.0.10.5", "Vlan10"), mac_address="INCOMPLETE")
+        _run(import_arp_entries, nxos_node, {ARP_COMMAND: [unresolved]})
+        entry = ArpEntry.query.filter_by(ip_address="10.0.10.5").one()
+        assert (entry.mac_address, entry.vendor) == ("Incomplete", "")
+
+        resolved = dict(_arp_row("10.0.10.5", "Vlan10"), mac_address="0000.0c07.ac01")
+        _run(import_arp_entries, nxos_node, {ARP_COMMAND: [resolved]})
+        _db.session.expire_all()
+        entry = ArpEntry.query.filter_by(ip_address="10.0.10.5").one()
+        assert (entry.mac_address, entry.vendor) == ("0000.0c07.ac01", "Cisco Systems, Inc")
+
+        _run(import_arp_entries, nxos_node, {ARP_COMMAND: [unresolved]})
+        _db.session.expire_all()
+        entry = ArpEntry.query.filter_by(ip_address="10.0.10.5").one()
+        assert (entry.mac_address, entry.vendor) == ("Incomplete", "")

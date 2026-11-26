@@ -36,7 +36,7 @@ import_interface:
       ip_address:
         source: ip_address
       status:
-        source: status
+        source: link
     index: null
   - command: show int desc
     field:
@@ -62,5 +62,4 @@ import_arp_entry:
         foreign_key: interface
     ignore:
       - age: '-'
-      - mac_address: Incomplete
     index: null

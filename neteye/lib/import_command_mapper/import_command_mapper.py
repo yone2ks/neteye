@@ -27,6 +27,9 @@ IMPORT_TYPES = {
     ArpEntry: "import_arp_entry"
 }
 
+# Values accepted for "normalizer:" in the mapping files. An unknown value silently falls back to noop.
+NORMALIZER_NAMES = frozenset({"noop", "interface", "mac_address", "mask", "speed", "duplex"})
+
 class ImportCommandMapper:
     MAPPING_DIR = os.path.dirname(__file__) + "/mappings/"
     SUFFIX = ".yml"

@@ -49,4 +49,3 @@ import_arp_entry:
         foreign_key: interface
     ignore:
       - age: '-'
-      - mac_address: Incomplete
