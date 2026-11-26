@@ -1,5 +1,8 @@
 import netaddr
 
+# Stored in place of a MAC address when the device could not resolve it (an unanswered ARP request).
+INCOMPLETE_MAC_ADDRESS = "Incomplete"
+
 
 def normalize_noop(value):
     """
@@ -27,8 +30,12 @@ def normalize_mac_address(mac_address, format=netaddr.mac_cisco):
     
     Note:
         - By default, the MAC address is represented in Cisco format (dot notation).
+        - An unresolved ARP entry ("Incomplete" on IOS, "INCOMPLETE" on NX-OS) is returned as
+          INCOMPLETE_MAC_ADDRESS, whatever its case.
         - If the given MAC address is not valid, it is returned unchanged.
     """
+    if isinstance(mac_address, str) and mac_address.strip().lower() == INCOMPLETE_MAC_ADDRESS.lower():
+        return INCOMPLETE_MAC_ADDRESS
     if netaddr.valid_mac(mac_address):
         return str(netaddr.EUI(mac_address).format(format))
     else:

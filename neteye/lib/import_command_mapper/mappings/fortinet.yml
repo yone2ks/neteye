@@ -23,10 +23,10 @@ import_interface:
         source: status
       speed:
         source: speed
-        normalize: speed
+        normalizer: speed
       duplex:
         source: duplex
-        normalize: duplex
+        normalizer: duplex
 import_arp_entry:
   - command: get system arp
     field:

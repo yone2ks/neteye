@@ -20,6 +20,13 @@ class TestNormalizeMacAddress:
     def test_invalid_mac_returned_as_is(self):
         assert normalize_mac_address("not-a-mac") == "not-a-mac"
 
+    @pytest.mark.parametrize("value", ["Incomplete", "INCOMPLETE", "incomplete", " INCOMPLETE "])
+    def test_unresolved_entry_is_stored_as_incomplete(self, value):
+        assert normalize_mac_address(value) == "Incomplete"
+
+    def test_none_is_returned_as_is(self):
+        assert normalize_mac_address(None) is None
+
 
 class TestNormalizeMask:
     def test_dotted_quad_to_cidr(self):
