@@ -7,6 +7,7 @@ from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
 from neteye.node.models import Node
 import neteye.node.routes as node_imports
+from neteye.lib.import_command_mapper.import_command_mapper import NoParsedOutputError
 
 
 class NodeSchema(ma.SQLAlchemyAutoSchema):
@@ -129,7 +130,10 @@ class NodeImportNode(AuthenticatedResource):
 class NodeImportSerial(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
-        node_imports.import_serials(node)
+        try:
+            node_imports.import_serials(node)
+        except NoParsedOutputError as err:
+            abort(502, message=str(err))
         return {"message": f"Serials imported for node {node.hostname}"}, 200
 
 
@@ -137,7 +141,10 @@ class NodeImportSerial(AuthenticatedResource):
 class NodeImportInterface(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
-        node_imports.import_interfaces(node)
+        try:
+            node_imports.import_interfaces(node)
+        except NoParsedOutputError as err:
+            abort(502, message=str(err))
         return {"message": f"Interfaces imported for node {node.hostname}"}, 200
 
 
@@ -145,7 +152,10 @@ class NodeImportInterface(AuthenticatedResource):
 class NodeImportArpEntry(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
-        node_imports.import_arp_entries(node)
+        try:
+            node_imports.import_arp_entries(node)
+        except NoParsedOutputError as err:
+            abort(502, message=str(err))
         return {"message": f"ARP entries imported for node {node.hostname}"}, 200
 
 
@@ -153,5 +163,5 @@ class NodeImportArpEntry(AuthenticatedResource):
 class NodeImportAll(AuthenticatedResource):
     def post(self, id):
         node = db.get_or_404(Node, id)
-        node_imports.import_all_data(node)
-        return {"message": f"All data imported for node {node.hostname}"}, 200
+        skipped_messages = node_imports.import_all_data(node)
+        return {"message": f"All data imported for node {node.hostname}", "skipped": skipped_messages}, 200
