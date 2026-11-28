@@ -5,8 +5,9 @@
 
 <script>
  $(document).ready(function(){
-     loadInterfaces($('#a_node').val(), 'a_interface');
-     loadInterfaces($('#b_node').val(), 'b_interface');
+     // After a rejected submit the page is rendered again; keep the interfaces the user selected.
+     loadInterfaces($('#a_node').val(), 'a_interface', { selectedValue: {{ form.a_interface.data|tojson }} });
+     loadInterfaces($('#b_node').val(), 'b_interface', { selectedValue: {{ form.b_interface.data|tojson }} });
 
      $('#a_node').change(function(){ loadInterfaces($(this).val(), 'a_interface'); });
      $('#b_node').change(function(){ loadInterfaces($(this).val(), 'b_interface'); });

@@ -1,12 +1,14 @@
 from flask import jsonify, request
 from flask_restx import Namespace, fields, abort
 from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 from neteye.api.interface_namespace import InterfaceSchema
 from neteye.api.routes import api_bp
-from neteye.cable.models import Cable
+from neteye.cable.models import Cable, CableEndpointError
 from neteye.api.routes import AuthenticatedResource
 from neteye.extensions import api, db, ma
+from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
 
 
 class CableSchema(ma.SQLAlchemyAutoSchema):
@@ -16,9 +18,17 @@ class CableSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
 
-def _sorted_ids(cable):
-    # Same key the web UI uses, so a duplicate A/B pair is rejected by the unique constraint.
-    return "-".join(sorted([cable.a_interface_id, cable.b_interface_id]))
+def _validate_endpoints(payload, cable=None):
+    # Checked before loading the payload, so a rejected request leaves no change in the session.
+    # On an update, an end that is not in the payload keeps its current interface.
+    if not isinstance(payload, dict):
+        abort(400, message="The request body must be a JSON object.")
+    a_interface_id = payload.get("a_interface_id", cable.a_interface_id if cable else None)
+    b_interface_id = payload.get("b_interface_id", cable.b_interface_id if cable else None)
+    try:
+        Cable.validate_endpoints(a_interface_id, b_interface_id)
+    except CableEndpointError as err:
+        abort(400, message=str(err))
 
 
 cables_schema = CableSchema(many=True)
@@ -45,13 +55,17 @@ class CablesResource(AuthenticatedResource):
     @cables_api.expect(cable_model, validate=True)
     @cables_api.marshal_with(cable_model, code=201)
     def post(self):
+        _validate_endpoints(api.payload)
         try:
             cable = cable_schema.load(api.payload)
-            cable.sorted_interface_ids = _sorted_ids(cable)
+            cable.sorted_interface_ids = Cable.make_sorted_interface_ids(cable.a_interface_id, cable.b_interface_id)
             cable.add()
             return cable, 201
         except ValidationError as err:
             abort(400, message=err.messages)
+        except IntegrityError as err:
+            # Base.add rolled the session back; the same A/B pair is already cabled.
+            abort(409, message=gen_integrity_error_message("Cable", err))
 
 
 @cables_api.route("/<string:id>")
@@ -64,13 +78,16 @@ class CableResource(AuthenticatedResource):
     @cables_api.marshal_with(cable_model)
     def put(self, id):
         cable = db.get_or_404(Cable, id)
+        _validate_endpoints(api.payload, cable)
         try:
             cable = cable_schema.load(api.payload, instance=cable)
-            cable.sorted_interface_ids = _sorted_ids(cable)
+            cable.sorted_interface_ids = Cable.make_sorted_interface_ids(cable.a_interface_id, cable.b_interface_id)
             cable.commit()
             return cable
         except ValidationError as err:
             abort(400, message=err.messages)
+        except IntegrityError as err:
+            abort(409, message=gen_integrity_error_message("Cable", err))
 
     @cables_api.response(204, "Cable deleted")
     def delete(self, id):
