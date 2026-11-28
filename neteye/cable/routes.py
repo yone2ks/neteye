@@ -48,10 +48,11 @@ def data():
     query = (
         db.session.query()
         .select_from(Cable)
-        .join(a_interface_table, Cable.a_interface_id == a_interface_table.id)
-        .join(a_node_table, a_interface_table.node_id == a_node_table.id)
-        .join(b_interface_table, Cable.b_interface_id == b_interface_table.id)
-        .join(b_node_table, b_interface_table.node_id == b_node_table.id)
+        # Outer joins: a cable whose interface was deleted is still listed, with that end empty.
+        .outerjoin(a_interface_table, Cable.a_interface_id == a_interface_table.id)
+        .outerjoin(a_node_table, a_interface_table.node_id == a_node_table.id)
+        .outerjoin(b_interface_table, Cable.b_interface_id == b_interface_table.id)
+        .outerjoin(b_node_table, b_interface_table.node_id == b_node_table.id)
     )
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
@@ -125,6 +126,8 @@ def edit(id):
     form = CableForm()
     a_interface = cable.a_interface
     b_interface = cable.b_interface
+    if a_interface is None or b_interface is None:
+        flash("An interface of this cable no longer exists. Select the interfaces again.", "warning")
     cable_type = cable.cable_type
     link_speed = cable.link_speed
     description = cable.description
@@ -132,10 +135,10 @@ def edit(id):
         "cable/edit.html",
         id=id,
         form=form,
-        a_node_id=a_interface.node_id,
-        b_node_id=b_interface.node_id,
-        a_interface_id=a_interface.id,
-        b_interface_id=b_interface.id,
+        a_node_id=a_interface.node_id if a_interface else "",
+        b_node_id=b_interface.node_id if b_interface else "",
+        a_interface_id=a_interface.id if a_interface else "",
+        b_interface_id=b_interface.id if b_interface else "",
         cable_type=cable_type,
         link_speed=link_speed,
         description=description
@@ -145,16 +148,19 @@ def edit(id):
 @cable_bp.route("/<id>/update", methods=["POST"])
 @auth_required()
 def update(id):
-    sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
     cable = Cable.get(id)
     if not cable:
         abort(404)
+    interface_ids = [request.form.get("a_interface", ""), request.form.get("b_interface", "")]
+    if not all(interface_id and db.session.get(Interface, interface_id) for interface_id in interface_ids):
+        flash("Select an existing interface for both ends of the cable.", "warning")
+        return redirect(url_for("cable.edit", id=id))
     cable.a_interface_id = request.form["a_interface"]
     cable.b_interface_id = request.form["b_interface"]
     cable.cable_type = request.form["cable_type"]
     cable.link_speed = request.form["link_speed"]
     cable.description = request.form["description"]
-    cable.sorted_interface_ids = sorted_interface_ids
+    cable.sorted_interface_ids = "-".join(sorted(interface_ids))
     try:
         cable.commit()
         return redirect(url_for("cable.index"))

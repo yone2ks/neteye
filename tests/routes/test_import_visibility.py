@@ -7,9 +7,9 @@ import pytest
 from neteye.arp_entry.models import ArpEntry
 from neteye.extensions import db as _db
 from neteye.interface.models import Interface
-from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper
+from neteye.lib.import_command_mapper.import_command_mapper import ImportCommandMapper, NoParsedOutputError
 from neteye.node.models import Node
-from neteye.node.routes import import_arp_entries, import_interfaces
+from neteye.node.routes import import_all_data, import_arp_entries, import_interfaces
 
 BRIEF_COMMAND = "show ip int brief vrf all"
 DESCRIPTION_COMMAND = "show int desc"
@@ -174,3 +174,71 @@ def test_incomplete_entry_is_imported_and_vendor_follows_the_resolved_mac(app, n
         _db.session.expire_all()
         entry = ArpEntry.query.filter_by(ip_address="10.0.10.5").one()
         assert (entry.mac_address, entry.vendor) == ("Incomplete", "")
+
+
+def _store_interfaces(node_id, names):
+    for name in names:
+        _db.session.add(Interface(node_id=node_id, name=name))
+    _db.session.commit()
+
+
+def test_import_without_parsed_output_keeps_the_stored_interfaces(app, nxos_node):
+    # A device that rejects every command returns its raw text instead of a parsed list. Before the
+    # guard, the empty result deleted every interface of the node (and orphaned its cables).
+    with app.app_context():
+        _store_interfaces(nxos_node, ["Ethernet1/1", "Vlan10"])
+        raw_error = "% Invalid command at '^' marker."
+        with pytest.raises(NoParsedOutputError):
+            _run(import_interfaces, nxos_node, {BRIEF_COMMAND: raw_error, DESCRIPTION_COMMAND: raw_error})
+
+        assert {i.name for i in Interface.query.filter_by(node_id=nxos_node).all()} == {"Ethernet1/1", "Vlan10"}
+
+
+def test_import_with_one_parsed_command_still_applies_the_delta(app, nxos_node):
+    with app.app_context():
+        _store_interfaces(nxos_node, ["Ethernet1/1", "Vlan10"])
+        _run(import_interfaces, nxos_node, {BRIEF_COMMAND: [_brief_row("Ethernet1/1")], DESCRIPTION_COMMAND: "raw"})
+
+        assert {i.name for i in Interface.query.filter_by(node_id=nxos_node).all()} == {"Ethernet1/1"}
+
+
+def test_import_all_data_continues_and_reports_the_skipped_types(app, nxos_node):
+    with app.app_context(), patch("neteye.node.routes.import_node_data"):
+        _store_interfaces(nxos_node, ["Ethernet1/1"])
+        class RawUnlessParsed(dict):
+            # A command without a template match returns its raw text, not an empty list.
+            def get(self, command, default=None):
+                return super().get(command, "raw output")
+
+        skipped = _run(import_all_data, nxos_node, RawUnlessParsed({ARP_COMMAND: [_arp_row("10.0.0.1", "Ethernet1/1")]}))
+
+        # Serials and interfaces had no parsed output; ARP entries were still imported.
+        assert len(skipped) == 2
+        assert any("Interface" in message for message in skipped)
+        assert {i.name for i in Interface.query.filter_by(node_id=nxos_node).all()} == {"Ethernet1/1"}
+        assert ArpEntry.query.filter_by(ip_address="10.0.0.1").count() == 1
+
+
+def test_import_route_flashes_a_warning_when_types_are_skipped(app, auth_client, nxos_node):
+    with patch("neteye.node.routes.import_all_data", return_value=["No parsed output for Interface on x"]):
+        response = auth_client.post(f"/node/import_node_from_id/{nxos_node}", follow_redirects=True)
+
+    page = response.get_data(as_text=True)
+    assert "imported with warnings" in page
+    assert "No parsed output for Interface" in page
+
+
+def test_interface_import_api_returns_502_without_parsed_output(app, auth_client, nxos_node):
+    with patch("neteye.node.routes.import_interfaces", side_effect=NoParsedOutputError("No parsed output")):
+        response = auth_client.post(f"/api/nodes/{nxos_node}/import/interface")
+
+    assert response.status_code == 502
+
+
+def test_single_import_route_flashes_a_warning_without_parsed_output(app, auth_client, nxos_node):
+    with patch("neteye.node.routes.import_interfaces", side_effect=NoParsedOutputError("No parsed output for Interface")):
+        response = auth_client.post(f"/node/import_interface/{nxos_node}", follow_redirects=True)
+
+    page = response.get_data(as_text=True)
+    assert "No parsed output for Interface" in page
+    assert "imported successfully" not in page

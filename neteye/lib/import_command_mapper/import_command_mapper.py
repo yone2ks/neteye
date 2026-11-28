@@ -19,6 +19,10 @@ class ForeignKeyNotFoundError(LookupError):
     """Raised when a record refers to a row that is not registered (for example, an unknown interface)."""
 
 
+class NoParsedOutputError(RuntimeError):
+    """Raised when none of the import commands returned parsed output, so the import cannot tell what is on the device."""
+
+
 # Import types
 IMPORT_TYPES = {
     Serial: "import_serial",

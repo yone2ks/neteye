@@ -13,7 +13,12 @@ from neteye.arp_entry.models import ArpEntry
 from neteye.blueprints import bp_factory, root_bp
 from neteye.extensions import connection_pool, db, ntc_template_utils, settings
 from neteye.interface.models import Interface
-from neteye.lib.import_command_mapper.import_command_mapper import ForeignKeyNotFoundError, ImportCommandMapper, IMPORT_TYPES
+from neteye.lib.import_command_mapper.import_command_mapper import (
+    ForeignKeyNotFoundError,
+    ImportCommandMapper,
+    IMPORT_TYPES,
+    NoParsedOutputError,
+)
 from neteye.lib.utils.neteye_differ import delta_commit
 from neteye.lib.utils.get_records_by_node import get_records_dict_by_node
 from neteye.serial.models import Serial
@@ -530,9 +535,9 @@ def import_node_from_id(id):
         if not node:
             flash(f"Node with ID {id} not found", "danger")
             return redirect(url_for("node.index"))
-        import_all_data(node)
-        logger.info(f"Node {id} imported successfully")
-        flash(f"Node {node.hostname} imported successfully", "success")
+        skipped_messages = import_all_data(node)
+        logger.info(f"Node {id} imported")
+        flash_import_all_result(node, skipped_messages)
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         report_exception(err, f"Error importing node {id}")
@@ -545,9 +550,9 @@ def import_node_from_ip(ip_address):
     try:
         node = try_connect_node(ip_address)
         if node:
-            import_all_data(node)
-            logger.info(f"Node {ip_address} imported successfully")
-            flash(f"Node {ip_address} imported successfully", "success")
+            skipped_messages = import_all_data(node)
+            logger.info(f"Node {ip_address} imported")
+            flash_import_all_result(node, skipped_messages)
             return redirect(url_for("node.index"))
         flash(f"Could not connect to {ip_address}", "danger")
         return redirect(url_for("node.index"))
@@ -570,6 +575,10 @@ def import_interface_only(id):
         flash(f"Interface data imported successfully for node {node.hostname}", "success")
         logger.info(f"Interface data imported for node {id}")
         return redirect(url_for("node.show", id=id))
+    except NoParsedOutputError as err:
+        logger.warning("%s", err)
+        flash(str(err), "warning")
+        return redirect(url_for("node.show", id=id))
     except Exception as err:
         report_exception(err, f"Error importing interface data for node {id}")
         return redirect(url_for("node.show", id=id))
@@ -588,6 +597,10 @@ def import_serial_only(id):
         import_serials(node)
         flash(f"Serial data imported successfully for node {node.hostname}", "success")
         logger.info(f"Serial data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except NoParsedOutputError as err:
+        logger.warning("%s", err)
+        flash(str(err), "warning")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         report_exception(err, f"Error importing serial data for node {id}")
@@ -614,6 +627,10 @@ def import_arp_only(id):
         else:
             flash(f"ARP entry data imported successfully for node {node.hostname}", "success")
         logger.info(f"ARP entry data imported for node {id}")
+        return redirect(url_for("node.show", id=id))
+    except NoParsedOutputError as err:
+        logger.warning("%s", err)
+        flash(str(err), "warning")
         return redirect(url_for("node.show", id=id))
     except Exception as err:
         report_exception(err, f"Error importing ARP entry data for node {id}")
@@ -729,6 +746,17 @@ def import_common(node, model):
 
     Returns:
         int: The number of records skipped because they refer to a row that is not registered.
+
+    Raises:
+        NoParsedOutputError: If no command returned parsed output (for example, the device rejected
+            every command or no template matched). The stored rows are left unchanged, because an
+            empty result here does not mean the device has none of them.
+
+    Note:
+        A device that really has no rows (for example an empty ARP table) also returns no parsed
+        output, because Node.command returns the raw text when the parse result is empty, and an
+        error message parses to an empty list too. Such a node keeps its last rows until an import
+        returns at least one row.
     """
     import_command_mapper = ImportCommandMapper(node.device_type)
     import_type = IMPORT_TYPES[model]
@@ -742,6 +770,7 @@ def import_common(node, model):
     # Accumulate all records observed across this set of commands
     after_records = {}
     skipped_count = 0
+    parsed_command_count = 0
 
     # get data for each command and merge into after_records
     for command in import_command_mapper.get_commands(import_type):
@@ -749,6 +778,7 @@ def import_common(node, model):
         result = node.command(command, current_user.email)
 
         if isinstance(result, list):
+            parsed_command_count += 1
             index = import_command_mapper.get_index(import_type, command)
             filtered_result = import_command_mapper.filter_ignore_records(
                 import_type=import_type, command=command, result=result
@@ -791,6 +821,12 @@ def import_common(node, model):
                         base_entry[field_name] = before_records.get(record_key, {}).get(field_name)
 
                 after_records[record_key] = base_entry
+
+    # Without any parsed output the delta below would delete every stored row of this node.
+    if parsed_command_count == 0:
+        raise NoParsedOutputError(
+            f"No parsed output for {model.__name__} on {node.hostname}; the stored records were left unchanged"
+        )
 
     # Interface names come from the template, so a short form it does not list becomes a second row.
     if model is Interface and import_command_mapper.interface_converter is not None:
@@ -840,10 +876,29 @@ def import_arp_entries(node):
     return import_common(node, ArpEntry)
 
 def import_all_data(node):
+    """
+    Import node data, serials, interfaces and ARP entries.
+
+    Returns:
+        list[str]: Messages for the data types whose import was skipped because no command returned
+            parsed output. The other data types are still imported.
+    """
     import_node_data(node)
-    import_serials(node)
-    import_interfaces(node)
-    import_arp_entries(node)
+    skipped_messages = []
+    for import_function in (import_serials, import_interfaces, import_arp_entries):
+        try:
+            import_function(node)
+        except NoParsedOutputError as err:
+            logger.warning("%s", err)
+            skipped_messages.append(str(err))
+    return skipped_messages
+
+
+def flash_import_all_result(node, skipped_messages):
+    if skipped_messages:
+        flash(f"Node {node.hostname} imported with warnings: " + " / ".join(skipped_messages), "warning")
+    else:
+        flash(f"Node {node.hostname} imported successfully", "success")
 
 
 def is_not_ignore_record(record, import_command):
