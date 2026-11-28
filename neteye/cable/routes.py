@@ -16,7 +16,7 @@ from neteye.lib.utils.integrity_error_utils import gen_integrity_error_message
 from neteye.lib.utils.report_exception import report_exception
 
 from .forms import CableForm
-from .models import Cable
+from .models import Cable, CableEndpointError
 
 logger = getLogger(__name__)
 
@@ -86,14 +86,20 @@ def new():
 @cable_bp.route("/create", methods=["POST"])
 @auth_required()
 def create():
-    sorted_interface_ids = "-".join(sorted([request.form["a_interface"], request.form["b_interface"]]))
+    a_interface_id = request.form.get("a_interface", "")
+    b_interface_id = request.form.get("b_interface", "")
+    try:
+        Cable.validate_endpoints(a_interface_id, b_interface_id)
+    except CableEndpointError as err:
+        flash(str(err), "danger")
+        return render_template("cable/new.html", form=CableForm(request.form))
     cable = Cable(
-        a_interface_id=request.form["a_interface"],
-        b_interface_id=request.form["b_interface"],
+        a_interface_id=a_interface_id,
+        b_interface_id=b_interface_id,
         cable_type=request.form["cable_type"],
         link_speed=request.form["link_speed"],
         description=request.form["description"],
-        sorted_interface_ids=sorted_interface_ids
+        sorted_interface_ids=Cable.make_sorted_interface_ids(a_interface_id, b_interface_id),
     )
     try:
         cable.add()
@@ -151,16 +157,19 @@ def update(id):
     cable = Cable.get(id)
     if not cable:
         abort(404)
-    interface_ids = [request.form.get("a_interface", ""), request.form.get("b_interface", "")]
-    if not all(interface_id and db.session.get(Interface, interface_id) for interface_id in interface_ids):
-        flash("Select an existing interface for both ends of the cable.", "warning")
+    a_interface_id = request.form.get("a_interface", "")
+    b_interface_id = request.form.get("b_interface", "")
+    try:
+        Cable.validate_endpoints(a_interface_id, b_interface_id)
+    except CableEndpointError as err:
+        flash(str(err), "danger")
         return redirect(url_for("cable.edit", id=id))
-    cable.a_interface_id = request.form["a_interface"]
-    cable.b_interface_id = request.form["b_interface"]
+    cable.a_interface_id = a_interface_id
+    cable.b_interface_id = b_interface_id
     cable.cable_type = request.form["cable_type"]
     cable.link_speed = request.form["link_speed"]
     cable.description = request.form["description"]
-    cable.sorted_interface_ids = "-".join(sorted(interface_ids))
+    cable.sorted_interface_ids = Cable.make_sorted_interface_ids(a_interface_id, b_interface_id)
     try:
         cable.commit()
         return redirect(url_for("cable.index"))

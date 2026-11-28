@@ -5,14 +5,14 @@
 
 <script>
  $(document).ready(function(){
-     var a_node_id = "{{a_node_id}}";
-     var b_node_id = "{{b_node_id}}";
-     $('#a_node').val(a_node_id);
-     $('#b_node').val(b_node_id);
+     var aNodeId = {{ a_node_id|tojson }};
+     var bNodeId = {{ b_node_id|tojson }};
+     $('#a_node').val(aNodeId);
+     $('#b_node').val(bNodeId);
 
      // A node id is empty when that end's interface was deleted; the user selects it again.
-     if (a_node_id) { loadInterfaces(a_node_id, 'a_interface', { selectedValue: '{{a_interface_id}}' }); }
-     if (b_node_id) { loadInterfaces(b_node_id, 'b_interface', { selectedValue: '{{b_interface_id}}' }); }
+     if (aNodeId) { loadInterfaces(aNodeId, 'a_interface', { selectedValue: {{ a_interface_id|tojson }} }); }
+     if (bNodeId) { loadInterfaces(bNodeId, 'b_interface', { selectedValue: {{ b_interface_id|tojson }} }); }
 
      $('#a_node').change(function(){ loadInterfaces($(this).val(), 'a_interface'); });
      $('#b_node').change(function(){ loadInterfaces($(this).val(), 'b_interface'); });

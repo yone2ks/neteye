@@ -58,8 +58,8 @@ def test_cable_edit_page_opens_when_an_interface_was_deleted(auth_client, orphan
     assert response.status_code == 200
     page = response.get_data(as_text=True)
     assert "no longer exists" in page
-    assert f'var a_node_id = "{orphan_cable["nodes"][0]}"' in page
-    assert 'var b_node_id = ""' in page
+    assert f'var aNodeId = "{orphan_cable["nodes"][0]}"' in page
+    assert 'var bNodeId = ""' in page
 
 
 def test_cable_update_requires_existing_interfaces(app, auth_client, orphan_cable):
@@ -69,6 +69,45 @@ def test_cable_update_requires_existing_interfaces(app, auth_client, orphan_cabl
         follow_redirects=True,
     )
 
-    assert "Select an existing interface" in response.get_data(as_text=True)
+    assert "Select the B-side interface" in response.get_data(as_text=True)
     with app.app_context():
         assert _db.session.get(Cable, orphan_cable["cable"]).b_interface_id != ""
+
+
+@pytest.mark.parametrize(
+    "b_interface,message",
+    [("", "Select the B-side interface"), ("missing-id", "is not registered"), ("same", "to itself")],
+    ids=["empty", "unknown", "same-interface"],
+)
+def test_cable_create_rejects_invalid_ends(app, auth_client, orphan_cable, b_interface, message):
+    a_interface = orphan_cable["a_interface"]
+    response = auth_client.post(
+        "/cable/create",
+        data={
+            "a_interface": a_interface,
+            "b_interface": a_interface if b_interface == "same" else b_interface,
+            "cable_type": "", "link_speed": "", "description": "",
+        },
+    )
+
+    assert response.status_code == 200
+    page = response.get_data(as_text=True)
+    assert message in page
+    # The re-rendered form pre-selects the interface the user chose (the list is loaded by JS).
+    assert f'selectedValue: "{a_interface}"' in page
+    with app.app_context():
+        touching = Cable.query.filter((Cable.a_interface_id == a_interface) | (Cable.b_interface_id == a_interface))
+        assert touching.count() == 1  # only the fixture's cable
+
+
+def test_cable_update_rejects_the_same_interface_on_both_ends(app, auth_client, orphan_cable):
+    a_interface = orphan_cable["a_interface"]
+    response = auth_client.post(
+        f"/cable/{orphan_cable['cable']}/update",
+        data={"a_interface": a_interface, "b_interface": a_interface, "cable_type": "", "link_speed": "", "description": ""},
+        follow_redirects=True,
+    )
+
+    assert "to itself" in response.get_data(as_text=True)
+    with app.app_context():
+        assert _db.session.get(Cable, orphan_cable["cable"]).b_interface_id != a_interface

@@ -46,10 +46,55 @@ def test_create_cable_via_api_and_reject_duplicate(auth_client, two_interfaces):
     cable_id = resp.get_json()["id"]
     # same pair in reverse order must not create a second cable
     dup = auth_client.post("/api/cables/", json={**body, "a_interface_id": if_ids[1], "b_interface_id": if_ids[0]})
-    assert dup.status_code >= 400
+    assert dup.status_code == 409
     auth_client.delete(f"/api/cables/{cable_id}")
 
 
 def test_invalid_payload_returns_400_not_500(auth_client):
     resp = auth_client.post("/api/cables/", json={"bogus_field": "x"})
     assert resp.status_code == 400
+
+
+@pytest.mark.parametrize(
+    "ends",
+    [
+        {},
+        {"a_interface_id": "missing-id"},
+        {"b_interface_id": "missing-id"},
+        {"b_interface_id": "same"},
+    ],
+    ids=["no-ends", "unknown-a", "unknown-b", "same-interface"],
+)
+def test_create_cable_via_api_rejects_invalid_ends(auth_client, two_interfaces, ends):
+    if_ids, _ = two_interfaces
+    body = {"a_interface_id": if_ids[0], "b_interface_id": if_ids[1], "cable_type": "cat6"}
+    if ends == {}:
+        body = {"cable_type": "cat6"}
+    else:
+        body.update({key: (if_ids[0] if value == "same" else value) for key, value in ends.items()})
+
+    resp = auth_client.post("/api/cables/", json=body)
+
+    assert resp.status_code == 400
+    assert auth_client.get("/api/cables/").get_json() == []
+
+
+def test_update_cable_via_api_validates_the_resulting_ends(auth_client, two_interfaces):
+    if_ids, _ = two_interfaces
+    created = auth_client.post("/api/cables/", json={"a_interface_id": if_ids[0], "b_interface_id": if_ids[1]})
+    cable_id = created.get_json()["id"]
+
+    # Only the B end is sent; with the current A end it would connect the interface to itself.
+    looped = auth_client.put(f"/api/cables/{cable_id}", json={"b_interface_id": if_ids[0]})
+    renamed = auth_client.put(f"/api/cables/{cable_id}", json={"description": "uplink"})
+
+    assert looped.status_code == 400
+    assert "to itself" in looped.get_json()["message"]
+    assert renamed.status_code == 200
+    # PUT does not validate types up front, so these reach the endpoint check.
+    for bad_end in (None, {"x": 1}, ["a", "b"], [if_ids[1]]):
+        response = auth_client.put(f"/api/cables/{cable_id}", json={"b_interface_id": bad_end})
+        assert response.status_code == 400, bad_end
+    stored = auth_client.get(f"/api/cables/{cable_id}").get_json()
+    assert (stored["b_interface_id"], stored["description"]) == (if_ids[1], "uplink")
+    auth_client.delete(f"/api/cables/{cable_id}")
